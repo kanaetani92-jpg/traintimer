@@ -8,6 +8,15 @@
     FINISHED: "finished"
   });
 
+  const TRAIN_STATUS = Object.freeze({
+    IDLE: "idle",
+    RUNNING: "running",
+    PAUSED: "paused",
+    ARRIVED: "arrived"
+  });
+
+  const MAX_ACTIVE_TRAINS = 20;
+
   const MIN_UNIT_MINUTES = 1;
   const MAX_UNIT_MINUTES = 180;
   const MAX_STATIONS = 10;
@@ -19,8 +28,8 @@
     OVERALL: "overall"
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
-  const STORAGE_SCHEMA_VERSION = 4;
-  const APP_VERSION = "1.8.0";
+  const STORAGE_SCHEMA_VERSION = 7;
+  const APP_VERSION = "1.12.0";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
@@ -296,6 +305,10 @@
     summaryAddedMinutes: document.getElementById("summaryAddedMinutes"),
 
     presetSection: document.getElementById("presetSection"),
+    activeTrainSummary: document.getElementById("activeTrainSummary"),
+    activeTrainsList: document.getElementById("activeTrainsList"),
+    activeTrainsCountBadge: document.getElementById("activeTrainsCountBadge"),
+    addCurrentRouteTrainButton: document.getElementById("addCurrentRouteTrainButton"),
     storageStatusBadge: document.getElementById("storageStatusBadge"),
     presetNameInput: document.getElementById("presetNameInput"),
     savePresetButton: document.getElementById("savePresetButton"),
@@ -365,6 +378,11 @@
   let timeAdditionHistory = [];
   let lastUndoableAdditionId = null;
   let presets = [];
+  let trainFleet = [];
+  let activeTrainId = null;
+  let trainFleetAnimationFrameId = null;
+  let lastTrainFleetFrameTimeMs = 0;
+  let lastGoalTonePlayedAt = 0;
   function createDefaultStoragePreferences() {
     return {
       defaultPresetId: null,
@@ -422,6 +440,23 @@
       .slice(0, MAX_PRESET_NAME_LENGTH);
 
     return normalized || fallbackName;
+  }
+
+  function normalizeString(value) {
+    return String(value ?? "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function sanitizeTrainName(value, fallbackName = "いま見る電車") {
+    return sanitizePresetName(value, fallbackName);
+  }
+
+  function normalizeTrainStatus(value) {
+    return Object.values(TRAIN_STATUS).includes(value)
+      ? value
+      : TRAIN_STATUS.IDLE;
   }
 
   function normalizeFontSize(value) {
@@ -702,6 +737,318 @@
     };
   }
 
+  function getTimerStatusForTrain() {
+    if (timer.state === TIMER_STATE.RUNNING) {
+      return TRAIN_STATUS.RUNNING;
+    }
+    if (timer.state === TIMER_STATE.PAUSED) {
+      return TRAIN_STATUS.PAUSED;
+    }
+    if (timer.state === TIMER_STATE.FINISHED) {
+      return TRAIN_STATUS.ARRIVED;
+    }
+    return TRAIN_STATUS.IDLE;
+  }
+
+  function normalizeTrainSoundSettings(source = {}) {
+    const preferences = normalizeUserPreferences(source);
+
+    return {
+      soundEnabled: preferences.soundEnabled,
+      stationSoundEnabled: preferences.stationSoundEnabled,
+      goalSoundEnabled: preferences.goalSoundEnabled,
+      actionSoundEnabled: preferences.actionSoundEnabled,
+      soundVolume: preferences.soundVolume,
+      quietMode: preferences.quietMode
+    };
+  }
+
+  function createTrainRecordFromConfiguration(
+    sourceConfiguration,
+    options = {}
+  ) {
+    const normalizedConfiguration = normalizeConfigurationData(
+      sourceConfiguration
+    );
+    const serialized = serializeConfiguration(normalizedConfiguration);
+    const now = new Date().toISOString();
+    const totalMinutes = calculateTotalMinutes(normalizedConfiguration);
+    const totalMs = totalMinutes * 60 * 1000;
+
+    return {
+      id: options.id || createId("train"),
+      name: sanitizeTrainName(options.name, "いま見る電車"),
+      status: normalizeTrainStatus(options.status),
+      settings: serialized.settings,
+      stations: serialized.stations,
+      segments: serialized.segments,
+      totalMinutes,
+      remainingMs: clamp(
+        Number.isFinite(Number(options.remainingMs))
+          ? Number(options.remainingMs)
+          : totalMs,
+        0,
+        totalMs
+      ),
+      endTimeMs:
+        normalizeTrainStatus(options.status) === TRAIN_STATUS.RUNNING &&
+        Number.isFinite(Number(options.endTimeMs))
+          ? Number(options.endTimeMs)
+          : null,
+      soundSettings: normalizeTrainSoundSettings(options.soundSettings),
+      createdAt:
+        typeof options.createdAt === "string" ? options.createdAt : now,
+      updatedAt:
+        typeof options.updatedAt === "string" ? options.updatedAt : now
+    };
+  }
+
+  function normalizeTrainData(source, fallbackConfiguration) {
+    if (!source || typeof source !== "object") {
+      throw new Error("電車データが正しくありません。");
+    }
+
+    const configurationSource =
+      source.configuration && typeof source.configuration === "object"
+        ? source.configuration
+        : source.stations && source.segments
+          ? source
+          : fallbackConfiguration;
+
+    if (!configurationSource) {
+      throw new Error("電車の経路データがありません。");
+    }
+
+    const normalizedConfiguration = normalizeConfigurationData(
+      configurationSource
+    );
+    const safeStatus = normalizeTrainStatus(source.status);
+
+    return createTrainRecordFromConfiguration(normalizedConfiguration, {
+      id:
+        typeof source.id === "string" && source.id.trim()
+          ? source.id.trim().slice(0, 120)
+          : createId("train"),
+      name: sanitizeTrainName(source.name, "いま見る電車"),
+      status: safeStatus,
+      remainingMs: source.remainingMs,
+      endTimeMs: source.endTimeMs,
+      soundSettings: source.soundSettings,
+      createdAt: source.createdAt,
+      updatedAt: source.updatedAt
+    });
+  }
+
+  function serializeTrainRecord(train) {
+    const normalized = normalizeTrainData(train);
+
+    return {
+      id: normalized.id,
+      name: normalized.name,
+      status: normalized.status,
+      settings: normalized.settings,
+      stations: normalized.stations.map((station) => ({ ...station })),
+      segments: normalized.segments.map((segment) => ({ ...segment })),
+      totalMinutes: normalized.totalMinutes,
+      remainingMs: normalized.remainingMs,
+      endTimeMs: normalized.endTimeMs,
+      soundSettings: { ...normalized.soundSettings },
+      createdAt: normalized.createdAt,
+      updatedAt: normalized.updatedAt
+    };
+  }
+
+  function getTrainTotalMs(train) {
+    const configurationForTrain = getTrainConfiguration(train);
+    return calculateTotalMinutes(configurationForTrain) * 60 * 1000;
+  }
+
+  function updateTrainRecordFromClock(train, nowMs = Date.now()) {
+    const normalized = serializeTrainRecord(train);
+
+    if (normalized.status !== TRAIN_STATUS.RUNNING) {
+      normalized.endTimeMs = null;
+      return normalized;
+    }
+
+    const totalMs = getTrainTotalMs(normalized);
+    let endTimeMs = Number(normalized.endTimeMs);
+
+    if (!Number.isFinite(endTimeMs) || endTimeMs <= 0) {
+      endTimeMs = nowMs + clamp(normalized.remainingMs, 0, totalMs);
+    }
+
+    const remainingMs = clamp(endTimeMs - nowMs, 0, totalMs);
+
+    normalized.remainingMs = remainingMs;
+    normalized.endTimeMs = remainingMs > 0 ? endTimeMs : null;
+    normalized.status = remainingMs > 0 ? TRAIN_STATUS.RUNNING : TRAIN_STATUS.ARRIVED;
+    normalized.updatedAt = new Date(nowMs).toISOString();
+
+    return normalized;
+  }
+
+  function pauseRunningTrainForRestore(train, nowMs = Date.now()) {
+    const updated = updateTrainRecordFromClock(train, nowMs);
+
+    if (updated.status === TRAIN_STATUS.RUNNING) {
+      updated.status = TRAIN_STATUS.PAUSED;
+      updated.endTimeMs = null;
+      updated.updatedAt = new Date(nowMs).toISOString();
+    }
+
+    return updated;
+  }
+
+  function updateInactiveTrainFleetFromClock(nowMs = Date.now()) {
+    const arrivedTrains = [];
+    let changed = false;
+
+    trainFleet = trainFleet.map((train) => {
+      if (train.id === activeTrainId || normalizeTrainStatus(train.status) !== TRAIN_STATUS.RUNNING) {
+        return train;
+      }
+
+      const beforeStatus = normalizeTrainStatus(train.status);
+      const updated = updateTrainRecordFromClock(train, nowMs);
+
+      if (
+        beforeStatus === TRAIN_STATUS.RUNNING &&
+        updated.status === TRAIN_STATUS.ARRIVED
+      ) {
+        arrivedTrains.push(updated);
+      }
+
+      if (
+        updated.remainingMs !== train.remainingMs ||
+        updated.status !== train.status ||
+        updated.endTimeMs !== train.endTimeMs
+      ) {
+        changed = true;
+      }
+
+      return updated;
+    });
+
+    return { arrivedTrains, changed };
+  }
+
+  function hasAnyRunningTrain() {
+    if (timer.state === TIMER_STATE.RUNNING) {
+      return true;
+    }
+
+    return trainFleet.some(
+      (train) => train.id !== activeTrainId && normalizeTrainStatus(train.status) === TRAIN_STATUS.RUNNING
+    );
+  }
+
+  function playGoalArrivalTone() {
+    const nowMs = Date.now();
+
+    if (nowMs - lastGoalTonePlayedAt < 1200) {
+      return;
+    }
+
+    lastGoalTonePlayedAt = nowMs;
+    playToneSequence("goal");
+  }
+
+  function notifyInactiveTrainArrivals(arrivedTrains) {
+    if (!Array.isArray(arrivedTrains) || arrivedTrains.length === 0) {
+      return;
+    }
+
+    const message = arrivedTrains.length === 1
+      ? `${arrivedTrains[0].name}が到着しました。`
+      : `${arrivedTrains.length}本の電車が到着しました。`;
+
+    showArrivalNotice(message);
+    setStatusMessage(message);
+    playGoalArrivalTone();
+  }
+
+  function trainFleetLoop(frameTimeMs) {
+    const { arrivedTrains, changed } = updateInactiveTrainFleetFromClock(Date.now());
+
+    if (arrivedTrains.length > 0) {
+      notifyInactiveTrainArrivals(arrivedTrains);
+      saveAppData();
+    }
+
+    if (
+      changed &&
+      (frameTimeMs - lastTrainFleetFrameTimeMs >= DISPLAY_UPDATE_INTERVAL_MS || lastTrainFleetFrameTimeMs === 0)
+    ) {
+      lastTrainFleetFrameTimeMs = frameTimeMs;
+      renderActiveTrainsList();
+    }
+
+    if (hasAnyRunningTrain()) {
+      trainFleetAnimationFrameId = window.requestAnimationFrame(trainFleetLoop);
+    } else {
+      trainFleetAnimationFrameId = null;
+      lastTrainFleetFrameTimeMs = 0;
+    }
+  }
+
+  function ensureTrainFleetLoop() {
+    if (trainFleetAnimationFrameId !== null || !hasAnyRunningTrain()) {
+      return;
+    }
+
+    trainFleetAnimationFrameId = window.requestAnimationFrame(trainFleetLoop);
+  }
+
+  function syncDisplayedTimerToActiveTrain() {
+    if (!activeTrainId) {
+      return null;
+    }
+
+    return upsertTrainRecord(getCurrentTrainSnapshot());
+  }
+
+  function getCurrentTrainSnapshot() {
+    const existingTrain = trainFleet.find(
+      (train) => train.id === activeTrainId
+    );
+
+    return createTrainRecordFromConfiguration(configuration, {
+      id: activeTrainId || existingTrain?.id || createId("train"),
+      name: existingTrain?.name || "いま見る電車",
+      status: getTimerStatusForTrain(),
+      remainingMs: timer.remainingMs,
+      endTimeMs: timer.state === TIMER_STATE.RUNNING ? timer.endTimeMs : null,
+      soundSettings: storagePreferences,
+      createdAt: existingTrain?.createdAt,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  function createTrainFleetForStorage() {
+    const currentTrain = getCurrentTrainSnapshot();
+    const existingTrains = Array.isArray(trainFleet) ? trainFleet : [];
+    const storedTrains = existingTrains
+      .filter((train) => train.id !== currentTrain.id)
+      .slice(0, Math.max(0, MAX_ACTIVE_TRAINS - 1))
+      .map((train) => serializeTrainRecord(train));
+
+    return [currentTrain, ...storedTrains];
+  }
+
+  function createInitialTrainFleet() {
+    const initialTrain = createTrainRecordFromConfiguration(
+      configuration,
+      {
+        name: "いま見る電車",
+        status: TRAIN_STATUS.IDLE
+      }
+    );
+
+    activeTrainId = initialTrain.id;
+    return [initialTrain];
+  }
+
   function normalizePresetData(source) {
     if (!source || typeof source !== "object") {
       throw new Error("プリセットデータが正しくありません。");
@@ -733,6 +1080,8 @@
 
   function createStoragePayload() {
     const current = serializeConfiguration(configuration);
+    const trains = createTrainFleetForStorage();
+    activeTrainId = trains[0]?.id || activeTrainId;
 
     return {
       schemaVersion: STORAGE_SCHEMA_VERSION,
@@ -740,6 +1089,8 @@
       settings: current.settings,
       stations: current.stations,
       segments: current.segments,
+      activeTrainId,
+      trains: trains.map((train) => serializeTrainRecord(train)),
       preferences: {
         ...normalizeUserPreferences(storagePreferences),
         defaultPresetId: storagePreferences.defaultPresetId,
@@ -815,6 +1166,52 @@
       }
     }
 
+    const rawTrains = Array.isArray(rawPayload.trains)
+      ? rawPayload.trains
+      : [];
+    const normalizedTrains = [];
+    const usedTrainIds = new Set();
+
+    rawTrains.slice(0, MAX_ACTIVE_TRAINS).forEach((trainSource) => {
+      try {
+        let train = normalizeTrainData(
+          trainSource,
+          currentConfiguration
+        );
+        train = pauseRunningTrainForRestore(train);
+
+        if (usedTrainIds.has(train.id)) {
+          train.id = createId("train");
+        }
+
+        usedTrainIds.add(train.id);
+        normalizedTrains.push(train);
+      } catch (error) {
+        console.warn("読み込めない電車データを除外しました。", error);
+      }
+    });
+
+    if (normalizedTrains.length === 0) {
+      const fallbackTrain = createTrainRecordFromConfiguration(
+        currentConfiguration,
+        {
+          name: "いま見る電車",
+          status: TRAIN_STATUS.IDLE
+        }
+      );
+      normalizedTrains.push(fallbackTrain);
+    }
+
+    const requestedActiveTrainId =
+      typeof rawPayload.activeTrainId === "string"
+        ? rawPayload.activeTrainId
+        : null;
+    const normalizedActiveTrainId = normalizedTrains.some(
+      (train) => train.id === requestedActiveTrainId
+    )
+      ? requestedActiveTrainId
+      : normalizedTrains[0].id;
+
     const requestedDefaultId =
       typeof rawPayload.preferences?.defaultPresetId === "string"
         ? rawPayload.preferences.defaultPresetId
@@ -831,6 +1228,8 @@
           ? rawPayload.savedAt
           : null,
       configuration: currentConfiguration,
+      activeTrainId: normalizedActiveTrainId,
+      trains: normalizedTrains,
       presets: normalizedPresets,
       preferences: {
         ...normalizeUserPreferences(rawPayload.preferences),
@@ -949,6 +1348,7 @@
 
     if (!storageAvailable) {
       presets = createInitialPresets();
+      trainFleet = createInitialTrainFleet();
       updateStorageStatusDisplay();
       return;
     }
@@ -958,6 +1358,7 @@
     if (!rawJson) {
       presets = createInitialPresets();
       storagePreferences = createDefaultStoragePreferences();
+      trainFleet = createInitialTrainFleet();
       saveAppData();
       return;
     }
@@ -965,6 +1366,8 @@
     try {
       const normalized = normalizeStoragePayload(JSON.parse(rawJson));
       configuration = cloneConfiguration(normalized.configuration);
+      activeTrainId = normalized.activeTrainId;
+      trainFleet = normalized.trains;
       presets = normalized.presets;
       storagePreferences = {
         ...createDefaultStoragePreferences(),
@@ -976,6 +1379,7 @@
       configuration = createInitialConfiguration();
       presets = createInitialPresets();
       storagePreferences = createDefaultStoragePreferences();
+      trainFleet = createInitialTrainFleet();
       const recoveryMessage =
         "保存データを読み込めなかったため初期値で起動しました。";
       storageRecoveryNotice = recoveryMessage;
@@ -1429,6 +1833,544 @@
   }
 
 
+
+  function getTrainConfiguration(train) {
+    return normalizeConfigurationData({
+      settings: train.settings,
+      stations: train.stations,
+      segments: train.segments
+    });
+  }
+
+  function upsertTrainRecord(trainRecord) {
+    const normalized = serializeTrainRecord(trainRecord);
+    const index = trainFleet.findIndex((train) => train.id === normalized.id);
+
+    if (index >= 0) {
+      trainFleet[index] = normalized;
+    } else {
+      trainFleet.unshift(normalized);
+    }
+
+    trainFleet = trainFleet.slice(0, MAX_ACTIVE_TRAINS);
+    return normalized;
+  }
+
+  function syncActiveTrainToFleet() {
+    const currentTrain = getCurrentTrainSnapshot();
+    return upsertTrainRecord(currentTrain);
+  }
+
+  function getTrainFleetForDisplay() {
+    syncActiveTrainToFleet();
+
+    if (trainFleet.length === 0) {
+      trainFleet = createInitialTrainFleet();
+    }
+
+    return trainFleet.map((train) => serializeTrainRecord(train));
+  }
+
+  function getTrainById(trainId) {
+    return getTrainFleetForDisplay().find((train) => train.id === trainId) || null;
+  }
+
+  function getTrainStatusLabel(status) {
+    const normalizedStatus = normalizeTrainStatus(status);
+
+    if (normalizedStatus === TRAIN_STATUS.RUNNING) return "運転中";
+    if (normalizedStatus === TRAIN_STATUS.PAUSED) return "停車中";
+    if (normalizedStatus === TRAIN_STATUS.ARRIVED) return "到着";
+    return "開始前";
+  }
+
+  function getTrainStatusClass(status) {
+    const normalizedStatus = normalizeTrainStatus(status);
+
+    if (normalizedStatus === TRAIN_STATUS.RUNNING) return "active-train-status--running";
+    if (normalizedStatus === TRAIN_STATUS.PAUSED) return "active-train-status--paused";
+    if (normalizedStatus === TRAIN_STATUS.ARRIVED) return "active-train-status--arrived";
+    return "";
+  }
+
+  function createActiveTrainButton({ label, action, trainId, className = "", disabled = false }) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `active-train-button ${className}`.trim();
+    button.dataset.action = action;
+    button.dataset.trainId = trainId;
+    button.textContent = label;
+    button.disabled = Boolean(disabled);
+    button.setAttribute(
+      "aria-label",
+      disabled ? `${label}：この電車は現在表示中です` : `${label}`
+    );
+    return button;
+  }
+
+  function renderActiveTrainSummary() {
+    const count = getTrainFleetForDisplay().length;
+    const label = `運行中の電車：${count}本`;
+
+    if (elements.activeTrainSummary) {
+      elements.activeTrainSummary.textContent = label;
+    }
+
+    if (elements.activeTrainsCountBadge) {
+      elements.activeTrainsCountBadge.textContent = `${count}本`;
+    }
+  }
+
+  function renderActiveTrainsList() {
+    if (!elements.activeTrainsList) {
+      renderActiveTrainSummary();
+      return;
+    }
+
+    updateInactiveTrainFleetFromClock(Date.now());
+    const trains = getTrainFleetForDisplay();
+    elements.activeTrainsList.textContent = "";
+
+    trains.forEach((train) => {
+      const isActive = train.id === activeTrainId;
+      const status = isActive ? getTimerStatusForTrain() : normalizeTrainStatus(train.status);
+      const remainingMs = isActive ? timer.remainingMs : train.remainingMs;
+      const trainConfiguration = isActive ? configuration : getTrainConfiguration(train);
+      const totalMs = calculateTotalMinutes(trainConfiguration) * 60 * 1000;
+      const progressPercent = clamp(
+        totalMs > 0 ? ((totalMs - remainingMs) / totalMs) * 100 : 0,
+        0,
+        100
+      );
+      const shapeLabel = getTrackShapeDetails(trainConfiguration.trackShape).label;
+      const stationCount = trainConfiguration.stations.length;
+      const item = document.createElement("article");
+      item.className = "active-train-card";
+      item.dataset.trainId = train.id;
+      item.classList.toggle("is-active", isActive);
+      item.classList.toggle("is-running", status === TRAIN_STATUS.RUNNING);
+      item.classList.toggle("is-paused", status === TRAIN_STATUS.PAUSED);
+      item.classList.toggle("is-arrived", status === TRAIN_STATUS.ARRIVED);
+
+      const main = document.createElement("div");
+      main.className = "active-train-main";
+
+      const title = document.createElement("div");
+      title.className = "active-train-title";
+
+      const nameRow = document.createElement("div");
+      nameRow.className = "active-train-name-row";
+
+      const name = document.createElement("strong");
+      name.className = "active-train-name";
+      name.textContent = train.name;
+      nameRow.append(name);
+
+      if (isActive) {
+        const badge = document.createElement("span");
+        badge.className = "active-train-current-badge";
+        badge.textContent = "いま見る電車";
+        nameRow.append(badge);
+      }
+
+      const meta = document.createElement("div");
+      meta.className = "active-train-meta";
+      [`${shapeLabel}線路`, `${stationCount}駅`, `${train.totalMinutes}分`].forEach((text) => {
+        const span = document.createElement("span");
+        span.textContent = text;
+        meta.append(span);
+      });
+
+      title.append(nameRow, meta);
+
+      const time = document.createElement("div");
+      time.className = "active-train-time";
+      time.textContent = formatDuration(remainingMs);
+
+      main.append(title, time);
+
+      const progress = document.createElement("div");
+      progress.className = "active-train-progress";
+      progress.setAttribute("aria-hidden", "true");
+
+      const progressBar = document.createElement("span");
+      progressBar.style.width = `${progressPercent}%`;
+      progress.append(progressBar);
+
+      const statusLine = document.createElement("div");
+      statusLine.className = "active-train-status-line";
+
+      const statusBadge = document.createElement("span");
+      statusBadge.className = `active-train-status ${getTrainStatusClass(status)}`.trim();
+      statusBadge.textContent = getTrainStatusLabel(status);
+      statusLine.append(statusBadge);
+
+      const primaryAction = status === TRAIN_STATUS.RUNNING ? "pause-train" : "start-train";
+      const primaryLabel = status === TRAIN_STATUS.RUNNING
+        ? "一時停止"
+        : status === TRAIN_STATUS.PAUSED
+          ? "つづきから"
+          : "はじめる";
+
+      const actions = document.createElement("div");
+      actions.className = "active-train-actions active-train-actions--multi";
+      actions.append(
+        createActiveTrainButton({
+          label: primaryLabel,
+          action: primaryAction,
+          trainId: train.id,
+          className: status === TRAIN_STATUS.RUNNING
+            ? "active-train-button--pause"
+            : "active-train-button--start"
+        }),
+        createActiveTrainButton({
+          label: "はじめから",
+          action: "restart-train",
+          trainId: train.id,
+          className: "active-train-button--restart"
+        }),
+        createActiveTrainButton({
+          label: isActive ? "表示中" : "表示する",
+          action: "show-train",
+          trainId: train.id,
+          className: "active-train-button--show",
+          disabled: isActive
+        }),
+        createActiveTrainButton({
+          label: "削除",
+          action: "delete-train",
+          trainId: train.id,
+          className: "active-train-button--danger"
+        })
+      );
+
+      item.append(main, progress, statusLine, actions);
+      elements.activeTrainsList.append(item);
+    });
+
+    renderActiveTrainSummary();
+  }
+
+  function applyTrainRecordToMainTimer(trainRecord, options = {}) {
+    const clockAdjustedTrain = updateTrainRecordFromClock(trainRecord);
+    const normalizedTrain = serializeTrainRecord(clockAdjustedTrain);
+    const nextConfiguration = getTrainConfiguration(normalizedTrain);
+    const nextTotalMs = calculateTotalMinutes(nextConfiguration) * 60 * 1000;
+    const nextStatus = normalizeTrainStatus(normalizedTrain.status);
+
+    cancelTimerLoop();
+    hideArrivalNotice();
+    configuration = cloneConfiguration(nextConfiguration);
+    activeTrainId = normalizedTrain.id;
+    clearSessionTimeAdditionHistory();
+
+    timer.initialDurationMs = nextTotalMs;
+    timer.remainingMs = clamp(normalizedTrain.remainingMs, 0, nextTotalMs);
+    timer.state =
+      nextStatus === TRAIN_STATUS.ARRIVED || timer.remainingMs <= 0
+        ? TIMER_STATE.FINISHED
+        : nextStatus === TRAIN_STATUS.RUNNING
+          ? TIMER_STATE.RUNNING
+          : nextStatus === TRAIN_STATUS.PAUSED
+            ? TIMER_STATE.PAUSED
+            : TIMER_STATE.IDLE;
+    timer.endTimeMs =
+      timer.state === TIMER_STATE.RUNNING
+        ? (Number.isFinite(Number(normalizedTrain.endTimeMs))
+            ? Number(normalizedTrain.endTimeMs)
+            : Date.now() + timer.remainingMs)
+        : null;
+    timer.lastRenderedSecond = null;
+    timer.lastFrameTimeMs = 0;
+    timer.lastReachedStationIndex = 0;
+    timer.lastJourneyTextSecond = null;
+
+    renderConfiguration();
+    renderTimerState();
+    renderRemainingTime(true);
+    renderPersistenceUi();
+
+    if (timer.state === TIMER_STATE.RUNNING) {
+      timer.animationFrameId = window.requestAnimationFrame(timerLoop);
+    }
+
+    ensureTrainFleetLoop();
+
+    if (options.announceMessage) {
+      showArrivalNotice(options.announceMessage);
+      setStatusMessage(options.announceMessage);
+    }
+  }
+
+  function getSuggestedTrainName() {
+    const trains = getTrainFleetForDisplay();
+    const usedNames = new Set(
+      trains.map((train) => normalizeString(train.name)).filter(Boolean)
+    );
+    const nameCandidates = [
+      "朝の支度号",
+      "勉強号",
+      "休憩号",
+      "お片付け号",
+      "電車2"
+    ];
+
+    const candidate = nameCandidates.find(
+      (name) => !usedNames.has(normalizeString(name))
+    );
+
+    if (candidate) {
+      return candidate;
+    }
+
+    let index = trains.length + 1;
+    let nextName = `電車${index}`;
+    while (usedNames.has(normalizeString(nextName))) {
+      index += 1;
+      nextName = `電車${index}`;
+    }
+
+    return nextName;
+  }
+
+  function duplicateCurrentRouteAsTrain() {
+    const trains = getTrainFleetForDisplay();
+
+    if (trains.length >= MAX_ACTIVE_TRAINS) {
+      setStatusMessage(
+        `運行中の電車は${MAX_ACTIVE_TRAINS}本まで追加できます。使わない電車を削除してください。`
+      );
+      return;
+    }
+
+    const suggestedName = getSuggestedTrainName();
+    const rawName = window.prompt(
+      "今の経路をコピーして、新しい電車として追加します。\n電車名を入力してください。",
+      suggestedName
+    );
+
+    if (rawName === null) {
+      return;
+    }
+
+    const trainName = sanitizeTrainName(rawName, suggestedName);
+    const newTrain = createTrainRecordFromConfiguration(configuration, {
+      name: trainName,
+      status: TRAIN_STATUS.IDLE,
+      remainingMs: calculateTotalMinutes(configuration) * 60 * 1000,
+      soundSettings: storagePreferences
+    });
+
+    const activeBeforeAdd = activeTrainId;
+    syncActiveTrainToFleet();
+    trainFleet = trainFleet.filter((train) => train.id !== newTrain.id);
+    trainFleet.push(newTrain);
+    trainFleet = trainFleet.slice(0, MAX_ACTIVE_TRAINS);
+    activeTrainId = activeBeforeAdd;
+
+    saveAppData();
+    renderPersistenceUi();
+    setStatusMessage(
+      `${newTrain.name}を運行中の電車に追加しました。表示する場合は「表示する」を押してください。`
+    );
+  }
+
+  function showTrainInMainTimer(trainId) {
+    if (!trainId || trainId === activeTrainId) {
+      return;
+    }
+
+    if (timer.state === TIMER_STATE.RUNNING) {
+      timer.remainingMs = calculateRemainingFromClock();
+    }
+
+    syncActiveTrainToFleet();
+    const targetTrain = trainFleet.find((train) => train.id === trainId);
+
+    if (!targetTrain) {
+      setStatusMessage("表示する電車が見つかりませんでした。");
+      return;
+    }
+
+    applyTrainRecordToMainTimer(targetTrain, {
+      announceMessage: `${targetTrain.name}をタイマー画面に表示しました。`
+    });
+    saveAppData();
+    showPage("timer", { focusTarget: elements.startButton });
+  }
+
+  function startTrainById(trainId) {
+    if (!trainId) {
+      return;
+    }
+
+    if (trainId === activeTrainId) {
+      startTimer();
+      return;
+    }
+
+    const trains = getTrainFleetForDisplay();
+    const train = trains.find((item) => item.id === trainId);
+
+    if (!train) {
+      setStatusMessage("開始する電車が見つかりませんでした。");
+      return;
+    }
+
+    const totalMs = getTrainTotalMs(train);
+    const remainingMs = train.status === TRAIN_STATUS.ARRIVED || train.remainingMs <= 0
+      ? totalMs
+      : clamp(train.remainingMs, 0, totalMs);
+    const updatedTrain = {
+      ...train,
+      status: TRAIN_STATUS.RUNNING,
+      remainingMs,
+      endTimeMs: Date.now() + remainingMs,
+      updatedAt: new Date().toISOString()
+    };
+
+    upsertTrainRecord(updatedTrain);
+    playActionSound();
+    saveAppData();
+    renderPersistenceUi();
+    ensureTrainFleetLoop();
+    setStatusMessage(`${updatedTrain.name}を出発しました。`);
+  }
+
+  function pauseTrainById(trainId) {
+    if (!trainId) {
+      return;
+    }
+
+    if (trainId === activeTrainId) {
+      pauseTimer();
+      return;
+    }
+
+    const trains = getTrainFleetForDisplay();
+    const train = trains.find((item) => item.id === trainId);
+
+    if (!train) {
+      setStatusMessage("一時停止する電車が見つかりませんでした。");
+      return;
+    }
+
+    const updatedTrain = updateTrainRecordFromClock(train);
+
+    if (updatedTrain.status === TRAIN_STATUS.RUNNING) {
+      updatedTrain.status = TRAIN_STATUS.PAUSED;
+      updatedTrain.endTimeMs = null;
+      updatedTrain.updatedAt = new Date().toISOString();
+    }
+
+    upsertTrainRecord(updatedTrain);
+    playActionSound();
+    saveAppData();
+    renderPersistenceUi();
+    setStatusMessage(`${updatedTrain.name}を一時停止しました。`);
+  }
+
+  function restartTrainById(trainId) {
+    if (!trainId) {
+      return;
+    }
+
+    if (trainId === activeTrainId) {
+      restartTimer();
+      return;
+    }
+
+    const trains = getTrainFleetForDisplay();
+    const train = trains.find((item) => item.id === trainId);
+
+    if (!train) {
+      setStatusMessage("はじめから走らせる電車が見つかりませんでした。");
+      return;
+    }
+
+    const totalMs = getTrainTotalMs(train);
+    const updatedTrain = {
+      ...train,
+      status: TRAIN_STATUS.RUNNING,
+      remainingMs: totalMs,
+      endTimeMs: Date.now() + totalMs,
+      updatedAt: new Date().toISOString()
+    };
+
+    upsertTrainRecord(updatedTrain);
+    playActionSound();
+    saveAppData();
+    renderPersistenceUi();
+    ensureTrainFleetLoop();
+    setStatusMessage(`${updatedTrain.name}をはじめから出発しました。`);
+  }
+
+  function deleteTrainFromFleet(trainId) {
+    const trains = getTrainFleetForDisplay();
+    const targetTrain = trains.find((train) => train.id === trainId);
+
+    if (!targetTrain) {
+      setStatusMessage("削除する電車が見つかりませんでした。");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `「${targetTrain.name}」を削除しますか？\nこの操作は元に戻せません。`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    trainFleet = trains.filter((train) => train.id !== trainId);
+
+    if (trainFleet.length === 0) {
+      const fallbackConfiguration = createInitialConfiguration();
+      const fallbackTrain = createTrainRecordFromConfiguration(
+        fallbackConfiguration,
+        {
+          name: "いま見る電車",
+          status: TRAIN_STATUS.IDLE
+        }
+      );
+      trainFleet = [fallbackTrain];
+      applyTrainRecordToMainTimer(fallbackTrain, {
+        announceMessage: "最後の電車を削除したため、初期設定の電車を作成しました。"
+      });
+    } else if (trainId === activeTrainId) {
+      applyTrainRecordToMainTimer(trainFleet[0], {
+        announceMessage: `${targetTrain.name}を削除し、別の電車を表示しました。`
+      });
+    } else {
+      renderPersistenceUi();
+      setStatusMessage(`${targetTrain.name}を削除しました。`);
+    }
+
+    saveAppData();
+  }
+
+  function handleActiveTrainsListClick(event) {
+    const button = event.target.closest("button[data-action][data-train-id]");
+
+    if (!button) {
+      return;
+    }
+
+    const { action, trainId } = button.dataset;
+
+    if (action === "show-train") {
+      showTrainInMainTimer(trainId);
+    } else if (action === "start-train") {
+      startTrainById(trainId);
+    } else if (action === "pause-train") {
+      pauseTrainById(trainId);
+    } else if (action === "restart-train") {
+      restartTrainById(trainId);
+    } else if (action === "delete-train") {
+      deleteTrainFromFleet(trainId);
+    }
+  }
+
   function getPresetById(presetId) {
     return presets.find((preset) => preset.id === presetId) || null;
   }
@@ -1594,6 +2536,7 @@
   }
 
   function renderPersistenceUi() {
+    renderActiveTrainsList();
     renderPresetList();
     updateStorageStatusDisplay();
   }
@@ -2360,6 +3303,10 @@
     document.title = timer.state === TIMER_STATE.RUNNING
       ? `${formatDuration(timer.remainingMs)}｜でんしゃタイマー`
       : "でんしゃタイマー";
+
+    if (activePageId === "presets") {
+      renderActiveTrainsList();
+    }
   }
 
   function getStatePresentation() {
@@ -2480,8 +3427,11 @@
     timer.lastReachedStationIndex = configuration.stations.length - 1;
     renderTimerState();
     renderJourneyProgress({ forceText: true });
+    syncDisplayedTimerToActiveTrain();
+    renderPersistenceUi();
+    saveAppData();
     showArrivalNotice("ゴールにつきました！");
-    playToneSequence("goal");
+    playGoalArrivalTone();
     setStatusMessage("ゴールにつきました。タイマーが終了しました。");
 
     window.setTimeout(() => {
@@ -2510,6 +3460,7 @@
     ) {
       timer.lastFrameTimeMs = frameTimeMs;
       renderRemainingTime();
+      renderActiveTrainsList();
     }
 
     timer.animationFrameId = window.requestAnimationFrame(timerLoop);
@@ -2535,9 +3486,13 @@
     timer.lastRenderedSecond = null;
     renderTimerState();
     renderJourneyProgress({ forceText: true });
+    syncDisplayedTimerToActiveTrain();
+    renderPersistenceUi();
+    saveAppData();
     setStatusMessage("タイマーを開始しました。");
     cancelTimerLoop();
     timer.animationFrameId = window.requestAnimationFrame(timerLoop);
+    ensureTrainFleetLoop();
   }
 
   function pauseTimer() {
@@ -2560,6 +3515,9 @@
     timer.lastJourneyTextSecond = null;
     renderTimerState();
     renderJourneyProgress({ forceText: true });
+    syncDisplayedTimerToActiveTrain();
+    renderPersistenceUi();
+    saveAppData();
     setStatusMessage(`タイマーを一時停止しました。${formatAccessibleDuration(timer.remainingMs)}です。`);
   }
 
@@ -2593,6 +3551,9 @@
     hideArrivalNotice();
     renderTimerState();
     renderJourneyProgress({ forceText: true });
+    syncDisplayedTimerToActiveTrain();
+    renderPersistenceUi();
+    saveAppData();
 
     if (announce) {
       const totalMinutes = calculateTotalMinutes(configuration);
@@ -4545,6 +5506,11 @@
       undoLastTimeAddition
     );
 
+    addSafeListener(
+      elements.addCurrentRouteTrainButton,
+      "click",
+      duplicateCurrentRouteAsTrain
+    );
     addSafeListener(elements.savePresetButton, "click", saveCurrentAsPreset);
     addSafeListener(elements.presetNameInput, "keydown", (event) => {
       if (event.key === "Enter") {
@@ -4552,6 +5518,7 @@
         saveCurrentAsPreset();
       }
     });
+    addSafeListener(elements.activeTrainsList, "click", handleActiveTrainsListClick);
     addSafeListener(elements.presetList, "click", handlePresetListClick);
     addSafeListener(elements.presetList, "change", handlePresetNameChange);
     addSafeListener(elements.exportJsonButton, "click", exportJsonData);
@@ -4660,18 +5627,27 @@
     });
 
     initializePersistence();
-    timer.initialDurationMs =
-      calculateTotalMinutes(configuration) * 60 * 1000;
-    timer.remainingMs = timer.initialDurationMs;
+    const startupActiveTrain =
+      trainFleet.find((train) => train.id === activeTrainId) || trainFleet[0] || null;
 
     applyUserPreferences();
-    renderConfiguration();
+
+    if (startupActiveTrain) {
+      applyTrainRecordToMainTimer(startupActiveTrain);
+    } else {
+      timer.initialDurationMs =
+        calculateTotalMinutes(configuration) * 60 * 1000;
+      timer.remainingMs = timer.initialDurationMs;
+      renderConfiguration();
+      resetTimer({ announce: false });
+    }
+
     prepareRouteEditor();
     renderTimeAdditionHistory();
     renderPersistenceUi();
-    resetTimer({ announce: false });
     updateNetworkStatus();
     initializeMobileNavigationObserver();
+    ensureTrainFleetLoop();
     registerServiceWorker();
 
     if (storageRecoveryNotice) {

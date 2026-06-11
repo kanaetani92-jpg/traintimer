@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="でんしゃタイマー">
   <meta
     name="description"
-    content="駅と区間の時間を自由に設定できる、子どもにも分かりやすい電車タイマーです。"
+    content="駅と区間の時間を自由に設定でき、My設定で複数の電車を同時に走らせられる電車タイマーです。"
   >
   <title>でんしゃタイマー</title>
   <link rel="manifest" href="manifest.webmanifest">
@@ -77,6 +77,10 @@
         <p id="timerStateLabel" class="timer-state-label" aria-live="polite">
           <span class="timer-state-dot" aria-hidden="true"></span>
           <span id="timerStateText">出発前です</span>
+        </p>
+
+        <p id="activeTrainSummary" class="active-train-summary" aria-live="polite">
+          運行中の電車：1本
         </p>
         </div>
 
@@ -534,6 +538,45 @@
 
       <div id="pagePresets" class="app-page" data-page="presets" hidden>
       <section
+        id="activeTrainsSection"
+        class="active-trains-card"
+        aria-labelledby="activeTrainsHeading"
+      >
+        <div class="section-heading-row active-trains-heading-row">
+          <div>
+            <p class="eyebrow">いま使う電車</p>
+            <h2 id="activeTrainsHeading">運行中の電車</h2>
+          </div>
+          <span id="activeTrainsCountBadge" class="status-badge">1本</span>
+        </div>
+
+        <p class="active-trains-introduction">
+          タイマー画面では1本の電車を大きく表示します。ここでは、表示する電車を選んだり、電車ごとに出発・一時停止・はじめから・削除を操作できます。
+        </p>
+
+        <div class="active-train-add-area">
+          <button
+            id="addCurrentRouteTrainButton"
+            class="active-train-add-button"
+            type="button"
+            aria-label="今の経路を電車として追加する"
+          >
+            <span aria-hidden="true">🚆</span>
+            <span>今の経路を電車として追加</span>
+          </button>
+          <p class="active-train-add-note">
+            今タイマー画面で見ている線路をコピーして、別の電車として保存します。追加しても表示中の電車は切り替わりません。
+          </p>
+        </div>
+
+        <div
+          id="activeTrainsList"
+          class="active-trains-list"
+          aria-live="polite"
+        ></div>
+      </section>
+
+      <section
         id="presetSection"
         class="preset-card"
         aria-labelledby="presetHeading"
@@ -716,11 +759,11 @@
             <p class="eyebrow">アプリ情報</p>
             <h2 id="aboutHeading">でんしゃタイマー</h2>
           </div>
-          <span class="status-badge">Version 1.8.0</span>
+          <span class="status-badge">Version 1.12.0</span>
         </div>
 
         <dl class="about-list">
-          <div><dt>バージョン</dt><dd>1.8.0</dd></div>
+          <div><dt>バージョン</dt><dd>1.12.0</dd></div>
           <div><dt>更新日</dt><dd>2026年6月10日</dd></div>
           <div><dt>保存場所</dt><dd>この端末のブラウザ内</dd></div>
           <div><dt>通信</dt><dd>設定やプリセットを外部へ送信しません</dd></div>
