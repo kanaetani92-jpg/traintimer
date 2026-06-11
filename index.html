@@ -1,1166 +1,1016 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#e6002d">
-  <meta name="application-name" content="でんしゃタイマー">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="でんしゃタイマー">
-  <meta
-    name="description"
-    content="駅と区間の時間を自由に設定でき、My設定で複数の電車を同時に走らせられる電車タイマーです。"
-  >
-  <title>でんしゃタイマー</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="#e6002d" name="theme-color"/>
+<meta content="でんしゃタイマー" name="application-name"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="でんしゃタイマー" name="apple-mobile-web-app-title"/>
+<meta content="駅と区間の時間を自由に設定でき、My設定で複数の電車を同時に走らせられる電車タイマーです。" name="description"/>
+<title>でんしゃタイマー</title>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link href="icon-192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="icon-192.png" rel="apple-touch-icon"/>
+<link href="style.css" rel="stylesheet"/>
 </head>
 <body>
-  <a class="skip-link" href="#mainContent">メイン内容へ移動</a>
-  <div class="app-shell">
-    <header class="app-header">
-      <button
-        id="menuButton"
-        class="icon-button"
-        type="button"
-        aria-label="メニューを開く"
-        aria-controls="sideMenu"
-        aria-expanded="false"
-      >
-        <span aria-hidden="true">☰</span>
-      </button>
+<a class="skip-link" href="#mainContent">メイン内容へ移動</a>
+<div class="app-shell">
+<header class="app-header">
+<button aria-controls="sideMenu" aria-expanded="false" aria-label="メニューを開く" class="icon-button" id="menuButton" type="button">
+<span aria-hidden="true">☰</span>
+</button>
+<h1 class="app-title">
+<span aria-hidden="true" class="app-title-mark">🚆</span>
+<span class="app-title-copy">
+<span>でんしゃタイマー</span>
+<small class="app-title-subtitle">経路型ビジュアルタイマー</small>
+</span>
+</h1>
+<button aria-controls="settingsPanel" aria-expanded="false" aria-label="設定を開く" class="icon-button" id="settingsButton" type="button">
+<span aria-hidden="true">⚙️</span>
+</button>
+</header>
+<main class="main-content" id="mainContent">
+<div class="app-page is-active" data-page="timer" id="pageTimer">
+      <!-- 表示順：線路切替 → 線路表示エリア → 現在区間・次の駅 → 操作ボタン → ＋1分・＋5分 -->
+      <section aria-labelledby="railwayHeading" class="railway-card" id="routeSection">
+<div class="timer-route-heading-source visually-hidden">
+<div>
+<p class="eyebrow">経路案内</p>
+<h2 id="railwayHeading">横線路</h2>
+</div>
+<span class="status-badge" id="trackShapeBadge">路線図：横</span>
+</div>
 
-      <h1 class="app-title">
-        <span class="app-title-mark" aria-hidden="true">🚆</span>
-        <span class="app-title-copy">
-          <span>でんしゃタイマー</span>
-          <small class="app-title-subtitle">経路型ビジュアルタイマー</small>
-        </span>
-      </h1>
-
-      <button
-        id="settingsButton"
-        class="icon-button"
-        type="button"
-        aria-label="設定を開く"
-        aria-controls="settingsPanel"
-        aria-expanded="false"
-      >
-        <span aria-hidden="true">⚙️</span>
-      </button>
-    </header>
-
-    <main id="mainContent" class="main-content">
-      <div id="pageTimer" class="app-page is-active" data-page="timer">
-      <section id="timerSection" class="timer-card timer-card--hero timer-card--source" aria-labelledby="timerHeading">
-        <div class="timer-time-summary">
-        <p id="timerHeading" class="eyebrow">ゴールまで</p>
-        <p class="timer-support-copy">スタートからゴールまでを一画面で確認できます</p>
-        <p
-          id="remainingTime"
-          class="timer-display"
-          role="timer"
-          aria-live="off"
-          aria-label="残り時間30分"
-        >
-          30:00
-        </p>
-
-        <p class="next-station">
-          この区間
-          <strong id="nextStationTime">10:00</strong>
-        </p>
-
-        <p id="timerStateLabel" class="timer-state-label" aria-live="polite">
-          <span class="timer-state-dot" aria-hidden="true"></span>
-          <span id="timerStateText">出発前です</span>
-        </p>
-
-        <p id="activeTrainSummary" class="active-train-summary" aria-live="polite">
-          運行中の電車：1本
-        </p>
-        </div>
-
-
-
-
-
-      </section>
-
-      <section id="routeSection" class="railway-card" aria-labelledby="railwayHeading">
-        <div class="section-heading-row">
-          <div>
-            <p class="eyebrow">経路案内</p>
-            <h2 id="railwayHeading">横線路</h2>
-          </div>
-          <span id="trackShapeBadge" class="status-badge">路線図：横</span>
-        </div>
-
-        <div
-          id="trackShapeSwitcher"
-          class="track-shape-switcher"
-          role="group"
-          aria-label="線路の形を切り替える"
-        >
-          <button
-            class="track-shape-button is-selected"
-            type="button"
-            data-track-shape="horizontal"
-            aria-pressed="true"
-            aria-label="横線路に切り替える"
-          >
-            <span class="track-shape-button-icon" aria-hidden="true">↔️</span>
-            <span>横</span>
-          </button>
-          <button
-            class="track-shape-button"
-            type="button"
-            data-track-shape="vertical"
-            aria-pressed="false"
-            aria-label="縦線路に切り替える"
-          >
-            <span class="track-shape-button-icon" aria-hidden="true">↕️</span>
-            <span>縦</span>
-          </button>
-          <button
-            class="track-shape-button"
-            type="button"
-            data-track-shape="circle"
-            aria-pressed="false"
-            aria-label="円形線路に切り替える"
-          >
-            <span class="track-shape-button-icon" aria-hidden="true">⭕</span>
-            <span>円</span>
-          </button>
-        </div>
-
-        <div
-          id="railwayPreview"
-          class="railway-preview railway-preview--horizontal"
-          data-track-shape="horizontal"
-          aria-label="現在設定されている駅と区間の進行状況"
-        >
-          <p id="arrivalNotice" class="arrival-notice" role="status" hidden>
+<div aria-label="線路の形を切り替える" class="track-shape-switcher" id="trackShapeSwitcher" role="group">
+<button aria-label="横線路に切り替える" aria-pressed="true" class="track-shape-button is-selected" data-track-shape="horizontal" type="button">
+<span aria-hidden="true" class="track-shape-button-icon">↔️</span>
+<span>横</span>
+</button>
+<button aria-label="縦線路に切り替える" aria-pressed="false" class="track-shape-button" data-track-shape="vertical" type="button">
+<span aria-hidden="true" class="track-shape-button-icon">↕️</span>
+<span>縦</span>
+</button>
+<button aria-label="円形線路に切り替える" aria-pressed="false" class="track-shape-button" data-track-shape="circle" type="button">
+<span aria-hidden="true" class="track-shape-button-icon">⭕</span>
+<span>円</span>
+</button>
+</div>
+<div aria-label="現在設定されている駅と区間の進行状況" class="railway-preview railway-stage railway-preview--horizontal" data-track-shape="horizontal" id="railwayPreview">
+<p class="arrival-notice" hidden="" id="arrivalNotice" role="status">
             駅につきました
           </p>
+<section aria-label="線路内の残り時間" aria-live="off" class="route-time-panel" id="routeTimePanel">
+<span class="route-time-title">のこり時間</span>
+<div class="route-time-content" id="routeTimeContent">
+<div class="route-time-value-block">
+<small>全体</small>
+<strong>30:00</strong>
+</div>
+</div>
+<span class="route-time-state" id="routeTimerStateText">出発前です</span>
+</section>
+<div class="railway-track railway-track--horizontal" data-track-shape="horizontal" id="railwayTrack"></div>
+</div>
+<dl class="journey-status-grid">
+<div class="journey-status-item">
+<dt>乗車中の区間</dt>
+<dd id="currentSegmentName">スタート → 駅1</dd>
+</div>
+<div class="journey-status-item">
+<dt>次の停車駅</dt>
+<dd id="nextStationName">駅1</dd>
+</div>
+</dl><p aria-live="polite" class="active-train-summary active-train-summary--timer-page" id="activeTrainSummary">
+          運行中の電車：1本
+        </p>
 
-          <section
-            id="routeTimePanel"
-            class="route-time-panel"
-            aria-label="線路内の残り時間"
-            aria-live="off"
-          >
-            <span class="route-time-title">のこり時間</span>
-            <div id="routeTimeContent" class="route-time-content">
-              <div class="route-time-value-block">
-                <small>全体</small>
-                <strong>30:00</strong>
-              </div>
-            </div>
-            <span id="routeTimerStateText" class="route-time-state">出発前です</span>
-          </section>
+<div aria-label="線路全体の進み具合" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="journey-progress" role="progressbar">
+<div class="journey-progress-heading">
+<span>ゴールまでの進捗</span>
+<strong id="journeyProgressText">0%</strong>
+</div>
+<div aria-hidden="true" class="journey-progress-track">
+<span id="journeyProgressBar" style="width: 0%;"></span>
+</div>
+</div>
+<div class="segment-overview">
+<h3>経路の内訳</h3>
+<ul class="segment-overview-list" id="segmentOverviewList"></ul>
+</div>
+</section>
 
-          <div
-            id="railwayTrack"
-            class="railway-track railway-track--horizontal"
-            data-track-shape="horizontal"
-          ></div>
-        </div>
-
-        <dl class="journey-status-grid">
-          <div class="journey-status-item">
-            <dt>乗車中の区間</dt>
-            <dd id="currentSegmentName">スタート → 駅1</dd>
-          </div>
-          <div class="journey-status-item">
-            <dt>次の停車駅</dt>
-            <dd id="nextStationName">駅1</dd>
-          </div>
-        </dl>
-
-        <div
-          class="journey-progress"
-          role="progressbar"
-          aria-label="線路全体の進み具合"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="0"
-        >
-          <div class="journey-progress-heading">
-            <span>ゴールまでの進捗</span>
-            <strong id="journeyProgressText">0%</strong>
-          </div>
-          <div class="journey-progress-track" aria-hidden="true">
-            <span id="journeyProgressBar" style="width: 0%;"></span>
-          </div>
-        </div>
-
-        <div class="segment-overview">
-          <h3>経路の内訳</h3>
-          <ul id="segmentOverviewList" class="segment-overview-list"></ul>
-        </div>
-      </section>
-
-        <section id="timerActionsSection" class="timer-actions-card" aria-label="タイマー操作">
-        <div class="primary-controls" aria-label="タイマー操作">
-          <button
-            id="startButton"
-            class="control-button control-button--start"
-            type="button"
-            aria-label="タイマーをはじめる"
-          >
-            <span id="startButtonIcon" aria-hidden="true">▶</span>
-            <span id="startButtonText">はじめる</span>
-          </button>
-
-          <button
-            id="startOverButton"
-            class="control-button control-button--start-over"
-            type="button"
-            aria-label="タイマーを最初から始める"
-            hidden
-          >
-            <span aria-hidden="true">↺</span>
-            <span>はじめから</span>
-          </button>
-
-          <button
-            id="pauseButton"
-            class="control-button control-button--pause"
-            type="button"
-            aria-label="タイマーを一時停止する"
-          >
-            <span aria-hidden="true">⏸</span>
-            <span>一時停止</span>
-          </button>
-
-          <button
-            id="resetButton"
-            class="control-button control-button--neutral"
-            type="button"
-            aria-label="タイマーをリセットする"
-          >
-            <span aria-hidden="true">↺</span>
-            リセット
-          </button>
-        </div>
-
-        <div class="quick-add-controls" aria-label="時間を追加">
-          <button
-            id="addOneMinuteButton"
-            class="quick-add-button"
-            type="button"
-            aria-label="追加先を選んで時間を1分追加する"
-          >
+      <section aria-label="タイマー操作" class="timer-actions-card" id="timerActionsSection">
+<div class="timer-actions-layout">
+<div class="action-zone action-zone--primary">
+<p class="action-zone-label">出発・停車</p>
+<div aria-label="タイマー操作" class="primary-controls">
+<button aria-label="タイマーをはじめる" class="control-button control-button--start" id="startButton" type="button">
+<span aria-hidden="true" id="startButtonIcon">▶</span>
+<span id="startButtonText">はじめる</span>
+</button>
+<button aria-label="タイマーを最初から始める" class="control-button control-button--start-over" hidden="" id="startOverButton" type="button">
+<span aria-hidden="true">↺</span>
+<span>はじめから</span>
+</button>
+<button aria-label="タイマーを一時停止する" class="control-button control-button--pause" hidden="" id="pauseButton" type="button">
+<span aria-hidden="true">⏸</span>
+<span>一時停止</span>
+</button>
+<button aria-label="タイマーをリセットする" class="control-button control-button--neutral" hidden="" id="resetButton" type="button">
+<span aria-hidden="true">↺</span>
+<span>リセット</span>
+</button>
+</div>
+</div>
+<div class="action-zone action-zone--time-adjust">
+<p class="action-zone-label">時間を少し調整</p>
+<div aria-label="時間を追加" class="quick-add-controls">
+<button aria-label="追加先を選んで時間を1分追加する" class="quick-add-button" id="addOneMinuteButton" type="button">
             ＋1分
           </button>
-          <button
-            id="addFiveMinutesButton"
-            class="quick-add-button"
-            type="button"
-            aria-label="追加先を選んで時間を5分追加する"
-          >
+<button aria-label="追加先を選んで時間を5分追加する" class="quick-add-button" id="addFiveMinutesButton" type="button">
             ＋5分
           </button>
-        </div>
-
-        <section
-          id="completionPanel"
-          class="completion-panel"
-          aria-labelledby="completionTitle"
-          hidden
-        >
-          <div class="completion-icon" aria-hidden="true">🎉</div>
-          <h2 id="completionTitle">ゴールにつきました！</h2>
-          <p id="completionMessage">30分のタイマーが終わりました。</p>
-          <button
-            id="restartButton"
-            class="restart-button"
-            type="button"
-            aria-label="タイマーを最初からもういちど始める"
-          >
-            <span aria-hidden="true">▶</span>
+</div>
+</div>
+</div>
+<section aria-labelledby="completionTitle" class="completion-panel" hidden="" id="completionPanel">
+<div aria-hidden="true" class="completion-icon">🎉</div>
+<h2 id="completionTitle">ゴールにつきました！</h2>
+<p id="completionMessage">30分のタイマーが終わりました。</p>
+<button aria-label="タイマーを最初からもういちど始める" class="restart-button" id="restartButton" type="button">
+<span aria-hidden="true">▶</span>
             もういちど始める
           </button>
-        </section>
-
-        <section
-          id="timeAdditionHistoryCard"
-          class="time-addition-history-card"
-          aria-labelledby="timeAdditionHistoryTitle"
-          hidden
-        >
-          <div class="time-addition-history-header">
-            <div>
-              <p class="eyebrow">この画面での変更</p>
-              <h2 id="timeAdditionHistoryTitle">時間追加の履歴</h2>
-            </div>
-            <button
-              id="undoTimeAdditionButton"
-              class="undo-time-button"
-              type="button"
-              aria-label="直前の時間追加を取り消す"
-              disabled
-            >
+</section>
+<section aria-labelledby="timeAdditionHistoryTitle" class="time-addition-history-card" hidden="" id="timeAdditionHistoryCard">
+<div class="time-addition-history-header">
+<div>
+<p class="eyebrow">この画面での変更</p>
+<h2 id="timeAdditionHistoryTitle">時間追加の履歴</h2>
+</div>
+<button aria-label="直前の時間追加を取り消す" class="undo-time-button" disabled="" id="undoTimeAdditionButton" type="button">
               ↶ 取り消す
             </button>
-          </div>
-          <ul
-            id="timeAdditionHistoryList"
-            class="time-addition-history-list"
-          ></ul>
-        </section>
-
-        <p class="stage-note">
+</div>
+<ul class="time-addition-history-list" id="timeAdditionHistoryList"></ul>
+</section>
+<p class="stage-note">
           予定に合わせて一時停止や時間追加ができます。
         </p>
-        </section>
+</section>
+      <!-- 残り時間などを更新するための非表示データソース。表示レイアウトには参加しません。 -->
+      <section aria-hidden="true" aria-labelledby="timerHeading" class="timer-card timer-card--hero timer-card--source timer-card--data-source" hidden="" id="timerSection">
+<div class="timer-time-summary">
+<p class="eyebrow" id="timerHeading">ゴールまで</p>
+<p class="timer-support-copy">スタートからゴールまでを一画面で確認できます</p>
+<p aria-label="残り時間30分" aria-live="off" class="timer-display" id="remainingTime" role="timer">
+          30:00
+        </p>
+<p class="next-station">
+          この区間
+          <strong id="nextStationTime">10:00</strong>
+</p>
+<p aria-live="polite" class="timer-state-label" id="timerStateLabel">
+<span aria-hidden="true" class="timer-state-dot"></span>
+<span id="timerStateText">出発前です</span>
+</p>
 
+</div>
+</section>
       </div>
-
-      <div id="pageEdit" class="app-page" data-page="edit" hidden>
-        <section class="page-intro-card" aria-labelledby="editPageHeading">
-          <div class="section-heading-row">
-            <div>
-              <p class="eyebrow">経路編集</p>
-              <h2 id="editPageHeading">タイマーの経路を編集</h2>
-            </div>
-            <span class="status-badge">直接編集</span>
-          </div>
-          <p class="page-intro-copy">
+<div class="app-page" data-page="edit" hidden="" id="pageEdit">
+<section aria-labelledby="editPageHeading" class="page-intro-card">
+<div class="section-heading-row">
+<div>
+<p class="eyebrow">経路編集</p>
+<h2 id="editPageHeading">タイマーの経路を編集</h2>
+</div>
+<span class="status-badge">直接編集</span>
+</div>
+<p class="page-intro-copy">
             このページで、1単位の分数、駅名、区間ごとの単位数、線路の形を変更できます。
           </p>
-        </section>
-
-      <section id="summarySection" class="summary-card" aria-labelledby="summaryHeading">
-        <div class="section-heading-row summary-heading-row">
-          <div>
-            <p class="eyebrow">検索条件</p>
-            <h2 id="summaryHeading">現在の設定</h2>
-          </div>
-          <span class="current-setting-chip" aria-label="現在適用中の設定">設定中</span>
-        </div>
-
-        <dl class="summary-grid">
-          <div class="summary-item">
-            <dt>設定時間</dt>
-            <dd id="summaryDuration">30分</dd>
-          </div>
-          <div class="summary-item">
-            <dt>1単位</dt>
-            <dd id="summaryUnitMinutes">5分</dd>
-          </div>
-          <div class="summary-item">
-            <dt>合計</dt>
-            <dd id="summaryTotalUnits">6単位</dd>
-          </div>
-          <div class="summary-item">
-            <dt>駅の数</dt>
-            <dd id="summaryStationCount">4駅</dd>
-          </div>
-          <div class="summary-item">
-            <dt>線路の形</dt>
-            <dd id="summaryTrackShape">横</dd>
-          </div>
-          <div class="summary-item">
-            <dt>区間の数</dt>
-            <dd id="summarySegmentCount">3区間</dd>
-          </div>
-          <div class="summary-item summary-item--wide">
-            <dt>追加した時間</dt>
-            <dd id="summaryAddedMinutes">0分</dd>
-          </div>
-          <div class="summary-item summary-item--wide">
-            <dt>タイマーの状態</dt>
-            <dd id="timerStateSummary">開始前</dd>
-          </div>
-        </dl>
-      </section>
-
-        <form id="routeEditorForm" class="route-editor-card settings-form" novalidate>
-          <div class="route-editor-heading">
-            <div>
-              <p class="eyebrow">編集内容</p>
-              <h2>駅・区間・線路</h2>
-            </div>
-            <span class="status-badge">未保存の変更</span>
-          </div>
-
-      <section class="settings-section" aria-labelledby="unitSettingsHeading">
-        <div class="settings-section-heading">
-          <div>
-            <p class="settings-step">1</p>
-            <div>
-              <h3 id="unitSettingsHeading">1単位の時間</h3>
-              <p>区間時間の基準になる分数です。</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="unit-setting-grid">
-          <div class="form-field">
-            <label for="unitPresetSelect">よく使う時間</label>
-            <select id="unitPresetSelect" name="unitPreset">
-              <option value="1">1分</option>
-              <option value="2">2分</option>
-              <option value="3">3分</option>
-              <option value="5" selected>5分</option>
-              <option value="10">10分</option>
-              <option value="15">15分</option>
-              <option value="custom">直接入力</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label for="unitMinutesInput">1単位</label>
-            <div class="number-input-with-unit">
-              <input
-                id="unitMinutesInput"
-                name="unitMinutes"
-                type="number"
-                min="1"
-                max="180"
-                step="1"
-                inputmode="numeric"
-                value="5"
-                aria-describedby="unitMinutesHelp"
-              >
-              <span>分</span>
-            </div>
-            <p id="unitMinutesHelp" class="field-help">
+</section>
+<section aria-labelledby="summaryHeading" class="summary-card" id="summarySection">
+<div class="section-heading-row summary-heading-row">
+<div>
+<p class="eyebrow">検索条件</p>
+<h2 id="summaryHeading">現在の設定</h2>
+</div>
+<span aria-label="現在適用中の設定" class="current-setting-chip">設定中</span>
+</div>
+<dl class="summary-grid">
+<div class="summary-item">
+<dt>設定時間</dt>
+<dd id="summaryDuration">30分</dd>
+</div>
+<div class="summary-item">
+<dt>1単位</dt>
+<dd id="summaryUnitMinutes">5分</dd>
+</div>
+<div class="summary-item">
+<dt>合計</dt>
+<dd id="summaryTotalUnits">6単位</dd>
+</div>
+<div class="summary-item">
+<dt>駅の数</dt>
+<dd id="summaryStationCount">4駅</dd>
+</div>
+<div class="summary-item">
+<dt>線路の形</dt>
+<dd id="summaryTrackShape">横</dd>
+</div>
+<div class="summary-item">
+<dt>区間の数</dt>
+<dd id="summarySegmentCount">3区間</dd>
+</div>
+<div class="summary-item summary-item--wide">
+<dt>追加した時間</dt>
+<dd id="summaryAddedMinutes">0分</dd>
+</div>
+<div class="summary-item summary-item--wide">
+<dt>タイマーの状態</dt>
+<dd id="timerStateSummary">開始前</dd>
+</div>
+</dl>
+</section>
+<form class="route-editor-card settings-form" id="routeEditorForm" novalidate="">
+<div class="route-editor-heading">
+<div>
+<p class="eyebrow">編集内容</p>
+<h2>駅・区間・線路</h2>
+</div>
+<span class="status-badge">未保存の変更</span>
+</div>
+<section aria-labelledby="unitSettingsHeading" class="settings-section">
+<div class="settings-section-heading">
+<div>
+<p class="settings-step">1</p>
+<div>
+<h3 id="unitSettingsHeading">1単位の時間</h3>
+<p>区間時間の基準になる分数です。</p>
+</div>
+</div>
+</div>
+<div class="unit-setting-grid">
+<div class="form-field">
+<label for="unitPresetSelect">よく使う時間</label>
+<select id="unitPresetSelect" name="unitPreset">
+<option value="1">1分</option>
+<option value="2">2分</option>
+<option value="3">3分</option>
+<option selected="" value="5">5分</option>
+<option value="10">10分</option>
+<option value="15">15分</option>
+<option value="custom">直接入力</option>
+</select>
+</div>
+<div class="form-field">
+<label for="unitMinutesInput">1単位</label>
+<div class="number-input-with-unit">
+<input aria-describedby="unitMinutesHelp" id="unitMinutesInput" inputmode="numeric" max="180" min="1" name="unitMinutes" step="1" type="number" value="5"/>
+<span>分</span>
+</div>
+<p class="field-help" id="unitMinutesHelp">
               1～180分で入力してください。
             </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="settings-section" aria-labelledby="stationSettingsHeading">
-        <div class="settings-section-heading">
-          <div>
-            <p class="settings-step">2</p>
-            <div>
-              <h3 id="stationSettingsHeading">駅の名前</h3>
-              <p>スタートとゴールは削除できません。</p>
-            </div>
-          </div>
-        </div>
-
-        <div id="stationEditorList" class="station-editor-list"></div>
-
-        <button
-          id="addStationButton"
-          class="outline-button"
-          type="button"
-          aria-label="ゴールの前に新しい駅を追加する"
-        >
-          <span aria-hidden="true">＋</span>
+</div>
+</div>
+</section>
+<section aria-labelledby="stationSettingsHeading" class="settings-section">
+<div class="settings-section-heading">
+<div>
+<p class="settings-step">2</p>
+<div>
+<h3 id="stationSettingsHeading">駅の名前</h3>
+<p>スタートとゴールは削除できません。</p>
+</div>
+</div>
+</div>
+<div class="station-editor-list" id="stationEditorList"></div>
+<button aria-label="ゴールの前に新しい駅を追加する" class="outline-button" id="addStationButton" type="button">
+<span aria-hidden="true">＋</span>
           ゴールの前に駅を追加
         </button>
-      </section>
-
-      <section class="settings-section" aria-labelledby="segmentSettingsHeading">
-        <div class="settings-section-heading">
-          <div>
-            <p class="settings-step">3</p>
-            <div>
-              <h3 id="segmentSettingsHeading">区間ごとの単位数</h3>
-              <p>マイナス・プラスで使用する単位数を変更します。</p>
-            </div>
-          </div>
-        </div>
-
-        <div id="segmentEditorList" class="segment-editor-list"></div>
-      </section>
-
-      <section class="settings-total-card" aria-live="polite">
-        <div>
-          <span>合計単位</span>
-          <strong id="draftTotalUnits">6単位</strong>
-        </div>
-        <div>
-          <span>設定時間</span>
-          <strong id="draftTotalMinutes">30分</strong>
-        </div>
-      </section>
-
-      <fieldset class="form-field">
-        <legend>線路の形</legend>
-        <p class="field-help track-shape-help">
+</section>
+<section aria-labelledby="segmentSettingsHeading" class="settings-section">
+<div class="settings-section-heading">
+<div>
+<p class="settings-step">3</p>
+<div>
+<h3 id="segmentSettingsHeading">区間ごとの単位数</h3>
+<p>マイナス・プラスで使用する単位数を変更します。</p>
+</div>
+</div>
+</div>
+<div class="segment-editor-list" id="segmentEditorList"></div>
+</section>
+<section aria-live="polite" class="settings-total-card">
+<div>
+<span>合計単位</span>
+<strong id="draftTotalUnits">6単位</strong>
+</div>
+<div>
+<span>設定時間</span>
+<strong id="draftTotalMinutes">30分</strong>
+</div>
+</section>
+<fieldset class="form-field">
+<legend>線路の形</legend>
+<p class="field-help track-shape-help">
           表示だけを変更する場合は、タイマーの残り時間と現在位置を保ちます。
         </p>
-        <div class="radio-card-group">
-          <label class="radio-card">
-            <input type="radio" name="trackShape" value="horizontal" checked>
-            <span class="radio-track-preview radio-track-preview--horizontal" aria-hidden="true">
-              <i></i><i></i><i></i>
-            </span>
-            <span>横線路</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="trackShape" value="vertical">
-            <span class="radio-track-preview radio-track-preview--vertical" aria-hidden="true">
-              <i></i><i></i><i></i>
-            </span>
-            <span>縦線路</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="trackShape" value="circle">
-            <span class="radio-track-preview radio-track-preview--circle" aria-hidden="true">
-              <i></i><i></i><i></i>
-            </span>
-            <span>円形線路</span>
-          </label>
-        </div>
-      </fieldset>
-
-          <div class="route-editor-actions">
-            <button
-              id="resetRouteEditorButton"
-              class="cancel-button"
-              type="button"
-              aria-label="未保存の経路変更を取り消す"
-            >
+<div class="radio-card-group">
+<label class="radio-card">
+<input checked="" name="trackShape" type="radio" value="horizontal"/>
+<span aria-hidden="true" class="radio-track-preview radio-track-preview--horizontal">
+<i></i><i></i><i></i>
+</span>
+<span>横線路</span>
+</label>
+<label class="radio-card">
+<input name="trackShape" type="radio" value="vertical"/>
+<span aria-hidden="true" class="radio-track-preview radio-track-preview--vertical">
+<i></i><i></i><i></i>
+</span>
+<span>縦線路</span>
+</label>
+<label class="radio-card">
+<input name="trackShape" type="radio" value="circle"/>
+<span aria-hidden="true" class="radio-track-preview radio-track-preview--circle">
+<i></i><i></i><i></i>
+</span>
+<span>円形線路</span>
+</label>
+</div>
+</fieldset>
+<div class="route-editor-actions">
+<button aria-label="未保存の経路変更を取り消す" class="cancel-button" id="resetRouteEditorButton" type="button">
               変更を取り消す
             </button>
-            <button
-              class="apply-button"
-              type="submit"
-              aria-label="経路の変更を反映する"
-            >
+<button aria-label="経路の変更を反映する" class="apply-button" type="submit">
               変更を反映する
             </button>
-          </div>
-        </form>
-      </div>
-
-      <div id="pagePresets" class="app-page" data-page="presets" hidden>
-      <section
-        id="activeTrainsSection"
-        class="active-trains-card"
-        aria-labelledby="activeTrainsHeading"
-      >
-        <div class="section-heading-row active-trains-heading-row">
-          <div>
-            <p class="eyebrow">いま使う電車</p>
-            <h2 id="activeTrainsHeading">運行中の電車</h2>
-          </div>
-          <span id="activeTrainsCountBadge" class="status-badge">1本</span>
-        </div>
-
-        <p class="active-trains-introduction">
+</div>
+</form>
+</div>
+<div class="app-page" data-page="presets" hidden="" id="pagePresets">
+<section aria-labelledby="quickRoutesHeading" class="quick-routes-card" id="quickRoutesSection">
+<div class="section-heading-row quick-routes-heading-row">
+<div>
+<p class="eyebrow">よく使う路線</p>
+<h2 id="quickRoutesHeading">すぐ使う</h2>
+</div>
+<span class="status-badge">開始前で追加</span>
+</div>
+<p class="quick-routes-introduction">
+          日常の活動で使いやすい路線を、運行中の電車リストへすぐ追加できます。追加しても自動では出発せず、表示中の電車も切り替わりません。
+        </p>
+<div aria-label="すぐ使う路線" class="quick-routes-list">
+<button class="quick-route-button" data-quick-route="break5" type="button">
+<span aria-hidden="true" class="quick-route-icon">🚃</span>
+<span class="quick-route-copy">
+<strong>休憩5分号</strong>
+<small>スタート → 休憩駅 → ゴール</small>
+</span>
+</button>
+<button class="quick-route-button" data-quick-route="cleanup10" type="button">
+<span aria-hidden="true" class="quick-route-icon">🚃</span>
+<span class="quick-route-copy">
+<strong>お片付け10分号</strong>
+<small>スタート → 前半 → 後半 → ゴール</small>
+</span>
+</button>
+<button class="quick-route-button" data-quick-route="morning15" type="button">
+<span aria-hidden="true" class="quick-route-icon">🚃</span>
+<span class="quick-route-copy">
+<strong>朝の支度15分号</strong>
+<small>スタート → 準備 → 確認 → ゴール</small>
+</span>
+</button>
+<button class="quick-route-button" data-quick-route="reading15" type="button">
+<span aria-hidden="true" class="quick-route-icon">🚃</span>
+<span class="quick-route-copy">
+<strong>読書15分号</strong>
+<small>スタート → 前半 → 後半 → ゴール</small>
+</span>
+</button>
+<button class="quick-route-button" data-quick-route="study25" type="button">
+<span aria-hidden="true" class="quick-route-icon">🚃</span>
+<span class="quick-route-copy">
+<strong>勉強25分号</strong>
+<small>スタート → 集中1 → 集中2 → まとめ → ゴール</small>
+</span>
+</button>
+</div>
+</section>
+<section aria-labelledby="activeTrainsHeading" class="active-trains-card" id="activeTrainsSection">
+<div class="section-heading-row active-trains-heading-row">
+<div>
+<p class="eyebrow">いま使う電車</p>
+<h2 id="activeTrainsHeading">運行中の電車</h2>
+</div>
+<span class="status-badge" id="activeTrainsCountBadge">1本</span>
+</div>
+<p class="active-trains-introduction">
           タイマー画面では1本の電車を大きく表示します。ここでは、表示する電車を選んだり、電車ごとに出発・一時停止・はじめから・削除を操作できます。
         </p>
-
-        <div class="active-train-add-area">
-          <button
-            id="addCurrentRouteTrainButton"
-            class="active-train-add-button"
-            type="button"
-            aria-label="今の経路を電車として追加する"
-          >
-            <span aria-hidden="true">🚆</span>
-            <span>今の経路を電車として追加</span>
-          </button>
-          <p class="active-train-add-note">
-            今タイマー画面で見ている線路をコピーして、別の電車として保存します。追加しても表示中の電車は切り替わりません。
+<div class="active-train-add-area">
+<div class="active-train-add-buttons">
+<button aria-label="今の経路を電車として追加する" class="active-train-add-button" id="addCurrentRouteTrainButton" type="button">
+<span aria-hidden="true">🚆</span>
+<span>今の経路を電車として追加</span>
+</button>
+<button aria-label="新しい電車を追加する" class="active-train-add-button active-train-add-button--secondary" id="openCreateTrainButton" type="button">
+<span aria-hidden="true">🚃</span>
+<span>新しい電車を追加</span>
+</button>
+</div>
+<p class="active-train-add-note">
+            今の経路をコピーするか、時間・駅数・線路の形を選んで新しい電車を作れます。追加しても、初期状態では表示中の電車は切り替わりません。
           </p>
-        </div>
-
-        <div
-          id="activeTrainsList"
-          class="active-trains-list"
-          aria-live="polite"
-        ></div>
-      </section>
-
-      <section
-        id="presetSection"
-        class="preset-card"
-        aria-labelledby="presetHeading"
-      >
-        <div class="section-heading-row preset-heading-row">
-          <div>
-            <p class="eyebrow">Myタイマー</p>
-            <h2 id="presetHeading">登録した経路</h2>
-          </div>
-          <span id="storageStatusBadge" class="status-badge">保存できます</span>
-        </div>
-
-        <p class="preset-introduction">
+</div>
+<div aria-live="polite" class="active-trains-list" id="activeTrainsList"></div>
+</section>
+<section aria-labelledby="presetHeading" class="preset-card" id="presetSection">
+<div class="section-heading-row preset-heading-row">
+<div>
+<p class="eyebrow">Myタイマー</p>
+<h2 id="presetHeading">登録した経路</h2>
+</div>
+<span class="status-badge" id="storageStatusBadge">保存できます</span>
+</div>
+<p class="preset-introduction">
           よく使う時間・駅・区間を登録して、次回すぐに呼び出せます。
           タイマー動作中の残り時間は保存せず、再読み込み後は開始前へ戻ります。
         </p>
-
-        <div class="preset-save-box">
-          <div class="form-field preset-name-field">
-            <label for="presetNameInput">登録名</label>
-            <input
-              id="presetNameInput"
-              type="text"
-              maxlength="40"
-              placeholder="例：朝の準備"
-              autocomplete="off"
-            >
-          </div>
-          <button
-            id="savePresetButton"
-            class="apply-button preset-save-button"
-            type="button"
-            aria-label="現在の設定を新しいプリセットとして保存する"
-          >
-            <span aria-hidden="true">💾</span>
+<div class="preset-save-box">
+<div class="form-field preset-name-field">
+<label for="presetNameInput">登録名</label>
+<input autocomplete="off" id="presetNameInput" maxlength="40" placeholder="例：朝の準備" type="text"/>
+</div>
+<button aria-label="現在の設定を新しいプリセットとして保存する" class="apply-button preset-save-button" id="savePresetButton" type="button">
+<span aria-hidden="true">💾</span>
             この経路を登録
           </button>
-        </div>
-
-        <div class="preset-list-header">
-          <h3>登録済み経路</h3>
-          <p id="presetCountText">0件</p>
-        </div>
-
-        <div
-          id="presetList"
-          class="preset-list"
-          aria-live="polite"
-        ></div>
-
-        <section class="data-management" aria-labelledby="dataManagementHeading">
-          <div class="data-management-heading">
-            <div>
-              <p class="eyebrow">バックアップと初期化</p>
-              <h3 id="dataManagementHeading">データ管理</h3>
-            </div>
-            <p id="lastSavedText">まだ保存されていません</p>
-          </div>
-
-          <div class="data-action-grid">
-            <button
-              id="exportJsonButton"
-              class="data-action-button"
-              type="button"
-              aria-label="現在の設定とプリセットをJSONファイルに書き出す"
-            >
-              <span aria-hidden="true">⬇️</span>
+</div>
+<div class="preset-list-header">
+<h3>登録済み経路</h3>
+<p id="presetCountText">0件</p>
+</div>
+<div aria-live="polite" class="preset-list" id="presetList"></div>
+<section aria-labelledby="dataManagementHeading" class="data-management">
+<div class="data-management-heading">
+<div>
+<p class="eyebrow">バックアップと初期化</p>
+<h3 id="dataManagementHeading">データ管理</h3>
+</div>
+<p id="lastSavedText">まだ保存されていません</p>
+</div>
+<div class="data-action-grid">
+<button aria-label="現在の設定とプリセットをJSONファイルに書き出す" class="data-action-button" id="exportJsonButton" type="button">
+<span aria-hidden="true">⬇️</span>
               JSONを書き出す
             </button>
-
-            <button
-              id="importJsonButton"
-              class="data-action-button"
-              type="button"
-              aria-label="JSONファイルから設定とプリセットを読み込む"
-            >
-              <span aria-hidden="true">⬆️</span>
+<button aria-label="JSONファイルから設定とプリセットを読み込む" class="data-action-button" id="importJsonButton" type="button">
+<span aria-hidden="true">⬆️</span>
               JSONを読み込む
             </button>
-
-            <input
-              id="importJsonInput"
-              class="visually-hidden"
-              type="file"
-              accept="application/json,.json"
-              tabindex="-1"
-            >
-
-            <button
-              id="resetCurrentSettingsButton"
-              class="data-action-button"
-              type="button"
-              aria-label="現在の設定だけを初期状態へ戻す"
-            >
-              <span aria-hidden="true">↺</span>
+<input accept="application/json,.json" class="visually-hidden" id="importJsonInput" tabindex="-1" type="file"/>
+<button aria-label="現在の設定だけを初期状態へ戻す" class="data-action-button" id="resetCurrentSettingsButton" type="button">
+<span aria-hidden="true">↺</span>
               現在の設定を初期化
             </button>
-
-            <button
-              id="deleteAllPresetsButton"
-              class="data-action-button data-action-button--danger"
-              type="button"
-              aria-label="保存済みのプリセットをすべて削除する"
-            >
-              <span aria-hidden="true">🗑️</span>
+<button aria-label="保存済みのプリセットをすべて削除する" class="data-action-button data-action-button--danger" id="deleteAllPresetsButton" type="button">
+<span aria-hidden="true">🗑️</span>
               全プリセットを削除
             </button>
-
-            <button
-              id="resetEntireAppButton"
-              class="data-action-button data-action-button--danger data-action-button--wide"
-              type="button"
-              aria-label="保存データをすべて削除してアプリ全体を初期状態へ戻す"
-            >
-              <span aria-hidden="true">⚠️</span>
+<button aria-label="保存データをすべて削除してアプリ全体を初期状態へ戻す" class="data-action-button data-action-button--danger data-action-button--wide" id="resetEntireAppButton" type="button">
+<span aria-hidden="true">⚠️</span>
               アプリ全体を初期状態へ戻す
             </button>
-          </div>
-        </section>
-      </section>
-
-      </div>
-
-      <div id="pageSettings" class="app-page" data-page="settings" hidden>
-      <section class="page-intro-card" aria-labelledby="settingsPageHeading">
-        <div class="section-heading-row">
-          <div>
-            <p class="eyebrow">設定</p>
-            <h2 id="settingsPageHeading">表示と使い方</h2>
-          </div>
-          <span class="status-badge">表示・音・情報</span>
-        </div>
-        <p class="page-intro-copy">見え方、音、残り時間の表示方法などは、下のボタンから設定できます。</p>
-        <button id="openPreferencesPanelButton" class="apply-button" type="button" aria-label="表示と音の設定を開く">
-          <span aria-hidden="true">⚙️</span>
+</div>
+</section>
+</section>
+</div>
+<div class="app-page" data-page="settings" hidden="" id="pageSettings">
+<section aria-labelledby="settingsPageHeading" class="page-intro-card">
+<div class="section-heading-row">
+<div>
+<p class="eyebrow">設定</p>
+<h2 id="settingsPageHeading">表示と使い方</h2>
+</div>
+<span class="status-badge">表示・音・情報</span>
+</div>
+<p class="page-intro-copy">見え方、音、画面ロック、残り時間の表示方法などは、下のボタンから設定できます。</p>
+<button aria-label="表示と音の設定を開く" class="apply-button" id="openPreferencesPanelButton" type="button">
+<span aria-hidden="true">⚙️</span>
           表示と音の設定を開く
         </button>
-      </section>
-
-      <section id="guideSection" class="guide-card" aria-labelledby="guideHeading">
-        <div class="section-heading-row">
-          <div>
-            <p class="eyebrow">使い方</p>
-            <h2 id="guideHeading">操作ガイド</h2>
-          </div>
-          <span class="status-badge">キーボード対応</span>
-        </div>
-        <div class="guide-grid">
-          <article class="guide-item">
-            <span class="guide-icon" aria-hidden="true">1</span>
-            <div><h3>時間と駅を設定</h3><p>歯車から1単位、駅名、区間の単位数を決めます。</p></div>
-          </article>
-          <article class="guide-item">
-            <span class="guide-icon" aria-hidden="true">2</span>
-            <div><h3>線路を選択</h3><p>横・縦・円の表示は、運転中でも切り替えられます。</p></div>
-          </article>
-          <article class="guide-item">
-            <span class="guide-icon" aria-hidden="true">3</span>
-            <div><h3>はじめる</h3><p>電車が時間に合わせて進み、駅までの残り時間を表示します。</p></div>
-          </article>
-          <article class="guide-item">
-            <span class="guide-icon" aria-hidden="true">4</span>
-            <div><h3>必要なら時間を追加</h3><p>＋1分・＋5分を現在区間または最後の区間へ追加できます。</p></div>
-          </article>
-        </div>
-        <div class="shortcut-box">
-          <h3>キーボード操作</h3>
-          <dl>
-            <div><dt><kbd>Space</kbd></dt><dd>開始・一時停止・再開</dd></div>
-            <div><dt><kbd>R</kbd></dt><dd>リセット</dd></div>
-            <div><dt><kbd>M</kbd></dt><dd>音のオン・オフ</dd></div>
-            <div><dt><kbd>Esc</kbd></dt><dd>開いている画面を閉じる</dd></div>
-          </dl>
-        </div>
-      </section>
-
-      <section id="aboutSection" class="about-card" aria-labelledby="aboutHeading">
-        <div class="section-heading-row">
-          <div>
-            <p class="eyebrow">アプリ情報</p>
-            <h2 id="aboutHeading">でんしゃタイマー</h2>
-          </div>
-          <span class="status-badge">Version 1.12.0</span>
-        </div>
-
-        <dl class="about-list">
-          <div><dt>バージョン</dt><dd>1.12.0</dd></div>
-          <div><dt>更新日</dt><dd>2026年6月10日</dd></div>
-          <div><dt>保存場所</dt><dd>この端末のブラウザ内</dd></div>
-          <div><dt>通信</dt><dd>設定やプリセットを外部へ送信しません</dd></div>
-        </dl>
-
-        <div class="pwa-status-card">
-          <div>
-            <p class="eyebrow">オフライン利用</p>
-            <h3>ホーム画面から使えます</h3>
-            <p id="pwaStatusText">オフライン機能を準備しています。</p>
-          </div>
-          <div class="pwa-actions">
-            <span id="networkStatusBadge" class="network-status-badge">オンライン</span>
-            <button id="installAppButton" class="install-app-button" type="button" hidden>
+</section>
+<section aria-labelledby="settingsOverviewHeading" class="settings-overview-card" id="settingsOverviewSection">
+<div class="section-heading-row">
+<div>
+<p class="eyebrow">設定項目</p>
+<h2 id="settingsOverviewHeading">調整できること</h2>
+</div>
+<span class="status-badge">一覧</span>
+</div>
+<p class="page-intro-copy">音、表示、文字サイズ、ロック、画面をつけたままにする設定をここで確認できます。変更は「表示と音の設定を開く」から行います。</p>
+<div class="settings-overview-grid" aria-label="設定項目の一覧">
+<article class="settings-overview-item">
+<span aria-hidden="true" class="settings-overview-icon">🔔</span>
+<div><h3>音</h3><p>駅到着音、ゴール音、操作音、音量を調整します。</p></div>
+</article>
+<article class="settings-overview-item">
+<span aria-hidden="true" class="settings-overview-icon">👀</span>
+<div><h3>表示</h3><p>線路内の残り時間、全体・区間表示を選びます。</p></div>
+</article>
+<article class="settings-overview-item">
+<span aria-hidden="true" class="settings-overview-icon">🔤</span>
+<div><h3>文字と見やすさ</h3><p>文字サイズ、高コントラスト、動きを減らす設定です。</p></div>
+</article>
+<article class="settings-overview-item">
+<span aria-hidden="true" class="settings-overview-icon">🔒</span>
+<div><h3>いたずら防止ロック</h3><p>ロック中は操作を止め、3秒長押しで解除します。</p></div>
+</article>
+<article class="settings-overview-item">
+<span aria-hidden="true" class="settings-overview-icon">💡</span>
+<div><h3>運転中は画面をつけたままにする</h3><p>運転中に画面が暗くなりにくいようにします。</p></div>
+</article>
+</div>
+</section>
+<section aria-labelledby="guideHeading" class="guide-card" id="guideSection">
+<div class="section-heading-row">
+<div>
+<p class="eyebrow">使い方</p>
+<h2 id="guideHeading">操作ガイド</h2>
+</div>
+<span class="status-badge">キーボード対応</span>
+</div>
+<div class="guide-grid">
+<article class="guide-item">
+<span aria-hidden="true" class="guide-icon">1</span>
+<div><h3>時間と駅を設定</h3><p>歯車から1単位、駅名、区間の単位数を決めます。</p></div>
+</article>
+<article class="guide-item">
+<span aria-hidden="true" class="guide-icon">2</span>
+<div><h3>線路を選択</h3><p>横・縦・円の表示は、運転中でも切り替えられます。</p></div>
+</article>
+<article class="guide-item">
+<span aria-hidden="true" class="guide-icon">3</span>
+<div><h3>はじめる</h3><p>電車が時間に合わせて進み、駅までの残り時間を表示します。</p></div>
+</article>
+<article class="guide-item">
+<span aria-hidden="true" class="guide-icon">4</span>
+<div><h3>必要なら時間を追加</h3><p>＋1分・＋5分を現在区間または最後の区間へ追加できます。</p></div>
+</article>
+</div>
+<div class="shortcut-box">
+<h3>キーボード操作</h3>
+<dl>
+<div><dt><kbd>Space</kbd></dt><dd>開始・一時停止・再開</dd></div>
+<div><dt><kbd>R</kbd></dt><dd>リセット</dd></div>
+<div><dt><kbd>M</kbd></dt><dd>音のオン・オフ</dd></div>
+<div><dt><kbd>Esc</kbd></dt><dd>開いている画面を閉じる</dd></div>
+</dl>
+</div>
+</section>
+<section aria-labelledby="aboutHeading" class="about-card" id="aboutSection">
+<div class="section-heading-row">
+<div>
+<p class="eyebrow">アプリ情報</p>
+<h2 id="aboutHeading">でんしゃタイマー</h2>
+</div>
+<span class="status-badge">Version 1.16.4</span>
+</div>
+<dl class="about-list">
+<div><dt>バージョン</dt><dd>1.16.4</dd></div>
+<div><dt>更新日</dt><dd>2026年6月10日</dd></div>
+<div><dt>保存場所</dt><dd>この端末のブラウザ内</dd></div>
+<div><dt>通信</dt><dd>設定やプリセットを外部へ送信しません</dd></div>
+</dl>
+<div class="pwa-status-card">
+<div>
+<p class="eyebrow">オフライン利用</p>
+<h3>ホーム画面から使えます</h3>
+<p id="pwaStatusText">オフライン機能を準備しています。</p>
+</div>
+<div class="pwa-actions">
+<span class="network-status-badge" id="networkStatusBadge">オンライン</span>
+<button class="install-app-button" hidden="" id="installAppButton" type="button">
               ホーム画面に追加
             </button>
-          </div>
-        </div>
-
-        <div class="disclaimer-box">
-          <h3>免責事項</h3>
-          <p>本アプリは時間の見通しを支援する補助ツールです。安全管理、医療、教育上の判断を代替するものではありません。重要な予定では、端末の時計や他の方法も併用してください。</p>
-        </div>
-      </section>
-      </div>
-    </main>
-  </div>
-
-  <nav class="mobile-bottom-nav" aria-label="スマートフォン用ページナビゲーション">
-    <button class="mobile-nav-item is-active" type="button" data-page-target="timer" aria-label="タイマー画面を表示" aria-current="page">
-      <span aria-hidden="true">⏱️</span>
-      <span>タイマー</span>
-    </button>
-    <button class="mobile-nav-item" type="button" data-page-target="edit" aria-label="経路編集画面を表示">
-      <span aria-hidden="true">🛤️</span>
-      <span>経路編集</span>
-    </button>
-    <button class="mobile-nav-item" type="button" data-page-target="presets" aria-label="My設定画面を表示">
-      <span aria-hidden="true">💾</span>
-      <span>My設定</span>
-    </button>
-    <button
-      id="mobileSettingsButton"
-      class="mobile-nav-item mobile-nav-button"
-      type="button"
-      data-page-target="settings"
-      aria-label="設定画面を表示"
-    >
-      <span aria-hidden="true">⚙️</span>
-      <span>設定</span>
-    </button>
-  </nav>
-
-  <div id="menuBackdrop" class="backdrop" hidden></div>
-
-  <nav
-    id="sideMenu"
-    class="side-menu"
-    aria-label="メインメニュー"
-    aria-hidden="true"
-  >
-    <div class="panel-header">
-      <div>
-        <p class="eyebrow">メニュー</p>
-        <h2>でんしゃタイマー</h2>
-      </div>
-      <button
-        id="closeMenuButton"
-        class="icon-button icon-button--small"
-        type="button"
-        aria-label="メニューを閉じる"
-      >
-        <span aria-hidden="true">✕</span>
-      </button>
-    </div>
-
-    <ul class="menu-list">
-      <li>
-        <button id="menuTimerButton" type="button" class="menu-item" aria-label="タイマー画面を表示" data-page-target="timer">
-          <span aria-hidden="true">⏱️</span>
+</div>
+</div>
+<div class="disclaimer-box">
+<h3>免責事項</h3>
+<p>本アプリは時間の見通しを支援する補助ツールです。安全管理、医療、教育上の判断を代替するものではありません。重要な予定では、端末の時計や他の方法も併用してください。</p>
+</div>
+</section>
+</div>
+</main>
+</div>
+<nav aria-label="スマートフォン用ページナビゲーション" class="mobile-bottom-nav">
+<button aria-current="page" aria-label="タイマー画面を表示" class="mobile-nav-item is-active" data-page-target="timer" type="button">
+<span aria-hidden="true">⏱️</span>
+<span>タイマー</span>
+</button>
+<button aria-label="経路編集画面を表示" class="mobile-nav-item" data-page-target="edit" type="button">
+<span aria-hidden="true">🛤️</span>
+<span>経路編集</span>
+</button>
+<button aria-label="My設定画面を表示" class="mobile-nav-item" data-page-target="presets" type="button">
+<span aria-hidden="true">💾</span>
+<span>My設定</span>
+</button>
+<button aria-label="設定画面を表示" class="mobile-nav-item mobile-nav-button" data-page-target="settings" id="mobileSettingsButton" type="button">
+<span aria-hidden="true">⚙️</span>
+<span>設定</span>
+</button>
+</nav>
+<div class="backdrop" hidden="" id="menuBackdrop"></div>
+<nav aria-hidden="true" aria-label="メインメニュー" class="side-menu" id="sideMenu">
+<div class="panel-header">
+<div>
+<p class="eyebrow">メニュー</p>
+<h2>でんしゃタイマー</h2>
+</div>
+<button aria-label="メニューを閉じる" class="icon-button icon-button--small" id="closeMenuButton" type="button">
+<span aria-hidden="true">✕</span>
+</button>
+</div>
+<ul class="menu-list">
+<li>
+<button aria-label="タイマー画面を表示" class="menu-item" data-page-target="timer" id="menuTimerButton" type="button">
+<span aria-hidden="true">⏱️</span>
           タイマー
         </button>
-      </li>
-      <li>
-        <button
-          id="menuResetTimerButton"
-          type="button"
-          class="menu-item"
-          aria-label="タイマーをリセットする"
-        >
-          <span aria-hidden="true">↺</span>
+</li>
+<li>
+<button aria-label="タイマーをリセットする" class="menu-item" id="menuResetTimerButton" type="button">
+<span aria-hidden="true">↺</span>
           タイマーをリセット
         </button>
-      </li>
-      <li>
-        <button
-          id="menuPresetsButton"
-          type="button"
-          class="menu-item"
-          data-page-target="presets"
-          aria-label="My設定画面を表示"
-        >
-          <span aria-hidden="true">💾</span>
+</li>
+<li>
+<button aria-label="My設定画面を表示" class="menu-item" data-page-target="presets" id="menuPresetsButton" type="button">
+<span aria-hidden="true">💾</span>
           My設定
         </button>
-      </li>
-      <li>
-        <button id="menuGuideButton" type="button" class="menu-item" data-page-target="edit" aria-label="経路編集画面を表示">
-          <span aria-hidden="true">🛤️</span>
+</li>
+<li>
+<button aria-label="経路編集画面を表示" class="menu-item" data-page-target="edit" id="menuGuideButton" type="button">
+<span aria-hidden="true">🛤️</span>
           経路編集
         </button>
-      </li>
-      <li>
-        <button id="menuAboutButton" type="button" class="menu-item" data-page-target="settings" aria-label="設定画面を表示">
-          <span aria-hidden="true">⚙️</span>
+</li>
+<li>
+<button aria-label="設定画面を表示" class="menu-item" data-page-target="settings" id="menuAboutButton" type="button">
+<span aria-hidden="true">⚙️</span>
           設定
         </button>
-      </li>
-    </ul>
-
-    <p class="panel-note">
+</li>
+</ul>
+<p class="panel-note">
       設定やプリセットはこの端末のブラウザ内に保存されます。
     </p>
-  </nav>
-
-  <div id="settingsBackdrop" class="backdrop" hidden></div>
-
-  <aside
-    id="settingsPanel"
-    class="settings-panel settings-panel--preferences"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="settingsTitle"
-    aria-hidden="true"
-  >
-    <div class="panel-handle" aria-hidden="true"></div>
-
-    <div class="panel-header">
-      <div>
-        <p class="eyebrow">設定</p>
-        <h2 id="settingsTitle">表示・音・操作</h2>
-      </div>
-      <button
-        id="closeSettingsButton"
-        class="icon-button icon-button--small"
-        type="button"
-        aria-label="設定を閉じる"
-      >
-        <span aria-hidden="true">✕</span>
-      </button>
-    </div>
-
-    <form id="preferencesForm" class="settings-form preferences-form">
-      <section class="settings-section" aria-labelledby="comfortSettingsHeading">
-        <div class="settings-section-heading">
-          <div>
-            <p class="settings-step">4</p>
-            <div>
-              <h3 id="comfortSettingsHeading">音・表示・操作</h3>
-              <p>使う場所や見え方に合わせて調整できます。</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="preference-list">
-          <div class="preference-row">
-            <div>
-              <label for="soundToggle">音を使う</label>
-              <p class="field-help">駅到着音、ゴール音、操作音の共通設定です。</p>
-            </div>
-            <label class="switch">
-              <input id="soundToggle" type="checkbox" checked>
-              <span class="switch-slider" aria-hidden="true"></span>
-              <span class="visually-hidden">音の有効と無効を切り替える</span>
-            </label>
-          </div>
-
-          <div id="soundDetailControls" class="preference-subgroup">
-            <label class="check-option">
-              <input id="stationSoundToggle" type="checkbox" checked>
-              <span>駅到着音</span>
-            </label>
-            <label class="check-option">
-              <input id="goalSoundToggle" type="checkbox" checked>
-              <span>ゴール音</span>
-            </label>
-            <label class="check-option">
-              <input id="actionSoundToggle" type="checkbox" checked>
-              <span>操作音</span>
-            </label>
-            <div class="volume-control">
-              <label for="soundVolumeRange">音量</label>
-              <input id="soundVolumeRange" type="range" min="0" max="100" step="5" value="55">
-              <output id="soundVolumeOutput" for="soundVolumeRange">55%</output>
-            </div>
-          </div>
-
-          <div class="preference-row">
-            <div>
-              <label for="quietModeToggle">静かなモード</label>
-              <p class="field-help">すべての音を止め、動きを少なくします。</p>
-            </div>
-            <label class="switch">
-              <input id="quietModeToggle" type="checkbox">
-              <span class="switch-slider" aria-hidden="true"></span>
-              <span class="visually-hidden">静かなモードを切り替える</span>
-            </label>
-          </div>
-
-          <div class="form-field">
-            <label for="fontSizeSelect">文字サイズ</label>
-            <select id="fontSizeSelect">
-              <option value="normal">標準</option>
-              <option value="large">大きい</option>
-              <option value="xlarge">特大</option>
-            </select>
-          </div>
-
-          <div class="preference-row">
-            <div>
-              <label for="highContrastToggle">高コントラスト</label>
-              <p class="field-help">文字と境界線をはっきり表示します。</p>
-            </div>
-            <label class="switch">
-              <input id="highContrastToggle" type="checkbox">
-              <span class="switch-slider" aria-hidden="true"></span>
-              <span class="visually-hidden">高コントラスト表示を切り替える</span>
-            </label>
-          </div>
-
-          <div class="preference-row">
-            <div>
-              <label for="reduceMotionToggle">動きを減らす</label>
-              <p class="field-help">電車の揺れや切り替えアニメーションを抑えます。</p>
-            </div>
-            <label class="switch">
-              <input id="reduceMotionToggle" type="checkbox">
-              <span class="switch-slider" aria-hidden="true"></span>
-              <span class="visually-hidden">アニメーションを減らす設定を切り替える</span>
-            </label>
-          </div>
-
-          <div class="preference-row">
-            <div>
-              <label for="circleRemainingTimeToggle">線路内に残り時間を表示</label>
-              <p class="field-help">
+</nav>
+<div class="backdrop" hidden="" id="settingsBackdrop"></div>
+<aside aria-hidden="true" aria-labelledby="settingsTitle" aria-modal="true" class="settings-panel settings-panel--preferences" id="settingsPanel" role="dialog">
+<div aria-hidden="true" class="panel-handle"></div>
+<div class="panel-header">
+<div>
+<p class="eyebrow">設定</p>
+<h2 id="settingsTitle">表示・音・操作</h2>
+</div>
+<button aria-label="設定を閉じる" class="icon-button icon-button--small" id="closeSettingsButton" type="button">
+<span aria-hidden="true">✕</span>
+</button>
+</div>
+<form class="settings-form preferences-form" id="preferencesForm">
+<section aria-labelledby="comfortSettingsHeading" class="settings-section">
+<div class="settings-section-heading">
+<div>
+<p class="settings-step">4</p>
+<div>
+<h3 id="comfortSettingsHeading">音・表示・操作</h3>
+<p>使う場所や見え方に合わせて調整できます。</p>
+</div>
+</div>
+</div>
+<div class="preference-list">
+<div class="preference-row">
+<div>
+<label for="soundToggle">音を使う</label>
+<p class="field-help">駅到着音、ゴール音、操作音の共通設定です。</p>
+</div>
+<label class="switch">
+<input checked="" id="soundToggle" type="checkbox"/>
+<span aria-hidden="true" class="switch-slider"></span>
+<span class="visually-hidden">音の有効と無効を切り替える</span>
+</label>
+</div>
+<div class="preference-subgroup" id="soundDetailControls">
+<label class="check-option">
+<input checked="" id="stationSoundToggle" type="checkbox"/>
+<span>駅到着音</span>
+</label>
+<label class="check-option">
+<input checked="" id="goalSoundToggle" type="checkbox"/>
+<span>ゴール音</span>
+</label>
+<label class="check-option">
+<input checked="" id="actionSoundToggle" type="checkbox"/>
+<span>操作音</span>
+</label>
+<div class="volume-control">
+<label for="soundVolumeRange">音量</label>
+<input id="soundVolumeRange" max="100" min="0" step="5" type="range" value="55"/>
+<output for="soundVolumeRange" id="soundVolumeOutput">55%</output>
+</div>
+</div>
+<div class="preference-row">
+<div>
+<label for="quietModeToggle">静かなモード</label>
+<p class="field-help">すべての音を止め、動きを少なくします。</p>
+</div>
+<label class="switch">
+<input id="quietModeToggle" type="checkbox"/>
+<span aria-hidden="true" class="switch-slider"></span>
+<span class="visually-hidden">静かなモードを切り替える</span>
+</label>
+</div>
+<div class="preference-row preference-row--guard">
+<div>
+<label for="childLockToggle">いたずら防止ロック</label>
+<p class="field-help">オンにするとタイマー画面の操作を止めます。解除は3秒長押しです。</p>
+</div>
+<label class="switch">
+<input id="childLockToggle" type="checkbox"/>
+<span aria-hidden="true" class="switch-slider"></span>
+<span class="visually-hidden">いたずら防止ロックを切り替える</span>
+</label>
+</div>
+<div class="preference-row preference-row--guard">
+<div>
+<label for="keepAwakeToggle">運転中は画面をつけたままにする</label>
+<p class="field-help" id="wakeLockSupportText">端末やブラウザによっては、画面が暗くなることがあります。</p>
+</div>
+<label class="switch">
+<input id="keepAwakeToggle" type="checkbox"/>
+<span aria-hidden="true" class="switch-slider"></span>
+<span class="visually-hidden">運転中に画面をつけたままにする設定を切り替える</span>
+</label>
+</div>
+<div class="form-field">
+<label for="fontSizeSelect">文字サイズ</label>
+<select id="fontSizeSelect">
+<option value="normal">標準</option>
+<option value="large">大きい</option>
+<option value="xlarge">特大</option>
+</select>
+</div>
+<div class="preference-row">
+<div>
+<label for="highContrastToggle">高コントラスト</label>
+<p class="field-help">文字と境界線をはっきり表示します。</p>
+</div>
+<label class="switch">
+<input id="highContrastToggle" type="checkbox"/>
+<span aria-hidden="true" class="switch-slider"></span>
+<span class="visually-hidden">高コントラスト表示を切り替える</span>
+</label>
+</div>
+<div class="preference-row">
+<div>
+<label for="reduceMotionToggle">動きを減らす</label>
+<p class="field-help">電車の揺れや切り替えアニメーションを抑えます。</p>
+</div>
+<label class="switch">
+<input id="reduceMotionToggle" type="checkbox"/>
+<span aria-hidden="true" class="switch-slider"></span>
+<span class="visually-hidden">アニメーションを減らす設定を切り替える</span>
+</label>
+</div>
+<div class="preference-row">
+<div>
+<label for="circleRemainingTimeToggle">線路内に残り時間を表示</label>
+<p class="field-help">
                 オンにすると、線路内に残り時間を表示します。
               </p>
-            </div>
-            <label class="switch">
-              <input id="circleRemainingTimeToggle" type="checkbox" checked>
-              <span class="switch-slider" aria-hidden="true"></span>
-              <span class="visually-hidden">
+</div>
+<label class="switch">
+<input checked="" id="circleRemainingTimeToggle" type="checkbox"/>
+<span aria-hidden="true" class="switch-slider"></span>
+<span class="visually-hidden">
                 線路内の残り時間表示を切り替える
               </span>
-            </label>
-          </div>
-
-          <div class="form-field">
-            <label for="remainingTimeDisplayModeSelect">残り時間の表示内容</label>
-            <select id="remainingTimeDisplayModeSelect">
-              <option value="overall">全体の残り時間</option>
-              <option value="segment">その区間の残り時間</option>
-              <option value="both">全体とその区間の両方</option>
-              <option value="off">表示しない</option>
-            </select>
-            <p class="field-help">
+</label>
+</div>
+<div class="form-field">
+<label for="remainingTimeDisplayModeSelect">残り時間の表示内容</label>
+<select id="remainingTimeDisplayModeSelect">
+<option value="overall">全体の残り時間</option>
+<option value="segment">その区間の残り時間</option>
+<option value="both">全体とその区間の両方</option>
+<option value="off">表示しない</option>
+</select>
+<p class="field-help">
               線路内に表示する残り時間の内容を選べます。
             </p>
-          </div>
-        </div>
-      </section>
-
-      <div class="settings-actions">
-        <button
-          id="cancelSettingsButton"
-          class="cancel-button"
-          type="button"
-          aria-label="変更を取り消して設定を閉じる"
-        >
+</div>
+</div>
+</section>
+<div class="settings-actions">
+<button aria-label="変更を取り消して設定を閉じる" class="cancel-button" id="cancelSettingsButton" type="button">
           キャンセル
         </button>
-        <button
-          class="apply-button"
-          type="submit"
-          aria-label="表示と音の設定を保存する"
-        >
+<button aria-label="表示と音の設定を保存する" class="apply-button" type="submit">
           設定を保存
         </button>
-      </div>
-    </form>
-  </aside>
-
-
-  <div id="timeAdditionBackdrop" class="backdrop time-addition-backdrop" hidden></div>
-
-  <section
-    id="timeAdditionDialog"
-    class="time-addition-dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="timeAdditionDialogTitle"
-    aria-describedby="timeAdditionDialogDescription"
-    aria-hidden="true"
-  >
-    <div class="panel-handle" aria-hidden="true"></div>
-
-    <div class="panel-header">
-      <div>
-        <p class="eyebrow">時間を追加</p>
-        <h2 id="timeAdditionDialogTitle">＋1分を追加します</h2>
-      </div>
-      <button
-        id="closeTimeAdditionButton"
-        class="icon-button icon-button--small"
-        type="button"
-        aria-label="時間追加をキャンセルして閉じる"
-      >
-        <span aria-hidden="true">✕</span>
-      </button>
-    </div>
-
-    <p id="timeAdditionDialogDescription" class="time-addition-description">
+</div>
+</form>
+</aside>
+<div aria-hidden="true" class="child-lock-overlay" hidden="" id="childLockOverlay">
+<div aria-describedby="childLockDescription" aria-labelledby="childLockTitle" class="child-lock-card" role="dialog">
+<div aria-hidden="true" class="child-lock-icon">🔒</div>
+<div class="child-lock-copy">
+<p class="eyebrow">いたずら防止</p>
+<h2 id="childLockTitle">画面ロック中</h2>
+<p id="childLockDescription">3秒長押しで解除</p>
+</div>
+<button aria-label="3秒長押しで画面ロックを解除する" class="unlock-hold-button" id="unlockHoldButton" type="button">
+<span>3秒長押しで解除</span>
+<span aria-hidden="true" class="unlock-progress-track">
+<span class="unlock-progress-bar" id="unlockProgressBar"></span>
+</span>
+</button>
+</div>
+</div>
+<div class="backdrop create-train-backdrop" hidden="" id="createTrainBackdrop"></div>
+<section aria-describedby="createTrainDescription" aria-hidden="true" aria-labelledby="createTrainTitle" aria-modal="true" class="create-train-panel" id="createTrainPanel" role="dialog">
+<div aria-hidden="true" class="panel-handle"></div>
+<div class="panel-header">
+<div>
+<p class="eyebrow">運行中の電車</p>
+<h2 id="createTrainTitle">新しい電車を追加</h2>
+</div>
+<button aria-label="新しい電車の作成画面を閉じる" class="icon-button icon-button--small" id="closeCreateTrainButton" type="button">
+<span aria-hidden="true">✕</span>
+</button>
+</div>
+<p class="create-train-description" id="createTrainDescription">
+      電車名、全体時間、駅の数を選ぶと、スタート・駅・ゴールと区間を自動で作ります。
+    </p>
+<form class="create-train-form" id="createTrainForm">
+<section aria-labelledby="newTrainExamplesHeading" class="create-train-section">
+<div class="settings-section-heading create-train-section-heading">
+<div>
+<p class="settings-step">例</p>
+<div>
+<h3 id="newTrainExamplesHeading">入力例</h3>
+<p>押すと入力欄に反映されます。追加はまだ行いません。</p>
+</div>
+</div>
+</div>
+<div aria-label="新しい電車の入力例" class="create-train-examples">
+<button class="create-train-example-button" data-example-train="study25" type="button">勉強25分号</button>
+<button class="create-train-example-button" data-example-train="break5" type="button">休憩5分号</button>
+<button class="create-train-example-button" data-example-train="cleanup10" type="button">お片付け10分号</button>
+<button class="create-train-example-button" data-example-train="morning15" type="button">朝の支度15分号</button>
+<button class="create-train-example-button" data-example-train="reading15" type="button">読書15分号</button>
+</div>
+</section>
+<section aria-labelledby="newTrainFormHeading" class="create-train-section">
+<div class="settings-section-heading create-train-section-heading">
+<div>
+<p class="settings-step">作成</p>
+<div>
+<h3 id="newTrainFormHeading">電車の内容</h3>
+<p>駅名と区間は自動で作成されます。</p>
+</div>
+</div>
+</div>
+<div class="create-train-grid">
+<div class="form-field create-train-field--wide">
+<label for="newTrainNameInput">電車名</label>
+<input autocomplete="off" id="newTrainNameInput" maxlength="40" type="text" value="勉強25分号"/>
+</div>
+<div class="form-field">
+<label for="newTrainTotalMinutesInput">全体時間</label>
+<div class="number-with-unit">
+<input id="newTrainTotalMinutesInput" inputmode="numeric" max="180" min="1" step="1" type="number" value="25"/>
+<span>分</span>
+</div>
+</div>
+<div class="form-field">
+<label for="newTrainStationCountInput">駅の数</label>
+<div class="number-with-unit">
+<input id="newTrainStationCountInput" inputmode="numeric" max="10" min="2" step="1" type="number" value="4"/>
+<span>駅</span>
+</div>
+</div>
+<div class="form-field">
+<label for="newTrainUnitMinutesInput">1単位の分数</label>
+<div class="number-with-unit">
+<input id="newTrainUnitMinutesInput" inputmode="numeric" max="180" min="1" step="1" type="number" value="5"/>
+<span>分</span>
+</div>
+</div>
+<div class="form-field">
+<label for="newTrainTrackShapeSelect">線路の形</label>
+<select id="newTrainTrackShapeSelect">
+<option value="horizontal">横</option>
+<option value="vertical">縦</option>
+<option value="circle">円</option>
+</select>
+</div>
+<div class="form-field create-train-field--wide">
+<label for="newTrainSoundSelect">音</label>
+<select id="newTrainSoundSelect">
+<option value="default">設定と同じ音</option>
+<option value="goal-only">到着音だけ</option>
+<option value="silent">音なし</option>
+</select>
+</div>
+</div>
+<p aria-live="polite" class="create-train-preview" id="newTrainAutoPreview">
+          スタート → 駅1 → 駅2 → ゴール、全体25分で作成します。
+        </p>
+<label class="check-option create-train-auto-show">
+<input id="newTrainAutoShowToggle" type="checkbox"/>
+<span>追加後にタイマー画面で表示する</span>
+</label>
+</section>
+<div class="settings-actions create-train-actions">
+<button class="cancel-button" id="cancelCreateTrainButton" type="button">キャンセル</button>
+<button class="apply-button" type="submit">追加する</button>
+</div>
+</form>
+</section>
+<div class="backdrop time-addition-backdrop" hidden="" id="timeAdditionBackdrop"></div>
+<section aria-describedby="timeAdditionDialogDescription" aria-hidden="true" aria-labelledby="timeAdditionDialogTitle" aria-modal="true" class="time-addition-dialog" id="timeAdditionDialog" role="dialog">
+<div aria-hidden="true" class="panel-handle"></div>
+<div class="panel-header">
+<div>
+<p class="eyebrow">時間を追加</p>
+<h2 id="timeAdditionDialogTitle">＋1分を追加します</h2>
+</div>
+<button aria-label="時間追加をキャンセルして閉じる" class="icon-button icon-button--small" id="closeTimeAdditionButton" type="button">
+<span aria-hidden="true">✕</span>
+</button>
+</div>
+<p class="time-addition-description" id="timeAdditionDialogDescription">
       追加する場所を選んでください。
     </p>
-
-    <div
-      id="finishedRestartNotice"
-      class="finished-restart-notice"
-      hidden
-    >
-      <strong>ゴール後の追加です</strong>
-      <span>追加した時間を最後の区間として、そのまま運転を再開します。</span>
-    </div>
-
-    <fieldset class="addition-target-fieldset">
-      <legend>追加先</legend>
-
-      <label class="addition-target-card">
-        <input
-          id="additionTargetCurrent"
-          type="radio"
-          name="additionTarget"
-          value="current"
-          checked
-        >
-        <span class="addition-target-icon" aria-hidden="true">🚃</span>
-        <span class="addition-target-copy">
-          <strong>現在の区間に追加</strong>
-          <small id="currentAdditionTargetLabel">
+<div class="finished-restart-notice" hidden="" id="finishedRestartNotice">
+<strong>ゴール後の追加です</strong>
+<span>追加した時間を最後の区間として、そのまま運転を再開します。</span>
+</div>
+<fieldset class="addition-target-fieldset">
+<legend>追加先</legend>
+<label class="addition-target-card">
+<input checked="" id="additionTargetCurrent" name="additionTarget" type="radio" value="current"/>
+<span aria-hidden="true" class="addition-target-icon">🚃</span>
+<span class="addition-target-copy">
+<strong>現在の区間に追加</strong>
+<small id="currentAdditionTargetLabel">
             スタート → 駅1に追加します
           </small>
-        </span>
-      </label>
-
-      <label class="addition-target-card">
-        <input
-          id="additionTargetOverall"
-          type="radio"
-          name="additionTarget"
-          value="overall"
-        >
-        <span class="addition-target-icon" aria-hidden="true">🏁</span>
-        <span class="addition-target-copy">
-          <strong>ゴールまでの全体時間に追加</strong>
-          <small id="overallAdditionTargetLabel">
+</span>
+</label>
+<label class="addition-target-card">
+<input id="additionTargetOverall" name="additionTarget" type="radio" value="overall"/>
+<span aria-hidden="true" class="addition-target-icon">🏁</span>
+<span class="addition-target-copy">
+<strong>ゴールまでの全体時間に追加</strong>
+<small id="overallAdditionTargetLabel">
             最後の区間へ追加します
           </small>
-        </span>
-      </label>
-    </fieldset>
-
-    <p class="time-addition-help">
+</span>
+</label>
+</fieldset>
+<p class="time-addition-help">
       現在の区間に追加すると、次の駅への到着時刻が後ろへずれます。
       全体時間に追加すると、最後の区間が延長されます。
     </p>
-
-    <div class="time-addition-actions">
-      <button
-        id="cancelTimeAdditionButton"
-        class="cancel-button"
-        type="button"
-      >
+<div class="time-addition-actions">
+<button class="cancel-button" id="cancelTimeAdditionButton" type="button">
         キャンセル
       </button>
-      <button
-        id="confirmTimeAdditionButton"
-        class="apply-button"
-        type="button"
-      >
+<button class="apply-button" id="confirmTimeAdditionButton" type="button">
         追加する
       </button>
-    </div>
-  </section>
-
-  <div id="statusMessage" class="visually-hidden" aria-live="polite"></div>
-
-  <script src="app.js" defer></script>
+</div>
+</section>
+<div aria-live="polite" class="visually-hidden" id="statusMessage"></div>
+<script defer="" src="app.js"></script>
 </body>
 </html>

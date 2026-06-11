@@ -1018,7 +1018,7 @@ h3 {
 
 .railway-track--vertical .train-position {
   left: 35%;
-  transform: translate(-50%, -50%);
+  transform: none;
 }
 
 .railway-track--circle .train-position {
@@ -5183,7 +5183,7 @@ body.is-high-contrast .about-card {
 }
 
 .route-time-panel {
-  position: absolute;
+  position: relative;
   z-index: 14;
   display: grid;
   min-width: 138px;
@@ -5198,7 +5198,7 @@ body.is-high-contrast .about-card {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.13);
   text-align: center;
   backdrop-filter: blur(6px);
-  transform: translate(-50%, -50%);
+  transform: none;
 }
 
 .route-time-panel[hidden] {
@@ -5277,20 +5277,6 @@ body.is-high-contrast .about-card {
   background: #eaf7f1;
 }
 
-.railway-preview[data-track-shape="horizontal"] .route-time-panel {
-  top: 20%;
-  left: 50%;
-}
-
-.railway-preview[data-track-shape="vertical"] .route-time-panel {
-  top: 50%;
-  left: 72%;
-}
-
-.railway-preview[data-track-shape="circle"] .route-time-panel {
-  top: 50%;
-  left: 50%;
-}
 
 .route-time-panel.is-double {
   min-width: 196px;
@@ -5355,13 +5341,6 @@ body.is-high-contrast .about-card {
     height: min(76vw, 310px);
   }
 
-  #pageTimer .railway-preview[data-track-shape="horizontal"] .route-time-panel {
-    top: 18%;
-  }
-
-  #pageTimer .railway-preview[data-track-shape="vertical"] .route-time-panel {
-    left: 72%;
-  }
 
   #pageTimer .route-time-panel {
     min-width: 126px;
@@ -6226,20 +6205,6 @@ body.page-timer-active .main-content {
     place-items: center;
   }
 
-  #pageTimer .railway-preview[data-track-shape="horizontal"] .route-time-panel {
-    top: 18%;
-    left: 50%;
-  }
-
-  #pageTimer .railway-preview[data-track-shape="vertical"] .route-time-panel {
-    top: 50%;
-    left: 72%;
-  }
-
-  #pageTimer .railway-preview[data-track-shape="circle"] .route-time-panel {
-    top: 50%;
-    left: 50%;
-  }
 
   #pageTimer .route-time-panel {
     min-width: 124px;
@@ -6678,20 +6643,17 @@ body.page-timer-active .main-content {
 @media (min-width: 600px) {
   #pageTimer .railway-track--horizontal .track-bed,
   #pageTimer .railway-track--horizontal .track-segment-list {
-    top: 43% !important;
+    top: var(--rail-y, 43%) !important;
   }
 
   #pageTimer .railway-track--horizontal .station {
-    top: calc(43% - 10px) !important;
+    top: calc(var(--rail-y, 43%) - 10px) !important;
   }
 
   #pageTimer .railway-track--horizontal .train-position {
-    top: calc(43% - 52px) !important;
+    top: calc(var(--rail-y, 43%) - 48px) !important;
   }
 
-  #pageTimer .railway-preview[data-track-shape="horizontal"] .route-time-panel {
-    top: 18% !important;
-  }
 }
 
 @media (min-width: 600px) and (max-width: 899px) and (orientation: portrait) {
@@ -7089,5 +7051,1490 @@ body.page-timer-active .main-content {
 @media (max-width: 520px) {
   .active-train-actions--multi {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   第5段階：新しい電車を追加する作成シート
+   ========================================================= */
+.active-train-add-buttons {
+  display: grid;
+  gap: 9px;
+}
+
+.active-train-add-button--secondary {
+  color: #e6002d;
+  border-color: #f1c5cd;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.active-train-add-button--secondary:hover {
+  color: #ffffff;
+  border-color: #c90027;
+  background: #c90027;
+}
+
+.create-train-panel {
+  position: fixed;
+  z-index: 102;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  max-height: min(94vh, 860px);
+  padding: 10px 18px calc(22px + var(--safe-bottom));
+  overflow-y: auto;
+  border-radius: 26px 26px 0 0;
+  background: var(--color-surface);
+  box-shadow: 0 0 34px rgba(27, 48, 64, 0.24);
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(104%);
+  transition:
+    transform 220ms ease,
+    visibility 220ms ease;
+}
+
+.create-train-panel.is-open {
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.create-train-description {
+  margin: -10px 0 16px;
+  color: #59636d;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.create-train-form {
+  display: grid;
+  gap: 16px;
+}
+
+.create-train-section {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e5e9ee;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.create-train-section-heading {
+  margin: 0;
+}
+
+.create-train-examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.create-train-example-button {
+  min-height: 44px;
+  padding: 9px 10px;
+  border: 1px solid #dce2e8;
+  border-radius: 12px;
+  color: #2a333b;
+  background: #fffafb;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.create-train-example-button:hover,
+.create-train-example-button:focus-visible {
+  border-color: #e6002d;
+  color: #b40024;
+  background: #fff0f2;
+}
+
+.create-train-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.number-with-unit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.number-with-unit span {
+  color: #59636d;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.create-train-preview {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed #e9aeb8;
+  border-radius: 12px;
+  color: #4f5963;
+  background: #fff8f9;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.65;
+}
+
+.create-train-auto-show {
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid #e5e9ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  font-weight: 900;
+}
+
+.create-train-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin: 0 -4px;
+  padding: 12px 4px 2px;
+  border-top: 1px solid rgba(226, 229, 232, 0.86);
+  background: linear-gradient(180deg, rgba(255,255,255,0.75), #ffffff 38%);
+}
+
+@media (min-width: 680px) {
+  .active-train-add-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .create-train-panel {
+    right: max(24px, calc((100vw - 780px) / 2));
+    left: max(24px, calc((100vw - 780px) / 2));
+    border-radius: 26px;
+    bottom: 24px;
+    max-height: min(88vh, 820px);
+  }
+
+  .create-train-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .create-train-field--wide {
+    grid-column: 1 / -1;
+  }
+
+  .create-train-examples {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .create-train-panel {
+    padding-inline: 14px;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .create-train-section {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .create-train-examples {
+    grid-template-columns: 1fr;
+  }
+
+  .create-train-grid {
+    gap: 10px;
+  }
+}
+
+/* =========================================================
+   第6段階：すぐ使う路線・クイック追加
+   ========================================================= */
+.quick-routes-card {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 16px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.quick-routes-heading-row {
+  margin-bottom: 0;
+}
+
+.quick-routes-introduction {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.quick-routes-list {
+  display: grid;
+  gap: 9px;
+}
+
+.quick-route-button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1px solid #dfe2e5;
+  border-radius: 12px;
+  color: #202124;
+  background: #ffffff;
+  text-align: left;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.035);
+}
+
+.quick-route-button:hover,
+.quick-route-button:focus-visible {
+  border-color: #e6002d;
+  background: #fff8f9;
+  outline: none;
+}
+
+.quick-route-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(230, 0, 45, 0.18);
+}
+
+.quick-route-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #f1c5cd;
+  border-radius: 999px;
+  background: #fff0f3;
+  font-size: 1rem;
+}
+
+.quick-route-copy {
+  min-width: 0;
+}
+
+.quick-route-copy strong,
+.quick-route-copy small {
+  display: block;
+}
+
+.quick-route-copy strong {
+  color: #202124;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.quick-route-copy small {
+  overflow: hidden;
+  margin-top: 2px;
+  color: #687078;
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 680px) {
+  .quick-routes-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .quick-routes-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .quick-routes-card {
+    padding: 14px 12px;
+  }
+
+  .quick-route-button {
+    min-height: 60px;
+    padding: 10px;
+  }
+
+  .quick-route-copy small {
+    white-space: normal;
+  }
+}
+
+/* Stage 22: いたずら防止ロックと画面をつけたままにする */
+.preference-row--guard {
+  border-color: #f2d5dc;
+  background: #fff9fa;
+}
+
+.child-lock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.child-lock-overlay[hidden] {
+  display: none;
+}
+
+.child-lock-card {
+  width: min(100%, 390px);
+  border: 1px solid rgba(144, 92, 102, 0.22);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 22px;
+  text-align: center;
+  box-shadow: 0 22px 55px rgba(73, 50, 58, 0.18);
+}
+
+.child-lock-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 10px;
+  border: 1px solid #f1c5cd;
+  border-radius: 999px;
+  background: #fff4f6;
+  font-size: 1.65rem;
+}
+
+.child-lock-copy h2 {
+  margin: 3px 0 4px;
+  color: #202124;
+  font-size: 1.35rem;
+  font-weight: 950;
+}
+
+.child-lock-copy p:last-child {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+  font-weight: 850;
+}
+
+.unlock-hold-button {
+  width: 100%;
+  min-height: 64px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #e6002d, #ff6b7e);
+  color: #fff;
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(230, 0, 45, 0.18);
+  touch-action: none;
+}
+
+.unlock-hold-button:focus-visible {
+  outline: 3px solid rgba(230, 0, 45, 0.28);
+  outline-offset: 4px;
+}
+
+.unlock-progress-track {
+  display: block;
+  width: calc(100% - 34px);
+  height: 7px;
+  margin: 9px auto 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.unlock-progress-bar {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+}
+
+body.is-child-locked .settings-panel,
+body.is-child-locked .side-menu,
+body.is-child-locked .create-train-panel,
+body.is-child-locked .time-addition-dialog {
+  pointer-events: none;
+}
+
+@media (max-width: 420px) {
+  .child-lock-card {
+    padding: 20px 16px;
+    border-radius: 24px;
+  }
+
+  .unlock-hold-button {
+    min-height: 60px;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .child-lock-overlay {
+    background: rgba(255, 255, 255, 0.88);
+  }
+}
+
+/* =========================================================
+   Stage 25: HTML表示順の安定化
+   - タイマー画面の可視DOM順を 線路切替 → 線路 → 現在区間/次の駅 → 操作 → 時間追加 に統一
+   - 非表示データソースはレイアウトに参加させない
+   ========================================================= */
+#pageTimer .timer-route-heading-source {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+#pageTimer .timer-card--data-source[hidden] {
+  display: none !important;
+}
+
+#pageTimer .active-train-summary--timer-page {
+  justify-self: center;
+  max-width: 100%;
+  margin: 6px auto 0;
+}
+
+@media (max-width: 699px) {
+  #pageTimer .railway-card {
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+
+  #pageTimer .track-shape-switcher {
+    grid-row: 1;
+  }
+
+  #pageTimer .railway-preview {
+    grid-row: 2;
+  }
+
+  #pageTimer .journey-status-grid {
+    grid-row: 3;
+  }
+
+  #pageTimer .active-train-summary--timer-page {
+    grid-row: 4;
+    min-height: 24px;
+    margin-top: 4px;
+    font-size: 0.66rem;
+  }
+}
+
+@media (min-width: 700px) {
+  #pageTimer .railway-card {
+    grid-row: 1;
+  }
+
+  #pageTimer .timer-actions-card {
+    grid-row: 2;
+  }
+}
+
+/* =========================================================
+   Stage 26：線路エリアだけ％配置に限定
+   - 線路表示領域を独立した stage として固定
+   - 残り時間カードは通常レイアウトに戻し、top/left/% 依存をなくす
+   - ％指定は駅・電車・進行バーなど線路内の進行表現だけに限定
+   ========================================================= */
+.railway-stage {
+  --rail-x-inset: 34px;
+  --rail-y: 96px;
+  --rail-y-start: 36px;
+  --rail-x-total-inset: 68px;
+  --rail-y-total-inset: 72px;
+  --rail-x: 35%;
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: clamp(320px, 52dvh, 620px);
+  max-height: min(680px, calc(100dvh - 210px));
+  aspect-ratio: 4 / 3;
+  align-items: stretch;
+}
+
+.railway-stage .railway-track {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* 横線路：残り時間 → 線路、の順に自然配置 */
+.railway-stage.railway-preview--horizontal {
+  grid-template-rows: auto minmax(210px, 1fr);
+}
+
+.railway-stage.railway-preview--horizontal .route-time-panel {
+  grid-row: 1;
+  justify-self: center;
+  align-self: start;
+}
+
+.railway-stage.railway-preview--horizontal .railway-track--horizontal {
+  grid-row: 2;
+  height: 100%;
+  min-height: 210px;
+  padding-right: var(--rail-x-inset);
+  padding-left: var(--rail-x-inset);
+}
+
+/* 縦線路：広い画面では線路と残り時間を横並びにして重なりを防ぐ */
+.railway-stage.railway-preview--vertical {
+  grid-template-columns: minmax(0, 1fr) minmax(132px, 190px);
+  grid-template-rows: minmax(320px, 1fr);
+  align-items: center;
+}
+
+.railway-stage.railway-preview--vertical .railway-track--vertical {
+  grid-column: 1;
+  grid-row: 1;
+  height: 100%;
+  min-height: 320px;
+}
+
+.railway-stage.railway-preview--vertical .route-time-panel {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: stretch;
+  align-self: center;
+}
+
+/* 円形線路：線路と残り時間を同じ grid area に置き、中央寄せで安定させる */
+.railway-stage.railway-preview--circle {
+  grid-template-areas: "stage";
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  min-height: clamp(320px, 52dvh, 560px);
+  max-height: min(610px, calc(100dvh - 210px));
+}
+
+.railway-stage.railway-preview--circle .railway-track--circle,
+.railway-stage.railway-preview--circle .route-time-panel {
+  grid-area: stage;
+}
+
+.railway-stage.railway-preview--circle .railway-track--circle {
+  place-self: center;
+}
+
+.railway-stage.railway-preview--circle .route-time-panel {
+  place-self: center;
+}
+
+/* 残り時間カードは線路外または円中央の通常レイアウト要素として扱う */
+.railway-stage .route-time-panel,
+.railway-preview[data-track-shape="horizontal"] .route-time-panel,
+.railway-preview[data-track-shape="vertical"] .route-time-panel,
+.railway-preview[data-track-shape="circle"] .route-time-panel {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 14;
+  max-width: min(100%, 230px);
+  transform: none;
+}
+
+/* 横線路の内部座標：線路内部だけ CSS 変数で制御 */
+.railway-track--horizontal .track-bed,
+.railway-track--horizontal .track-segment-list {
+  top: var(--rail-y);
+  right: var(--rail-x-inset);
+  left: var(--rail-x-inset);
+}
+
+.railway-track--horizontal .station {
+  top: calc(var(--rail-y) - 10px);
+}
+
+.railway-track--horizontal .train-position {
+  top: calc(var(--rail-y) - 48px);
+}
+
+/* 縦線路の内部座標：線路内部だけ CSS 変数で制御 */
+.railway-track--vertical .track-bed,
+.railway-track--vertical .track-segment-list {
+  top: var(--rail-y-start);
+  bottom: var(--rail-y-start);
+  left: var(--rail-x);
+}
+
+.railway-track--vertical .station {
+  left: var(--rail-x);
+}
+
+.railway-track--vertical .train-position {
+  left: var(--rail-x);
+}
+
+/* タイマー画面では線路領域を明確に独立させる */
+#pageTimer .railway-stage {
+  min-height: clamp(320px, 54dvh, 640px) !important;
+  height: auto;
+  overflow: hidden;
+}
+
+#pageTimer .railway-stage.railway-preview--horizontal {
+  grid-template-rows: auto minmax(220px, 1fr) !important;
+}
+
+#pageTimer .railway-stage.railway-preview--vertical {
+  grid-template-columns: minmax(0, 1fr) minmax(124px, 180px);
+  grid-template-rows: minmax(310px, 1fr) !important;
+}
+
+#pageTimer .railway-stage.railway-preview--circle {
+  min-height: clamp(315px, 52dvh, 570px) !important;
+}
+
+#pageTimer .railway-stage .railway-track--horizontal {
+  min-height: 220px;
+}
+
+#pageTimer .railway-stage .railway-track--vertical {
+  min-height: 310px;
+}
+
+#pageTimer .railway-stage .railway-track--circle {
+  width: min(72vw, 440px, 100%);
+  height: min(72vw, 440px, 100%);
+  min-width: 260px;
+  min-height: 260px;
+}
+
+/* スマートフォン：縦線路も残り時間を上へ逃がし、横幅の圧迫を避ける */
+@media (max-width: 599px) {
+  .railway-stage,
+  #pageTimer .railway-stage {
+    min-height: clamp(300px, 48dvh, 430px) !important;
+    max-height: min(470px, calc(100dvh - 205px));
+    aspect-ratio: auto;
+    gap: 8px;
+    padding: 6px 7px;
+  }
+
+  .railway-stage.railway-preview--horizontal,
+  #pageTimer .railway-stage.railway-preview--horizontal {
+    --rail-x-inset: 25px;
+    --rail-x-total-inset: 50px;
+    --rail-y: 42%;
+    grid-template-rows: auto minmax(190px, 1fr) !important;
+  }
+
+  .railway-stage.railway-preview--vertical,
+  #pageTimer .railway-stage.railway-preview--vertical {
+    --rail-y-start: 28px;
+    --rail-y-total-inset: 56px;
+    --rail-x: 32%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(220px, 1fr) !important;
+  }
+
+  .railway-stage.railway-preview--vertical .route-time-panel,
+  #pageTimer .railway-stage.railway-preview--vertical .route-time-panel {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+    width: auto;
+  }
+
+  .railway-stage.railway-preview--vertical .railway-track--vertical,
+  #pageTimer .railway-stage.railway-preview--vertical .railway-track--vertical {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 220px;
+  }
+
+  .railway-stage.railway-preview--circle,
+  #pageTimer .railway-stage.railway-preview--circle {
+    min-height: clamp(300px, 45dvh, 390px) !important;
+    aspect-ratio: 1 / 1;
+  }
+
+  #pageTimer .railway-stage .railway-track--horizontal {
+    min-height: 190px;
+  }
+
+  #pageTimer .railway-stage .railway-track--vertical {
+    min-height: 220px;
+  }
+
+  #pageTimer .railway-stage .railway-track--circle {
+    width: min(70vw, 300px, 36dvh);
+    height: min(70vw, 300px, 36dvh);
+    min-width: 230px;
+    min-height: 230px;
+  }
+
+  #pageTimer .railway-stage .route-time-panel {
+    min-width: 118px;
+    min-height: 70px;
+    padding: 7px 9px;
+  }
+}
+
+/* タブレット縦：余白を確保しつつ1カラムで安定 */
+@media (min-width: 600px) and (max-width: 899px) {
+  #pageTimer .railway-stage {
+    min-height: clamp(430px, 54dvh, 560px) !important;
+    max-height: 620px;
+  }
+
+  #pageTimer .railway-stage.railway-preview--horizontal {
+    --rail-y: 48%;
+    grid-template-rows: auto minmax(330px, 1fr) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical {
+    --rail-x: 34%;
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 200px);
+    grid-template-rows: minmax(410px, 1fr) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--circle .railway-track--circle {
+    width: min(500px, 68vw);
+    height: min(500px, 68vw);
+  }
+}
+
+/* タブレット横・PC：線路領域を大きく、残り時間は線路に重ねない */
+@media (min-width: 900px) {
+  #pageTimer .railway-stage {
+    min-height: clamp(500px, 64dvh, 690px) !important;
+    max-height: 720px;
+  }
+
+  #pageTimer .railway-stage.railway-preview--horizontal {
+    --rail-y: 50%;
+    grid-template-rows: auto minmax(390px, 1fr) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical {
+    --rail-x: 34%;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+    grid-template-rows: minmax(460px, 1fr) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--circle .railway-track--circle {
+    width: min(540px, 48vw);
+    height: min(540px, 48vw);
+  }
+}
+
+/* Stage 26 最終上書き：旧メディアクエリの％指定を線路内部変数へ集約 */
+#pageTimer .railway-stage .route-time-panel {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+#pageTimer .railway-stage .railway-track--horizontal .track-bed,
+#pageTimer .railway-stage .railway-track--horizontal .track-segment-list {
+  top: var(--rail-y) !important;
+  right: var(--rail-x-inset) !important;
+  left: var(--rail-x-inset) !important;
+}
+
+#pageTimer .railway-stage .railway-track--horizontal .station {
+  top: calc(var(--rail-y) - 10px) !important;
+}
+
+#pageTimer .railway-stage .railway-track--horizontal .train-position {
+  top: calc(var(--rail-y) - 48px) !important;
+}
+
+#pageTimer .railway-stage .railway-track--vertical .track-bed,
+#pageTimer .railway-stage .railway-track--vertical .track-segment-list {
+  top: var(--rail-y-start) !important;
+  bottom: var(--rail-y-start) !important;
+  left: var(--rail-x) !important;
+}
+
+#pageTimer .railway-stage .railway-track--vertical .station,
+#pageTimer .railway-stage .railway-track--vertical .train-position {
+  left: var(--rail-x) !important;
+}
+
+/* Stage 26 修正：線路表示エリアと状態カードを同じ行に重ねない */
+#pageTimer .railway-card {
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  gap: 10px;
+  align-items: start;
+}
+
+#pageTimer .track-shape-switcher {
+  grid-row: 1;
+}
+
+#pageTimer .railway-stage {
+  grid-row: 2;
+  align-self: stretch;
+}
+
+#pageTimer .journey-status-grid {
+  grid-row: 3;
+  position: relative;
+  z-index: 2;
+  height: auto !important;
+  min-height: 0;
+  margin: 0 !important;
+}
+
+#pageTimer .active-train-summary--timer-page {
+  grid-row: 4;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 900px) {
+  #pageTimer .railway-stage {
+    min-height: clamp(460px, 57dvh, 640px) !important;
+    max-height: 660px;
+  }
+
+  #pageTimer .railway-stage.railway-preview--horizontal {
+    grid-template-rows: auto minmax(320px, 1fr) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical {
+    grid-template-rows: minmax(430px, 1fr) !important;
+  }
+}
+
+/* Stage 26 最終上書き：旧3行グリッドを4行に戻し、状態カードを線路外へ固定 */
+#pageTimer .railway-card {
+  display: grid !important;
+  grid-template-rows: auto auto auto auto !important;
+  gap: 10px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+#pageTimer .railway-card .track-shape-switcher {
+  grid-row: 1 !important;
+}
+
+#pageTimer .railway-card .railway-stage {
+  grid-row: 2 !important;
+}
+
+#pageTimer .railway-card .journey-status-grid {
+  grid-row: 3 !important;
+  align-self: start !important;
+  margin: 0 !important;
+}
+
+#pageTimer .railway-card .active-train-summary--timer-page {
+  grid-row: 4 !important;
+  align-self: start !important;
+}
+
+/* =========================================================
+   v1.16.3 Stage27：操作ボタン・カードをGrid/Flexで安定配置
+   - 操作UIは％配置に依存しない
+   - 線路の下に、状態カード→主操作→時間調整の順で並べる
+   ========================================================= */
+#pageTimer .journey-status-grid,
+#pageTimer .timer-actions-card,
+#pageTimer .timer-actions-layout,
+#pageTimer .action-zone,
+#pageTimer .primary-controls,
+#pageTimer .quick-add-controls {
+  position: static;
+  inset: auto;
+  transform: none;
+}
+
+#pageTimer .timer-actions-card {
+  display: block;
+  min-width: 0;
+  padding: clamp(10px, 2.5vw, 16px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+#pageTimer .timer-actions-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+#pageTimer .action-zone {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+#pageTimer .action-zone-label {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+
+#pageTimer .action-zone--time-adjust {
+  padding-top: 10px;
+  border-top: 1px dashed var(--color-border);
+}
+
+#pageTimer .primary-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+#pageTimer .primary-controls.is-resume-choice {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+#pageTimer .control-button,
+#pageTimer .quick-add-button {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  line-height: 1.25;
+}
+
+#pageTimer .control-button[hidden],
+#pageTimer .quick-add-button[hidden] {
+  display: none !important;
+}
+
+#pageTimer .primary-controls .control-button:not([hidden]) {
+  grid-column: 1 / -1;
+}
+
+#pageTimer .primary-controls.is-resume-choice .control-button:not([hidden]) {
+  grid-column: auto;
+}
+
+#pageTimer .quick-add-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+}
+
+#pageTimer .quick-add-button {
+  min-height: 46px;
+  border-width: 1px;
+  background: #fff;
+}
+
+#pageTimer .stage-note {
+  margin: 10px 0 0;
+  text-align: center;
+}
+
+body.is-child-locked #pageTimer .timer-actions-card {
+  opacity: 0.72;
+}
+
+body.is-child-locked #pageTimer .timer-actions-card button {
+  cursor: not-allowed;
+}
+
+@media (max-width: 699px) {
+  #pageTimer .timer-actions-card {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  #pageTimer .timer-actions-layout {
+    gap: 8px;
+  }
+
+  #pageTimer .action-zone-label {
+    font-size: 0.68rem;
+  }
+
+  #pageTimer .control-button {
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 0.92rem;
+  }
+
+  #pageTimer .quick-add-button {
+    min-height: 44px;
+    padding: 9px 10px;
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 359px) {
+  #pageTimer .timer-actions-card {
+    padding: 8px;
+  }
+
+  #pageTimer .primary-controls.is-resume-choice,
+  #pageTimer .quick-add-controls {
+    gap: 6px;
+  }
+
+  #pageTimer .control-button,
+  #pageTimer .quick-add-button {
+    min-height: 44px;
+    padding-right: 7px;
+    padding-left: 7px;
+    font-size: 0.78rem;
+    letter-spacing: -0.02em;
+  }
+
+  #pageTimer .action-zone-label {
+    font-size: 0.62rem;
+  }
+}
+
+@media (pointer: coarse) {
+  #pageTimer .control-button,
+  #pageTimer .quick-add-button {
+    min-height: 48px;
+  }
+}
+
+@media (min-width: 900px) {
+  #pageTimer .timer-actions-card {
+    padding: 16px;
+  }
+
+  #pageTimer .timer-actions-layout {
+    gap: 12px;
+  }
+
+  #pageTimer .control-button {
+    min-height: 54px;
+    font-size: 1rem;
+  }
+
+  #pageTimer .quick-add-button {
+    min-height: 48px;
+  }
+}
+
+/* =========================================================
+   Stage 28: My設定・経路編集・設定ページの端末別安定化
+   - タイマー画面以外のカードとフォームを Grid/Flex で安定配置
+   ========================================================= */
+#pagePresets,
+#pageEdit,
+#pageSettings {
+  min-width: 0;
+  align-items: start;
+}
+
+#pagePresets > *,
+#pageEdit > *,
+#pageSettings > * {
+  min-width: 0;
+}
+
+#pagePresets .quick-routes-card {
+  order: 1;
+}
+
+#pagePresets .active-trains-card {
+  order: 2;
+}
+
+#pagePresets .preset-card {
+  order: 3;
+}
+
+.quick-routes-card,
+.active-trains-card,
+.preset-card,
+.route-editor-card,
+.page-intro-card,
+.summary-card,
+.settings-overview-card,
+.guide-card,
+.about-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+.quick-routes-list,
+.active-trains-list,
+.preset-list,
+.data-action-grid,
+.guide-grid,
+.settings-overview-grid,
+.summary-grid,
+.radio-card-group,
+.unit-setting-grid,
+.create-train-grid,
+.create-train-examples {
+  min-width: 0;
+}
+
+/* My設定：すぐ使うを上部に、運行中の電車と登録経路を下に整理 */
+#pagePresets .quick-routes-list {
+  grid-template-columns: 1fr;
+}
+
+#pagePresets .active-trains-list {
+  grid-template-columns: 1fr;
+}
+
+#pagePresets .quick-route-button,
+#pagePresets .active-train-button,
+#pagePresets .active-train-add-button,
+#pagePresets .preset-action-button,
+#pagePresets .data-action-button {
+  min-height: 48px;
+}
+
+#pagePresets .active-train-add-buttons {
+  grid-template-columns: 1fr;
+}
+
+#pagePresets .active-train-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#pagePresets .active-train-button--danger,
+#pagePresets .preset-action-button--danger,
+#pagePresets .data-action-button--danger {
+  font-weight: 800;
+}
+
+#pagePresets .data-management {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed #d9dde1;
+}
+
+#pagePresets .data-management-heading {
+  align-items: flex-start;
+}
+
+#pagePresets .data-action-button--danger {
+  color: #8c4b48;
+  border-color: #ead5d2;
+  background: #fffafa;
+}
+
+#pagePresets .data-action-button--danger:hover,
+#pagePresets .data-action-button--danger:focus-visible {
+  color: #8d322f;
+  border-color: #d78b86;
+  background: #fff0ee;
+}
+
+/* 経路編集：現在設定・駅・区間・線路形状・保存ボタンを読みやすく */
+#pageEdit .summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#pageEdit .route-editor-card {
+  gap: 14px;
+}
+
+#pageEdit .station-editor-list,
+#pageEdit .segment-editor-list {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+#pageEdit .settings-total-card {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#pageEdit .radio-card-group {
+  grid-template-columns: 1fr;
+}
+
+#pageEdit .route-editor-actions {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#pageEdit .route-editor-actions .apply-button,
+#pageEdit .route-editor-actions .cancel-button {
+  min-height: 48px;
+}
+
+/* 設定ページ：音・表示・文字・ロック・画面維持を読めるカード化 */
+.settings-overview-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px 14px;
+  border: 1px solid rgba(213, 228, 239, .92);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.settings-overview-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-overview-item {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 11px;
+  align-items: start;
+  min-height: 84px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-soft);
+}
+
+.settings-overview-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid #f1c5cd;
+  border-radius: 999px;
+  background: #fff0f3;
+  font-size: 1rem;
+}
+
+.settings-overview-item h3 {
+  margin: 0 0 4px;
+  color: var(--color-primary-dark);
+  font-size: .9rem;
+}
+
+.settings-overview-item p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: .76rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+#pageSettings .guide-card,
+#pageSettings .about-card {
+  padding: 16px 14px;
+}
+
+.settings-panel--preferences {
+  width: min(100vw - 24px, 760px);
+}
+
+.settings-panel--preferences .settings-section,
+.settings-panel--preferences .preference-row,
+.settings-panel--preferences .preference-subgroup {
+  min-width: 0;
+}
+
+.settings-panel--preferences .preference-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.settings-panel--preferences .form-field select,
+.settings-panel--preferences .form-field input,
+#pageEdit .form-field select,
+#pageEdit .form-field input,
+#pagePresets .form-field input {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 420px) {
+  #pagePresets .active-train-actions {
+    grid-template-columns: 1fr;
+  }
+
+  #pagePresets .data-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #pageEdit .summary-grid,
+  #pageEdit .settings-total-card {
+    grid-template-columns: 1fr;
+  }
+
+  #pageEdit .route-editor-actions {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .settings-panel--preferences .preference-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .settings-panel--preferences .preference-row .switch {
+    justify-self: start;
+  }
+
+  .volume-control {
+    grid-template-columns: 1fr 54px;
+  }
+
+  .volume-control label {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 680px) {
+  #pagePresets .quick-routes-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pagePresets .active-trains-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pagePresets .active-train-add-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageEdit .unit-setting-grid,
+  #pageEdit .settings-total-card,
+  #pageEdit .radio-card-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageEdit .route-editor-actions {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  }
+
+  #pageSettings .settings-overview-grid,
+  #pageSettings .guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 760px) and (max-width: 1099px) {
+  #pagePresets.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  #pagePresets .quick-routes-card,
+  #pageSettings .page-intro-card,
+  #pageSettings .settings-overview-card {
+    grid-column: 1 / -1;
+  }
+
+  #pagePresets .active-trains-card,
+  #pagePresets .preset-card,
+  #pageSettings .guide-card,
+  #pageSettings .about-card {
+    align-self: start;
+  }
+}
+
+@media (min-width: 1000px) {
+  #pageEdit.app-page.is-active {
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  #pageEdit .page-intro-card,
+  #pageEdit .summary-card {
+    grid-column: 1;
+  }
+
+  #pageEdit .route-editor-card {
+    grid-column: 2;
+  }
+
+  #pageEdit .route-editor-actions {
+    position: sticky;
+    bottom: 18px;
+  }
+}
+
+@media (min-width: 1100px) {
+  #pagePresets.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+    gap: 18px;
+  }
+
+  #pagePresets .quick-routes-card,
+  #pageSettings .page-intro-card,
+  #pageSettings .settings-overview-card {
+    grid-column: 1 / -1;
+  }
+
+  #pagePresets .quick-routes-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #pagePresets .active-trains-card,
+  #pageSettings .guide-card {
+    grid-column: 1;
+  }
+
+  #pagePresets .preset-card,
+  #pageSettings .about-card {
+    grid-column: 2;
+  }
+
+  #pagePresets .active-trains-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageSettings .settings-overview-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   Stage 29: 統合確認時の下部ナビ重なり対策
+   - タイマー以外のページで、固定下部ナビが最後の操作ボタンを隠さないよう余白を確保
+   ========================================================= */
+@media (max-width: 699px) {
+  #pageEdit.app-page.is-active,
+  #pagePresets.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    padding-bottom: calc(132px + var(--safe-bottom));
+  }
+
+  #pagePresets .active-train-button,
+  #pagePresets .quick-route-button,
+  #pagePresets .active-train-add-button,
+  #pagePresets .preset-action-button,
+  #pagePresets .data-action-button,
+  #pageEdit .route-editor-actions,
+  #pageSettings .apply-button,
+  #pageSettings .cancel-button {
+    scroll-margin-bottom: calc(148px + var(--safe-bottom));
   }
 }

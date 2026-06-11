@@ -28,8 +28,8 @@
     OVERALL: "overall"
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
-  const STORAGE_SCHEMA_VERSION = 7;
-  const APP_VERSION = "1.12.0";
+  const STORAGE_SCHEMA_VERSION = 9;
+  const APP_VERSION = "1.16.5";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
@@ -42,7 +42,10 @@
     highContrast: false,
     reduceMotion: false,
     showCircleRemainingTime: true,
-    remainingTimeDisplayMode: "overall"
+    remainingTimeDisplayMode: "overall",
+    switchToNewTrainAfterCreate: false,
+    childLockEnabled: false,
+    keepAwakeEnabled: false
   });
   const STORAGE_KEY = "trainTimerAppData";
   const MAX_PRESET_NAME_LENGTH = 40;
@@ -70,6 +73,57 @@
       heading: "円形線路",
       badge: "円表示",
       direction: "↻"
+    }
+  });
+
+  const NEW_TRAIN_EXAMPLES = Object.freeze({
+    study25: { name: "勉強25分号", totalMinutes: 25, stationCount: 4, unitMinutes: 5, trackShape: "horizontal", sound: "default" },
+    break5: { name: "休憩5分号", totalMinutes: 5, stationCount: 3, unitMinutes: 5, trackShape: "circle", sound: "goal-only" },
+    cleanup10: { name: "お片付け10分号", totalMinutes: 10, stationCount: 4, unitMinutes: 5, trackShape: "horizontal", sound: "default" },
+    morning15: { name: "朝の支度15分号", totalMinutes: 15, stationCount: 4, unitMinutes: 5, trackShape: "horizontal", sound: "default" },
+    reading15: { name: "読書15分号", totalMinutes: 15, stationCount: 4, unitMinutes: 5, trackShape: "vertical", sound: "goal-only" }
+  });
+
+  const QUICK_ROUTE_DEFINITIONS = Object.freeze({
+    break5: {
+      name: "休憩5分号",
+      totalMinutes: 5,
+      unitMinutes: 1,
+      trackShape: "circle",
+      sound: "goal-only",
+      stationNames: ["スタート", "休憩駅", "ゴール"]
+    },
+    cleanup10: {
+      name: "お片付け10分号",
+      totalMinutes: 10,
+      unitMinutes: 1,
+      trackShape: "horizontal",
+      sound: "default",
+      stationNames: ["スタート", "前半", "後半", "ゴール"]
+    },
+    morning15: {
+      name: "朝の支度15分号",
+      totalMinutes: 15,
+      unitMinutes: 1,
+      trackShape: "horizontal",
+      sound: "default",
+      stationNames: ["スタート", "準備", "確認", "ゴール"]
+    },
+    reading15: {
+      name: "読書15分号",
+      totalMinutes: 15,
+      unitMinutes: 1,
+      trackShape: "vertical",
+      sound: "goal-only",
+      stationNames: ["スタート", "前半", "後半", "ゴール"]
+    },
+    study25: {
+      name: "勉強25分号",
+      totalMinutes: 25,
+      unitMinutes: 1,
+      trackShape: "horizontal",
+      sound: "default",
+      stationNames: ["スタート", "集中1", "集中2", "まとめ", "ゴール"]
     }
   });
 
@@ -309,6 +363,22 @@
     activeTrainsList: document.getElementById("activeTrainsList"),
     activeTrainsCountBadge: document.getElementById("activeTrainsCountBadge"),
     addCurrentRouteTrainButton: document.getElementById("addCurrentRouteTrainButton"),
+    openCreateTrainButton: document.getElementById("openCreateTrainButton"),
+    createTrainBackdrop: document.getElementById("createTrainBackdrop"),
+    createTrainPanel: document.getElementById("createTrainPanel"),
+    closeCreateTrainButton: document.getElementById("closeCreateTrainButton"),
+    cancelCreateTrainButton: document.getElementById("cancelCreateTrainButton"),
+    createTrainForm: document.getElementById("createTrainForm"),
+    newTrainNameInput: document.getElementById("newTrainNameInput"),
+    newTrainTotalMinutesInput: document.getElementById("newTrainTotalMinutesInput"),
+    newTrainStationCountInput: document.getElementById("newTrainStationCountInput"),
+    newTrainUnitMinutesInput: document.getElementById("newTrainUnitMinutesInput"),
+    newTrainTrackShapeSelect: document.getElementById("newTrainTrackShapeSelect"),
+    newTrainSoundSelect: document.getElementById("newTrainSoundSelect"),
+    newTrainAutoShowToggle: document.getElementById("newTrainAutoShowToggle"),
+    newTrainAutoPreview: document.getElementById("newTrainAutoPreview"),
+    createTrainExampleButtons: document.querySelectorAll("[data-example-train]"),
+    quickRouteButtons: document.querySelectorAll("[data-quick-route]"),
     storageStatusBadge: document.getElementById("storageStatusBadge"),
     presetNameInput: document.getElementById("presetNameInput"),
     savePresetButton: document.getElementById("savePresetButton"),
@@ -360,6 +430,12 @@
     soundVolumeOutput: document.getElementById("soundVolumeOutput"),
     soundDetailControls: document.getElementById("soundDetailControls"),
     quietModeToggle: document.getElementById("quietModeToggle"),
+    childLockToggle: document.getElementById("childLockToggle"),
+    keepAwakeToggle: document.getElementById("keepAwakeToggle"),
+    wakeLockSupportText: document.getElementById("wakeLockSupportText"),
+    childLockOverlay: document.getElementById("childLockOverlay"),
+    unlockHoldButton: document.getElementById("unlockHoldButton"),
+    unlockProgressBar: document.getElementById("unlockProgressBar"),
     fontSizeSelect: document.getElementById("fontSizeSelect"),
     highContrastToggle: document.getElementById("highContrastToggle"),
     reduceMotionToggle: document.getElementById("reduceMotionToggle"),
@@ -398,6 +474,10 @@
   let storageAvailable = true;
   let lastSavedAt = null;
   let storageRecoveryNotice = "";
+  let wakeLock = null;
+  let unlockHoldTimerId = null;
+  let unlockHoldStartMs = 0;
+  let unlockProgressFrameId = null;
 
   const timer = {
     state: TIMER_STATE.IDLE,
@@ -416,7 +496,8 @@
   const focusState = {
     menuTrigger: null,
     settingsTrigger: null,
-    timeAdditionTrigger: null
+    timeAdditionTrigger: null,
+    createTrainTrigger: null
   };
 
   let activePageId = "timer";
@@ -507,7 +588,19 @@
           : DEFAULT_USER_PREFERENCES.showCircleRemainingTime,
       remainingTimeDisplayMode: normalizeRemainingTimeDisplayMode(
         source.remainingTimeDisplayMode
-      )
+      ),
+      switchToNewTrainAfterCreate:
+        typeof source.switchToNewTrainAfterCreate === "boolean"
+          ? source.switchToNewTrainAfterCreate
+          : DEFAULT_USER_PREFERENCES.switchToNewTrainAfterCreate,
+      childLockEnabled:
+        typeof source.childLockEnabled === "boolean"
+          ? source.childLockEnabled
+          : DEFAULT_USER_PREFERENCES.childLockEnabled,
+      keepAwakeEnabled:
+        typeof source.keepAwakeEnabled === "boolean"
+          ? source.keepAwakeEnabled
+          : DEFAULT_USER_PREFERENCES.keepAwakeEnabled
     };
   }
 
@@ -974,6 +1067,7 @@
     if (arrivedTrains.length > 0) {
       notifyInactiveTrainArrivals(arrivedTrains);
       saveAppData();
+      updateWakeLock();
     }
 
     if (
@@ -1662,8 +1756,8 @@
     );
 
     if (shape === "vertical") {
-      elements.trainPosition.style.left = "35%";
-      elements.trainPosition.style.top = `calc(36px + (100% - 72px) * ${percent / 100})`;
+      elements.trainPosition.style.left = "var(--rail-x, 35%)";
+      elements.trainPosition.style.top = `calc(var(--rail-y-start, 36px) + (100% - var(--rail-y-total-inset, 72px)) * ${percent / 100})`;
       return;
     }
 
@@ -1675,8 +1769,8 @@
       return;
     }
 
-    elements.trainPosition.style.left = `calc(34px + (100% - 68px) * ${percent / 100})`;
-    elements.trainPosition.style.top = "48px";
+    elements.trainPosition.style.left = `calc(var(--rail-x-inset, 34px) + (100% - var(--rail-x-total-inset, 68px)) * ${percent / 100})`;
+    elements.trainPosition.style.top = "";
   }
 
   function updateCircleRemainingTimeDisplay(snapshot = getJourneySnapshot()) {
@@ -2095,6 +2189,7 @@
     }
 
     ensureTrainFleetLoop();
+    updateWakeLock();
 
     if (options.announceMessage) {
       showArrivalNotice(options.announceMessage);
@@ -2175,6 +2270,369 @@
     );
   }
 
+  function generateStationNamesForNewTrain(stationCount) {
+    const safeStationCount = clamp(
+      Math.round(Number(stationCount) || 4),
+      2,
+      MAX_STATIONS
+    );
+
+    if (safeStationCount === 2) {
+      return ["スタート", "ゴール"];
+    }
+
+    return Array.from({ length: safeStationCount }, (_, index) => {
+      if (index === 0) return "スタート";
+      if (index === safeStationCount - 1) return "ゴール";
+      return `駅${index}`;
+    });
+  }
+
+  function distributeMinutesAcrossSegments(totalMinutes, segmentCount) {
+    const safeSegmentCount = Math.max(1, Math.round(Number(segmentCount) || 1));
+    const safeTotalMinutes = Math.max(
+      safeSegmentCount,
+      Math.round(Number(totalMinutes) || safeSegmentCount)
+    );
+    const base = Math.floor(safeTotalMinutes / safeSegmentCount);
+    let remainder = safeTotalMinutes % safeSegmentCount;
+
+    return Array.from({ length: safeSegmentCount }, () => {
+      const minutes = base + (remainder > 0 ? 1 : 0);
+      remainder -= remainder > 0 ? 1 : 0;
+      return minutes;
+    });
+  }
+
+  function createNewTrainConfiguration({
+    totalMinutes,
+    stationCount,
+    unitMinutes,
+    trackShape
+  }) {
+    const safeUnitMinutes = sanitizeUnitMinutes(unitMinutes);
+    const stationNames = generateStationNamesForNewTrain(stationCount);
+    const segmentMinutes = distributeMinutesAcrossSegments(
+      Math.max(
+        Math.round(Number(totalMinutes) || 1),
+        (stationNames.length - 1) * safeUnitMinutes
+      ),
+      stationNames.length - 1
+    );
+    const segmentUnits = segmentMinutes.map((minutes) =>
+      Math.max(1, Math.floor(minutes / safeUnitMinutes))
+    );
+    const segmentExtraMinutes = segmentMinutes.map((minutes, index) =>
+      Math.max(0, minutes - segmentUnits[index] * safeUnitMinutes)
+    );
+
+    return createConfigurationFromDefinition({
+      unitMinutes: safeUnitMinutes,
+      trackShape: normalizeTrackShape(trackShape),
+      stationNames,
+      segmentUnits,
+      segmentExtraMinutes
+    });
+  }
+
+  function createQuickRouteConfiguration(definition) {
+    const stationNames = Array.isArray(definition.stationNames) && definition.stationNames.length >= 2
+      ? definition.stationNames
+      : generateStationNamesForNewTrain(definition.stationCount || 4);
+    const safeUnitMinutes = sanitizeUnitMinutes(definition.unitMinutes || 1);
+    const segmentMinutes = distributeMinutesAcrossSegments(
+      definition.totalMinutes,
+      stationNames.length - 1
+    );
+    const segmentUnits = segmentMinutes.map((minutes) =>
+      Math.max(1, Math.floor(minutes / safeUnitMinutes))
+    );
+    const segmentExtraMinutes = segmentMinutes.map((minutes, index) =>
+      Math.max(0, minutes - segmentUnits[index] * safeUnitMinutes)
+    );
+
+    return createConfigurationFromDefinition({
+      unitMinutes: safeUnitMinutes,
+      trackShape: normalizeTrackShape(definition.trackShape),
+      stationNames,
+      segmentUnits,
+      segmentExtraMinutes
+    });
+  }
+
+  function addQuickRouteTrain(routeKey) {
+    const definition = QUICK_ROUTE_DEFINITIONS[routeKey];
+
+    if (!definition) {
+      setStatusMessage("追加する路線が見つかりませんでした。");
+      return;
+    }
+
+    const trains = getTrainFleetForDisplay();
+    if (trains.length >= MAX_ACTIVE_TRAINS) {
+      setStatusMessage(
+        `運行中の電車は${MAX_ACTIVE_TRAINS}本まで追加できます。使わない電車を削除してください。`
+      );
+      return;
+    }
+
+    const activeBeforeAdd = activeTrainId;
+    const configurationForRoute = createQuickRouteConfiguration(definition);
+    const newTrain = createTrainRecordFromConfiguration(configurationForRoute, {
+      name: definition.name,
+      status: TRAIN_STATUS.IDLE,
+      remainingMs: calculateTotalMinutes(configurationForRoute) * 60 * 1000,
+      soundSettings: getSoundSettingsForNewTrain(definition.sound)
+    });
+
+    syncActiveTrainToFleet();
+    trainFleet.push(newTrain);
+    trainFleet = trainFleet.slice(0, MAX_ACTIVE_TRAINS);
+
+    if (trains.length === 0) {
+      applyTrainRecordToMainTimer(newTrain, {
+        announceMessage: `${newTrain.name}を追加し、タイマー画面に表示しました。`
+      });
+    } else {
+      activeTrainId = activeBeforeAdd;
+      saveAppData();
+      renderPersistenceUi();
+      setStatusMessage(
+        `${newTrain.name}を運行中の電車に追加しました。表示する場合は「表示する」を押してください。`
+      );
+    }
+
+    playActionSound();
+  }
+
+  function getSoundSettingsForNewTrain(value) {
+    const base = normalizeTrainSoundSettings(storagePreferences);
+
+    if (value === "silent") {
+      return {
+        ...base,
+        soundEnabled: false,
+        stationSoundEnabled: false,
+        goalSoundEnabled: false,
+        actionSoundEnabled: false,
+        quietMode: true
+      };
+    }
+
+    if (value === "goal-only") {
+      return {
+        ...base,
+        soundEnabled: true,
+        stationSoundEnabled: false,
+        goalSoundEnabled: true,
+        actionSoundEnabled: false,
+        quietMode: false
+      };
+    }
+
+    return base;
+  }
+
+  function setCreateTrainFormValues(values = {}) {
+    if (elements.newTrainNameInput) {
+      elements.newTrainNameInput.value = sanitizeTrainName(
+        values.name,
+        "勉強25分号"
+      );
+    }
+    if (elements.newTrainTotalMinutesInput) {
+      elements.newTrainTotalMinutesInput.value = String(
+        clamp(Math.round(Number(values.totalMinutes) || 25), 1, 180)
+      );
+    }
+    if (elements.newTrainStationCountInput) {
+      elements.newTrainStationCountInput.value = String(
+        clamp(Math.round(Number(values.stationCount) || 4), 2, MAX_STATIONS)
+      );
+    }
+    if (elements.newTrainUnitMinutesInput) {
+      elements.newTrainUnitMinutesInput.value = String(
+        sanitizeUnitMinutes(values.unitMinutes || 5)
+      );
+    }
+    if (elements.newTrainTrackShapeSelect) {
+      elements.newTrainTrackShapeSelect.value = normalizeTrackShape(values.trackShape);
+    }
+    if (elements.newTrainSoundSelect) {
+      elements.newTrainSoundSelect.value = ["default", "goal-only", "silent"].includes(values.sound)
+        ? values.sound
+        : "default";
+    }
+
+    updateCreateTrainPreview();
+  }
+
+  function getCreateTrainFormValues() {
+    const stationCount = clamp(
+      Math.round(Number(elements.newTrainStationCountInput?.value) || 4),
+      2,
+      MAX_STATIONS
+    );
+    const unitMinutes = sanitizeUnitMinutes(
+      elements.newTrainUnitMinutesInput?.value || 5
+    );
+    const minimumTotalMinutes = (stationCount - 1) * unitMinutes;
+
+    return {
+      name: sanitizeTrainName(
+        elements.newTrainNameInput?.value,
+        getSuggestedTrainName()
+      ),
+      totalMinutes: clamp(
+        Math.max(
+          minimumTotalMinutes,
+          Math.round(Number(elements.newTrainTotalMinutesInput?.value) || 25)
+        ),
+        1,
+        180
+      ),
+      stationCount,
+      unitMinutes,
+      trackShape: normalizeTrackShape(elements.newTrainTrackShapeSelect?.value),
+      sound: elements.newTrainSoundSelect?.value || "default",
+      autoShow: Boolean(elements.newTrainAutoShowToggle?.checked)
+    };
+  }
+
+  function updateCreateTrainPreview() {
+    if (!elements.newTrainAutoPreview) {
+      return;
+    }
+
+    const stationCount = clamp(
+      Math.round(Number(elements.newTrainStationCountInput?.value) || 4),
+      2,
+      MAX_STATIONS
+    );
+    const unitMinutes = sanitizeUnitMinutes(
+      elements.newTrainUnitMinutesInput?.value || 5
+    );
+    const minimumTotalMinutes = (stationCount - 1) * unitMinutes;
+    const inputTotalMinutes = Math.round(
+      Number(elements.newTrainTotalMinutesInput?.value) || 25
+    );
+    const totalMinutes = Math.max(inputTotalMinutes, minimumTotalMinutes);
+    const stationNames = generateStationNamesForNewTrain(stationCount);
+    const shapeLabel = getTrackShapeDetails(
+      elements.newTrainTrackShapeSelect?.value
+    ).label;
+    const adjustment = inputTotalMinutes < minimumTotalMinutes
+      ? `（${stationCount}駅では最短${minimumTotalMinutes}分のため自動調整）`
+      : "";
+
+    elements.newTrainAutoPreview.textContent =
+      `${stationNames.join(" → ")}、${shapeLabel}線路、全体${totalMinutes}分で作成します。${adjustment}`;
+  }
+
+  function openCreateTrainPanel() {
+    if (!elements.createTrainPanel) {
+      return;
+    }
+
+    closeMenu(false);
+    closeSettings(false);
+    closeTimeAdditionDialog(false);
+    focusState.createTrainTrigger = document.activeElement;
+
+    setCreateTrainFormValues(NEW_TRAIN_EXAMPLES.study25);
+    if (elements.newTrainAutoShowToggle) {
+      elements.newTrainAutoShowToggle.checked = Boolean(
+        storagePreferences.switchToNewTrainAfterCreate
+      );
+    }
+
+    elements.createTrainPanel.classList.add("is-open");
+    elements.createTrainPanel.setAttribute("aria-hidden", "false");
+    showBackdrop(elements.createTrainBackdrop);
+    setBodyPanelState();
+
+    window.setTimeout(() => {
+      elements.newTrainNameInput?.focus();
+      elements.newTrainNameInput?.select?.();
+    }, 0);
+  }
+
+  function closeCreateTrainPanel(restoreFocus = true) {
+    if (!elements.createTrainPanel) {
+      return;
+    }
+
+    elements.createTrainPanel.classList.remove("is-open");
+    elements.createTrainPanel.setAttribute("aria-hidden", "true");
+    hideBackdrop(elements.createTrainBackdrop);
+    setBodyPanelState();
+
+    if (restoreFocus) {
+      const target = focusState.createTrainTrigger instanceof HTMLElement
+        ? focusState.createTrainTrigger
+        : elements.openCreateTrainButton;
+      target?.focus?.();
+    }
+  }
+
+  function handleCreateTrainExampleClick(event) {
+    const button = event.target.closest("[data-example-train]");
+
+    if (!button) {
+      return;
+    }
+
+    const example = NEW_TRAIN_EXAMPLES[button.dataset.exampleTrain];
+    if (!example) {
+      return;
+    }
+
+    setCreateTrainFormValues(example);
+    playActionSound();
+  }
+
+  function handleCreateTrainSubmit(event) {
+    event.preventDefault();
+
+    const trains = getTrainFleetForDisplay();
+    if (trains.length >= MAX_ACTIVE_TRAINS) {
+      setStatusMessage(
+        `運行中の電車は${MAX_ACTIVE_TRAINS}本まで追加できます。使わない電車を削除してください。`
+      );
+      return;
+    }
+
+    const values = getCreateTrainFormValues();
+    const newConfiguration = createNewTrainConfiguration(values);
+    const newTrain = createTrainRecordFromConfiguration(newConfiguration, {
+      name: values.name,
+      status: TRAIN_STATUS.IDLE,
+      remainingMs: calculateTotalMinutes(newConfiguration) * 60 * 1000,
+      soundSettings: getSoundSettingsForNewTrain(values.sound)
+    });
+
+    storagePreferences.switchToNewTrainAfterCreate = values.autoShow;
+    syncActiveTrainToFleet();
+    trainFleet.push(newTrain);
+    trainFleet = trainFleet.slice(0, MAX_ACTIVE_TRAINS);
+
+    if (values.autoShow) {
+      applyTrainRecordToMainTimer(newTrain, {
+        announceMessage: `${newTrain.name}を追加し、タイマー画面に表示しました。`
+      });
+      showPage("timer", { focusTarget: elements.startButton });
+    } else {
+      saveAppData();
+      renderPersistenceUi();
+      setStatusMessage(
+        `${newTrain.name}を運行中の電車に追加しました。表示する場合は「表示する」を押してください。`
+      );
+    }
+
+    saveAppData();
+    closeCreateTrainPanel(false);
+  }
+
   function showTrainInMainTimer(trainId) {
     if (!trainId || trainId === activeTrainId) {
       return;
@@ -2234,6 +2692,7 @@
     saveAppData();
     renderPersistenceUi();
     ensureTrainFleetLoop();
+    updateWakeLock();
     setStatusMessage(`${updatedTrain.name}を出発しました。`);
   }
 
@@ -2267,6 +2726,7 @@
     playActionSound();
     saveAppData();
     renderPersistenceUi();
+    updateWakeLock();
     setStatusMessage(`${updatedTrain.name}を一時停止しました。`);
   }
 
@@ -2302,6 +2762,7 @@
     saveAppData();
     renderPersistenceUi();
     ensureTrainFleetLoop();
+    updateWakeLock();
     setStatusMessage(`${updatedTrain.name}をはじめから出発しました。`);
   }
 
@@ -2992,6 +3453,8 @@
       "is-quiet-mode",
       preferences.quietMode
     );
+    renderChildLockOverlay();
+    updateWakeLock();
     updateCircleRemainingTimeDisplay();
   }
 
@@ -3020,6 +3483,17 @@
     }
     if (elements.quietModeToggle) {
       elements.quietModeToggle.checked = preferences.quietMode;
+    }
+    if (elements.childLockToggle) {
+      elements.childLockToggle.checked = preferences.childLockEnabled;
+    }
+    if (elements.keepAwakeToggle) {
+      elements.keepAwakeToggle.checked = preferences.keepAwakeEnabled;
+    }
+    if (elements.wakeLockSupportText) {
+      elements.wakeLockSupportText.textContent = "wakeLock" in navigator
+        ? "対応ブラウザでは、運転中に画面が暗くなりにくくなります。"
+        : "端末やブラウザによっては、画面が暗くなることがあります。";
     }
     if (elements.fontSizeSelect) {
       elements.fontSizeSelect.value = preferences.fontSize;
@@ -3063,6 +3537,166 @@
     });
   }
 
+  function isChildLockActive() {
+    return Boolean(storagePreferences.childLockEnabled);
+  }
+
+  function renderChildLockOverlay() {
+    const locked = isChildLockActive();
+
+    elements.body?.classList.toggle("is-child-locked", locked);
+
+    if (!elements.childLockOverlay) {
+      return;
+    }
+
+    elements.childLockOverlay.hidden = !locked;
+    elements.childLockOverlay.setAttribute("aria-hidden", locked ? "false" : "true");
+
+    if (locked) {
+      cancelUnlockHold();
+      window.setTimeout(() => {
+        elements.unlockHoldButton?.focus?.({ preventScroll: true });
+      }, 0);
+    }
+  }
+
+  function warnChildLockActive() {
+    if (!isChildLockActive()) {
+      return false;
+    }
+
+    setStatusMessage("画面ロック中です。3秒長押しで解除できます。");
+    return true;
+  }
+
+  function startUnlockHold(event) {
+    if (!isChildLockActive()) {
+      return;
+    }
+
+    event?.preventDefault?.();
+    cancelUnlockHold();
+    unlockHoldStartMs = performance.now();
+
+    if (elements.unlockProgressBar) {
+      elements.unlockProgressBar.style.width = "0%";
+    }
+
+    const updateProgress = () => {
+      const elapsedMs = performance.now() - unlockHoldStartMs;
+      const progress = clamp(elapsedMs / 3000, 0, 1);
+
+      if (elements.unlockProgressBar) {
+        elements.unlockProgressBar.style.width = `${Math.round(progress * 100)}%`;
+      }
+
+      if (progress >= 1) {
+        unlockChildLock();
+        return;
+      }
+
+      unlockProgressFrameId = window.requestAnimationFrame(updateProgress);
+    };
+
+    unlockHoldTimerId = window.setTimeout(unlockChildLock, 3000);
+    unlockProgressFrameId = window.requestAnimationFrame(updateProgress);
+  }
+
+  function cancelUnlockHold() {
+    if (unlockHoldTimerId !== null) {
+      window.clearTimeout(unlockHoldTimerId);
+      unlockHoldTimerId = null;
+    }
+
+    if (unlockProgressFrameId !== null) {
+      window.cancelAnimationFrame(unlockProgressFrameId);
+      unlockProgressFrameId = null;
+    }
+
+    unlockHoldStartMs = 0;
+
+    if (elements.unlockProgressBar) {
+      elements.unlockProgressBar.style.width = "0%";
+    }
+  }
+
+  function unlockChildLock() {
+    cancelUnlockHold();
+    storagePreferences.childLockEnabled = false;
+
+    if (draftPreferences) {
+      draftPreferences.childLockEnabled = false;
+    }
+
+    if (elements.childLockToggle) {
+      elements.childLockToggle.checked = false;
+    }
+
+    applyUserPreferences();
+    saveAppData();
+    setStatusMessage("画面ロックを解除しました。");
+  }
+
+  function canUseWakeLock() {
+    return "wakeLock" in navigator && typeof navigator.wakeLock?.request === "function";
+  }
+
+  async function requestScreenWakeLock() {
+    if (!storagePreferences.keepAwakeEnabled || !hasAnyRunningTrain() || document.visibilityState !== "visible") {
+      return;
+    }
+
+    if (!canUseWakeLock()) {
+      if (elements.wakeLockSupportText) {
+        elements.wakeLockSupportText.textContent = "端末やブラウザによっては、画面が暗くなることがあります。";
+      }
+      return;
+    }
+
+    if (wakeLock) {
+      return;
+    }
+
+    try {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => {
+        wakeLock = null;
+      });
+      if (elements.wakeLockSupportText) {
+        elements.wakeLockSupportText.textContent = "運転中は画面をつけたままにする準備ができています。";
+      }
+    } catch (error) {
+      console.warn("Wake Lockを有効にできませんでした。", error);
+      wakeLock = null;
+      if (elements.wakeLockSupportText) {
+        elements.wakeLockSupportText.textContent = "端末やブラウザによっては、画面が暗くなることがあります。";
+      }
+    }
+  }
+
+  async function releaseScreenWakeLock() {
+    if (!wakeLock) {
+      return;
+    }
+
+    try {
+      await wakeLock.release();
+    } catch (error) {
+      console.warn("Wake Lockを解除できませんでした。", error);
+    } finally {
+      wakeLock = null;
+    }
+  }
+
+  function updateWakeLock() {
+    if (storagePreferences.keepAwakeEnabled && hasAnyRunningTrain()) {
+      requestScreenWakeLock();
+    } else {
+      releaseScreenWakeLock();
+    }
+  }
+
   function readPreferenceControls() {
     return normalizeUserPreferences({
       soundEnabled: Boolean(elements.soundToggle?.checked),
@@ -3071,6 +3705,8 @@
       actionSoundEnabled: Boolean(elements.actionSoundToggle?.checked),
       soundVolume: Number(elements.soundVolumeRange?.value ?? 55),
       quietMode: Boolean(elements.quietModeToggle?.checked),
+      childLockEnabled: Boolean(elements.childLockToggle?.checked),
+      keepAwakeEnabled: Boolean(elements.keepAwakeToggle?.checked),
       fontSize: elements.fontSizeSelect?.value,
       highContrast: Boolean(elements.highContrastToggle?.checked),
       reduceMotion: Boolean(elements.reduceMotionToggle?.checked),
@@ -3234,6 +3870,9 @@
     if (elements.timeAdditionDialog?.classList.contains("is-open")) {
       return elements.timeAdditionDialog;
     }
+    if (elements.createTrainPanel?.classList.contains("is-open")) {
+      return elements.createTrainPanel;
+    }
     if (elements.settingsPanel?.classList.contains("is-open")) {
       return elements.settingsPanel;
     }
@@ -3374,12 +4013,17 @@
       elements.startButtonIcon.textContent = presentation.startIcon;
     }
 
+    const showStartButton =
+      timer.state === TIMER_STATE.IDLE || timer.state === TIMER_STATE.PAUSED;
+    const showPauseButton = timer.state === TIMER_STATE.RUNNING;
+    const showStartOverButton = timer.state === TIMER_STATE.PAUSED;
+    const showResetButton = false;
+
     if (elements.startButton) {
-      elements.startButton.disabled = timer.state === TIMER_STATE.RUNNING;
+      elements.startButton.hidden = !showStartButton;
+      elements.startButton.disabled = !showStartButton;
       elements.startButton.setAttribute("aria-label", presentation.startAriaLabel);
     }
-
-    const showStartOverButton = timer.state === TIMER_STATE.PAUSED;
 
     if (elements.startOverButton) {
       elements.startOverButton.hidden = !showStartOverButton;
@@ -3392,7 +4036,13 @@
     );
 
     if (elements.pauseButton) {
-      elements.pauseButton.disabled = timer.state !== TIMER_STATE.RUNNING;
+      elements.pauseButton.hidden = !showPauseButton;
+      elements.pauseButton.disabled = !showPauseButton;
+    }
+
+    if (elements.resetButton) {
+      elements.resetButton.hidden = !showResetButton;
+      elements.resetButton.disabled = !showResetButton;
     }
 
     if (elements.completionPanel) {
@@ -3430,6 +4080,7 @@
     syncDisplayedTimerToActiveTrain();
     renderPersistenceUi();
     saveAppData();
+    updateWakeLock();
     showArrivalNotice("ゴールにつきました！");
     playGoalArrivalTone();
     setStatusMessage("ゴールにつきました。タイマーが終了しました。");
@@ -3467,6 +4118,10 @@
   }
 
   function startTimer() {
+    if (warnChildLockActive()) {
+      return;
+    }
+
     if (timer.state === TIMER_STATE.RUNNING) {
       return;
     }
@@ -3489,6 +4144,7 @@
     syncDisplayedTimerToActiveTrain();
     renderPersistenceUi();
     saveAppData();
+    updateWakeLock();
     setStatusMessage("タイマーを開始しました。");
     cancelTimerLoop();
     timer.animationFrameId = window.requestAnimationFrame(timerLoop);
@@ -3496,6 +4152,10 @@
   }
 
   function pauseTimer() {
+    if (warnChildLockActive()) {
+      return;
+    }
+
     if (timer.state !== TIMER_STATE.RUNNING) {
       return;
     }
@@ -3518,10 +4178,15 @@
     syncDisplayedTimerToActiveTrain();
     renderPersistenceUi();
     saveAppData();
+    updateWakeLock();
     setStatusMessage(`タイマーを一時停止しました。${formatAccessibleDuration(timer.remainingMs)}です。`);
   }
 
   function requestResetTimer() {
+    if (warnChildLockActive()) {
+      return;
+    }
+
     const hasProgress =
       timer.state !== TIMER_STATE.IDLE ||
       timer.remainingMs < timer.initialDurationMs;
@@ -3554,6 +4219,7 @@
     syncDisplayedTimerToActiveTrain();
     renderPersistenceUi();
     saveAppData();
+    updateWakeLock();
 
     if (announce) {
       const totalMinutes = calculateTotalMinutes(configuration);
@@ -3562,12 +4228,23 @@
   }
 
   function restartTimer() {
+    if (warnChildLockActive()) {
+      return;
+    }
+
     resetTimer({ announce: false });
     startTimer();
   }
 
   function handleVisibilityChange() {
-    if (document.visibilityState !== "visible" || timer.state !== TIMER_STATE.RUNNING) {
+    if (document.visibilityState !== "visible") {
+      releaseScreenWakeLock();
+      return;
+    }
+
+    updateWakeLock();
+
+    if (timer.state !== TIMER_STATE.RUNNING) {
       return;
     }
 
@@ -3630,7 +4307,7 @@
     const item = document.createElement("li");
     item.className = "station";
     item.style.left =
-      `calc(34px + (100% - 68px) * ${stationPoint.positionPercent / 100})`;
+      `calc(var(--rail-x-inset, 34px) + (100% - var(--rail-x-total-inset, 68px)) * ${stationPoint.positionPercent / 100})`;
 
     applyStationStateClasses(item, stationPoint);
     const { marker, label } = createStationContents(stationPoint);
@@ -3643,7 +4320,7 @@
     const item = document.createElement("li");
     item.className = "station";
     item.style.top =
-      `calc(36px + (100% - 72px) * ${stationPoint.positionPercent / 100})`;
+      `calc(var(--rail-y-start, 36px) + (100% - var(--rail-y-total-inset, 72px)) * ${stationPoint.positionPercent / 100})`;
 
     applyStationStateClasses(item, stationPoint);
     const { marker, label } = createStationContents(stationPoint);
@@ -4094,6 +4771,7 @@
     }
 
     saveAppData();
+    updateWakeLock();
 
     if (announce) {
       const details = getTrackShapeDetails(normalizedShape);
@@ -4505,12 +5183,14 @@
 
     const menuIsOpen = elements.sideMenu?.classList.contains("is-open");
     const settingsIsOpen = elements.settingsPanel?.classList.contains("is-open");
+    const createTrainIsOpen =
+      elements.createTrainPanel?.classList.contains("is-open");
     const timeAdditionIsOpen =
       elements.timeAdditionDialog?.classList.contains("is-open");
 
     elements.body.classList.toggle(
       "panel-open",
-      Boolean(menuIsOpen || settingsIsOpen || timeAdditionIsOpen)
+      Boolean(menuIsOpen || settingsIsOpen || createTrainIsOpen || timeAdditionIsOpen)
     );
   }
 
@@ -4711,6 +5391,10 @@
   }
 
   function openTimeAdditionDialog(minutes, triggerElement) {
+    if (warnChildLockActive()) {
+      return;
+    }
+
     if (
       !elements.timeAdditionDialog ||
       !elements.timeAdditionDialogTitle ||
@@ -4725,6 +5409,7 @@
 
     closeMenu(false);
     closeSettings(false);
+    closeCreateTrainPanel(false);
 
     pendingAdditionMinutes = minutes;
     focusState.timeAdditionTrigger =
@@ -4809,6 +5494,11 @@
   }
 
   function applyTimeAddition() {
+    if (warnChildLockActive()) {
+      closeTimeAdditionDialog(false);
+      return;
+    }
+
     const minutes = Math.round(Number(pendingAdditionMinutes) || 0);
 
     if (minutes <= 0 || !synchronizeTimerWithClock()) {
@@ -5027,6 +5717,7 @@
 
     closeSettings(false);
     closeTimeAdditionDialog(false);
+    closeCreateTrainPanel(false);
     focusState.menuTrigger = document.activeElement;
 
     elements.sideMenu.classList.add("is-open");
@@ -5066,6 +5757,7 @@
 
     closeMenu(false);
     closeTimeAdditionDialog(false);
+    closeCreateTrainPanel(false);
     focusState.settingsTrigger = document.activeElement;
     draftPreferences = { ...storagePreferences };
     renderPreferenceControls();
@@ -5193,7 +5885,7 @@
     applyUserPreferences();
     renderPersistenceUi();
     saveAppData();
-    setStatusMessage("表示・音・操作の設定を保存しました。");
+    setStatusMessage("表示・音・操作・画面ロックの設定を保存しました。");
     closeSettings();
   }
 
@@ -5443,6 +6135,10 @@
         closeTimeAdditionDialog();
         return;
       }
+      if (elements.createTrainPanel?.classList.contains("is-open")) {
+        closeCreateTrainPanel();
+        return;
+      }
       if (elements.settingsPanel?.classList.contains("is-open")) {
         closeSettings();
         return;
@@ -5454,6 +6150,12 @@
     }
 
     if (isTypingTarget(event.target) || getOpenFocusContainer()) return;
+
+    if (isChildLockActive()) {
+      event.preventDefault();
+      warnChildLockActive();
+      return;
+    }
 
     if (event.code === "Space") {
       event.preventDefault();
@@ -5519,6 +6221,20 @@
       }
     });
     addSafeListener(elements.activeTrainsList, "click", handleActiveTrainsListClick);
+    addSafeListener(elements.openCreateTrainButton, "click", openCreateTrainPanel);
+    addSafeListener(elements.closeCreateTrainButton, "click", () => closeCreateTrainPanel());
+    addSafeListener(elements.cancelCreateTrainButton, "click", () => closeCreateTrainPanel());
+    addSafeListener(elements.createTrainBackdrop, "click", () => closeCreateTrainPanel());
+    addSafeListener(elements.createTrainForm, "submit", handleCreateTrainSubmit);
+    addSafeListener(elements.createTrainForm, "input", updateCreateTrainPreview);
+    addSafeListener(elements.createTrainForm, "change", updateCreateTrainPreview);
+    elements.createTrainExampleButtons?.forEach((button) => {
+      addSafeListener(button, "click", handleCreateTrainExampleClick);
+    });
+
+    elements.quickRouteButtons?.forEach((button) => {
+      addSafeListener(button, "click", () => addQuickRouteTrain(button.dataset.quickRoute));
+    });
     addSafeListener(elements.presetList, "click", handlePresetListClick);
     addSafeListener(elements.presetList, "change", handlePresetNameChange);
     addSafeListener(elements.exportJsonButton, "click", exportJsonData);
@@ -5548,6 +6264,8 @@
     addSafeListener(elements.soundVolumeRange, "input", handlePreferencePreviewChange);
     addSafeListener(elements.soundToggle, "change", handlePreferencePreviewChange);
     addSafeListener(elements.quietModeToggle, "change", handlePreferencePreviewChange);
+    addSafeListener(elements.childLockToggle, "change", handlePreferencePreviewChange);
+    addSafeListener(elements.keepAwakeToggle, "change", handlePreferencePreviewChange);
     addSafeListener(
       elements.circleRemainingTimeToggle,
       "change",
@@ -5608,6 +6326,12 @@
     elements.trackShapeRadios?.forEach((radio) => {
       addSafeListener(radio, "change", handleTrackShapeRadioChange);
     });
+
+    addSafeListener(elements.unlockHoldButton, "pointerdown", startUnlockHold);
+    addSafeListener(elements.unlockHoldButton, "pointerup", cancelUnlockHold);
+    addSafeListener(elements.unlockHoldButton, "pointerleave", cancelUnlockHold);
+    addSafeListener(elements.unlockHoldButton, "pointercancel", cancelUnlockHold);
+    addSafeListener(elements.unlockHoldButton, "contextmenu", (event) => event.preventDefault());
 
     document.addEventListener("keydown", handleDocumentKeydown);
     document.addEventListener("visibilitychange", handleVisibilityChange);
