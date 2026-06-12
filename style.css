@@ -9102,3 +9102,370 @@ body.is-child-locked #pageTimer .timer-actions-card button {
     min-height: 196px !important;
   }
 }
+
+/* =========================================================
+   Stage 32: iPad・Androidタブレット縦画面の最適化
+   - 600〜899pxの縦画面は広めの1カラムを基本にする
+   - 線路はスマホより大きく、操作は中央寄せで最大幅を制限
+   - My設定・経路編集・設定ページはカード内2列を許可しつつ、ページ自体は読みやすい1カラムへ
+   ========================================================= */
+@media (min-width: 600px) and (max-width: 899px) and (orientation: portrait) {
+  :root {
+    --tablet-portrait-header-height: 68px;
+    --tablet-portrait-nav-height: 76px;
+    --tablet-portrait-content-max: 820px;
+    --tablet-portrait-action-max: 620px;
+    --tablet-portrait-gap: 16px;
+  }
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+  }
+
+  .app-header {
+    min-height: var(--tablet-portrait-header-height);
+    padding-top: max(10px, env(safe-area-inset-top, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+    padding-bottom: 10px;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+  }
+
+  .app-title {
+    font-size: clamp(1.22rem, 2.8vw, 1.52rem);
+  }
+
+  .app-title-copy small {
+    display: block;
+    font-size: .74rem;
+  }
+
+  .app-header .icon-button {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+  }
+
+  .main-content {
+    width: 100%;
+    max-width: var(--tablet-portrait-content-max);
+    min-height: calc(100dvh - var(--tablet-portrait-header-height));
+    margin-inline: auto;
+    padding: 18px 22px calc(var(--tablet-portrait-nav-height) + 34px + env(safe-area-inset-bottom, 0px));
+    overflow-x: hidden;
+  }
+
+  .app-page.is-active,
+  #pageTimer.app-page.is-active,
+  #pageEdit.app-page.is-active,
+  #pagePresets.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: none !important;
+    gap: var(--tablet-portrait-gap);
+    width: 100%;
+    max-width: var(--tablet-portrait-content-max);
+    margin-inline: auto;
+    align-items: start;
+  }
+
+  #pageTimer .railway-card,
+  #pageTimer .timer-actions-card,
+  #pageEdit > *,
+  #pagePresets > *,
+  #pageSettings > * {
+    grid-column: 1 / -1 !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    position: static;
+  }
+
+  #pageTimer .railway-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  #pageTimer .track-shape-switcher {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  #pageTimer .track-shape-button {
+    min-height: 50px;
+    font-size: .92rem;
+  }
+
+  #pageTimer .railway-preview {
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+    padding: 14px;
+  }
+
+  #pageTimer .railway-stage.railway-preview--horizontal,
+  #pageTimer .railway-preview--horizontal {
+    height: clamp(430px, 46dvh, 520px) !important;
+    min-height: clamp(430px, 46dvh, 520px) !important;
+    max-height: clamp(430px, 46dvh, 520px) !important;
+    aspect-ratio: auto !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical,
+  #pageTimer .railway-preview--vertical {
+    height: clamp(480px, 52dvh, 590px) !important;
+    min-height: clamp(480px, 52dvh, 590px) !important;
+    max-height: clamp(480px, 52dvh, 590px) !important;
+    aspect-ratio: auto !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--circle,
+  #pageTimer .railway-preview--circle {
+    height: clamp(430px, 46dvh, 520px) !important;
+    min-height: clamp(430px, 46dvh, 520px) !important;
+    max-height: clamp(430px, 46dvh, 520px) !important;
+    aspect-ratio: auto !important;
+    place-items: center;
+  }
+
+  #pageTimer .railway-track--horizontal {
+    min-height: 380px;
+    padding-right: clamp(44px, 9vw, 78px);
+    padding-left: clamp(44px, 9vw, 78px);
+  }
+
+  #pageTimer .railway-track--vertical {
+    width: min(100%, 470px);
+    min-height: 450px;
+    margin-inline: auto;
+  }
+
+  #pageTimer .railway-stage.railway-preview--circle .railway-track--circle,
+  #pageTimer .railway-track--circle {
+    width: min(58vw, 430px) !important;
+    height: min(58vw, 430px) !important;
+    min-width: 350px !important;
+    min-height: 350px !important;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
+  }
+
+  #pageTimer .route-time-panel {
+    max-width: min(340px, 72%);
+    min-height: 92px;
+    padding: 12px 16px;
+  }
+
+  #pageTimer .journey-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  #pageTimer .journey-status-item {
+    min-height: 72px;
+    padding: 13px 16px;
+  }
+
+  #pageTimer .timer-actions-card {
+    width: min(100%, var(--tablet-portrait-action-max));
+    max-width: var(--tablet-portrait-action-max);
+    margin-inline: auto;
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  #pageTimer .timer-actions-layout {
+    gap: 13px;
+  }
+
+  #pageTimer .primary-controls,
+  #pageTimer .quick-add-controls {
+    display: grid;
+    gap: 10px;
+  }
+
+  #pageTimer .primary-controls.is-resume-choice,
+  #pageTimer .quick-add-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageTimer .control-button,
+  #pageTimer .quick-add-button {
+    min-height: 54px;
+    font-size: .96rem;
+  }
+
+  #pageEdit.app-page.is-active,
+  #pagePresets.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    padding-bottom: calc(var(--tablet-portrait-nav-height) + 46px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #pagePresets .quick-routes-card,
+  #pagePresets .active-trains-card,
+  #pagePresets .preset-card,
+  #pageEdit .page-intro-card,
+  #pageEdit .summary-card,
+  #pageEdit .route-editor-card,
+  #pageSettings .page-intro-card,
+  #pageSettings .settings-overview-card,
+  #pageSettings .guide-card,
+  #pageSettings .about-card {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  #pagePresets .quick-routes-list,
+  #pagePresets .active-trains-list,
+  #pageSettings .settings-overview-grid,
+  #pageSettings .guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  #pagePresets .preset-list,
+  #pagePresets .data-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  #pagePresets .active-train-add-buttons,
+  #pagePresets .active-train-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  #pagePresets .quick-route-button,
+  #pagePresets .active-train-add-button,
+  #pagePresets .active-train-button,
+  #pagePresets .preset-action-button,
+  #pagePresets .data-action-button,
+  #pageSettings .apply-button,
+  #pageEdit .apply-button,
+  #pageEdit .cancel-button {
+    min-height: 52px;
+  }
+
+  #pageEdit .summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  #pageEdit .summary-item--wide {
+    grid-column: span 2;
+  }
+
+  #pageEdit .unit-setting-grid,
+  #pageEdit .settings-total-card,
+  #pageEdit .radio-card-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageEdit .station-editor-list,
+  #pageEdit .segment-editor-list {
+    gap: 12px;
+  }
+
+  #pageEdit .route-editor-actions {
+    position: sticky;
+    bottom: calc(var(--tablet-portrait-nav-height) + 14px + env(safe-area-inset-bottom, 0px));
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    gap: 12px;
+    max-width: var(--tablet-portrait-action-max);
+    margin-inline: auto;
+  }
+
+  #pageSettings .settings-overview-item {
+    min-height: 104px;
+    padding: 14px;
+  }
+
+  .settings-panel--preferences,
+  .create-train-panel {
+    width: min(92vw, 700px);
+    max-height: min(86dvh, 860px);
+  }
+
+  .create-train-grid,
+  .create-train-examples {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-bottom-nav {
+    display: grid !important;
+    right: max(28px, env(safe-area-inset-right, 0px));
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+    left: max(28px, env(safe-area-inset-left, 0px));
+    max-width: 720px;
+    min-height: var(--tablet-portrait-nav-height);
+    margin-inline: auto;
+    padding: 8px;
+  }
+
+  .mobile-nav-item {
+    min-height: 58px;
+    font-size: .76rem;
+  }
+}
+
+/* Split View相当の狭いタブレット縦では、ページは1カラム、カード内2列は無理に使わない */
+@media (min-width: 600px) and (max-width: 679px) and (orientation: portrait) {
+  .main-content {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  #pagePresets .quick-routes-list,
+  #pagePresets .active-trains-list,
+  #pagePresets .preset-list,
+  #pagePresets .data-action-grid,
+  #pageSettings .settings-overview-grid,
+  #pageSettings .guide-grid,
+  .create-train-grid,
+  .create-train-examples {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #pageEdit .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageTimer .railway-stage.railway-preview--horizontal,
+  #pageTimer .railway-stage.railway-preview--circle {
+    height: clamp(390px, 44dvh, 470px) !important;
+    min-height: clamp(390px, 44dvh, 470px) !important;
+    max-height: clamp(390px, 44dvh, 470px) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical {
+    height: clamp(430px, 50dvh, 520px) !important;
+    min-height: clamp(430px, 50dvh, 520px) !important;
+    max-height: clamp(430px, 50dvh, 520px) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--circle .railway-track--circle,
+  #pageTimer .railway-track--circle {
+    width: min(62vw, 370px) !important;
+    height: min(62vw, 370px) !important;
+    min-width: 310px !important;
+    min-height: 310px !important;
+  }
+}
+
