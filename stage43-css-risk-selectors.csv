@@ -1,0 +1,328 @@
+﻿line,selector,risk,props,comment
+48,body,size-vh/%,"min-width: 320px min-height: 100vh margin: 0 overflow-x: hidden background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(180deg, #edf8ff 0%, #f6fbff 52%, #eef5f8 100%)",要確認。線路外なら見えづらさの原因候補。
+117,.app-shell,size-vh/%,"width: min(100%, 1100px) min-height: 100vh margin: 0 auto",要確認。線路外なら見えづらさの原因候補。
+123,.app-header,position,"position: sticky top: 0 z-index: 20 display: grid grid-template-columns: 48px minmax(0, 1fr) 48px align-items: center min-height: var(--header-height) padding:
+    max(8px, env(safe-area-inset-top))
+    12px
+    8px",要確認。線路外なら見えづらさの原因候補。
+180,.main-content,size-vh/%,display: grid gap: 16px width: 100% padding: 18px 14px calc(30px + var(--safe-bottom)),要確認。線路外なら見えづらさの原因候補。
+501,.time-addition-dialog,position / size-vh/%,"position: fixed z-index: 112 right: 0 bottom: 0 left: 0 max-height: min(88vh, 680px) padding: 10px 18px calc(22px + var(--safe-bottom)) overflow-y: auto",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+648,.time-addition-dialog,pos-% / size-vh/%,"top: 50% bottom: auto left: 50% width: min(480px, calc(100vw - 40px)) max-height: min(82vh, 680px) padding: 20px 24px 24px border-radius: 24px transform: translate(-50%, calc(-50% + 24px)) scale(0.98)",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+703,.restart-button,size-vh/%,"display: inline-flex align-items: center justify-content: center gap: 8px width: min(100%, 290px) min-height: 52px padding: 11px 16px border-radius: var(--radius-medium)",要確認。線路外なら見えづらさの原因候補。
+809,.arrival-notice,position / pos-% / size-vh/%,"position: absolute z-index: 20 top: 12px left: 50% min-width: min(84%, 280px) margin: 0 padding: 9px 14px border: 2px solid rgba(52, 127, 189, 0.3)",線路内表示だが、残り時間や通知は重なり確認が必要。
+848,.railway-track,size-vh/%,position: relative width: 100%,線路内表示だが、残り時間や通知は重なり確認が必要。
+859,.railway-track--vertical,size-vh/%,"width: min(100%, 380px) height: 510px margin: 0 auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+865,.railway-track--circle,size-vh/%,"width: min(100%, 360px) height: 354px margin: 0 auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+871,.track-bed,position,"position: absolute z-index: 1 border-radius: 999px background:
+    repeating-linear-gradient(
+      90deg,
+      #8a7564 0 9px,
+      #c0a58d 9px 15px
+    )",線路内の進行表現として許容。ただし親高さに依存。
+893,.railway-track--vertical .track-bed,pos-%,"top: 36px bottom: 36px left: 35% width: 10px background:
+    repeating-linear-gradient(
+      180deg,
+      #8a7564 0 9px,
+      #c0a58d 9px 15px
+    ) box-shadow:
+    -7px 0 0 -3px #65564b,
+    7px 0 0 -3px #65564b transform: translateX(-50%)",線路内の進行表現として許容。ただし親高さに依存。
+910,.track-segment-list,position,position: absolute z-index: 2 pointer-events: none,線路内の進行表現として許容。ただし親高さに依存。
+925,.railway-track--vertical .track-segment-list,pos-%,top: 36px bottom: 36px left: 35% width: 10px border-radius: 999px overflow: hidden transform: translateX(-50%),線路内の進行表現として許容。ただし親高さに依存。
+935,.track-segment,position,"position: absolute transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    stroke 180ms ease,
+    opacity 180ms ease",線路内の進行表現として許容。ただし親高さに依存。
+979,.track-segment-unit-label,position / size-vh/%,position: absolute z-index: 4 max-width: 90% overflow: hidden color: #53697a font-size: 0.63rem font-weight: 800 text-overflow: ellipsis,線路内の進行表現として許容。ただし親高さに依存。
+991,.railway-track--horizontal .track-segment-unit-label,pos-%,top: -25px left: 50% transform: translateX(-50%),線路内の進行表現として許容。ただし親高さに依存。
+997,.railway-track--vertical .track-segment-unit-label,pos-%,top: 50% right: 18px transform: translateY(-50%),線路内の進行表現として許容。ただし親高さに依存。
+1003,.train-position,position,"position: absolute z-index: 12 display: inline-flex align-items: flex-end gap: 1px will-change: left, top",線路内の進行表現として許容。ただし親高さに依存。
+1017,.railway-track--vertical .train-position,pos-%,left: 35% transform: none,線路内の進行表現として許容。ただし親高さに依存。
+1047,.station-list,position,position: absolute z-index: 8 inset: 0 margin: 0 padding: 0 list-style: none pointer-events: none,線路内の進行表現として許容。ただし親高さに依存。
+1058,.station,position,position: absolute display: flex min-width: 0 align-items: center color: var(--color-muted) text-align: center,線路内の進行表現として許容。ただし親高さに依存。
+1074,.railway-track--vertical .station,pos-% / size-vh/%,"left: 35% width: min(62%, 230px) flex-direction: row gap: 16px transform: translate(-11px, -50%) text-align: left",線路内の進行表現として許容。ただし親高さに依存。
+1111,.railway-track--horizontal .station-label,size-vh/%,width: 100% margin-top: 13px,線路内の進行表現として許容。ただし親高さに依存。
+1136,".station-name, .station-time",size-vh/%,max-width: 100% overflow-wrap: anywhere,線路内の進行表現として許容。ただし親高さに依存。
+1212,/* 円形線路：スタートとゴールの間に切れ目を設ける */ .circle-track-svg,position / size-vh/%,position: absolute z-index: 1 inset: 0 width: 100% height: 100% overflow: visible,線路内の進行表現として許容。ただし親高さに依存。
+1248,.circle-segment-label,position,"position: absolute z-index: 5 min-width: 43px padding: 3px 5px border-radius: 999px color: #53697a background: rgba(255, 255, 255, 0.9) font-size: 0.58rem",要確認。線路外なら見えづらさの原因候補。
+1263,.circle-remaining-time,position / pos-%,position: absolute z-index: 6 top: 50% left: 50% display: grid min-width: 132px min-height: 82px place-items: center,要確認。線路外なら見えづらさの原因候補。
+1398,.journey-progress-track span,size-vh/%,"display: block width: 0 height: 100% border-radius: inherit background: linear-gradient(90deg, var(--color-green), var(--color-primary)) transition: width 100ms linear",要確認。線路外なら見えづらさの原因候補。
+1500,".secondary-button, .outline-button",size-vh/%,display: inline-flex align-items: center justify-content: center gap: 8px width: 100% min-height: 50px margin-top: 14px padding: 10px 14px,要確認。線路外なら見えづらさの原因候補。
+1547,.preset-name-field input,size-vh/%,width: 100% min-height: 50px padding: 10px 13px border: 1px solid var(--color-border) border-radius: var(--radius-small) color: var(--color-text) background: #ffffff,要確認。線路外なら見えづらさの原因候補。
+1643,.preset-name-input,size-vh/%,width: 100% min-height: 44px padding: 8px 10px border: 1px solid transparent border-radius: 10px color: var(--color-text) background: var(--color-surface-soft) font-weight: 800,要確認。線路外なら見えづらさの原因候補。
+1849,.backdrop,position,"position: fixed z-index: 90 inset: 0 background: rgba(24, 43, 58, 0.48) opacity: 0 pointer-events: none transition: opacity 180ms ease",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+1864,".side-menu, .settings-panel",position,"position: fixed z-index: 100 background: var(--color-surface) box-shadow: 0 0 34px rgba(27, 48, 64, 0.24) visibility: hidden pointer-events: none transition:
+    transform 220ms ease,
+    visibility 220ms ease",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+1896,.settings-panel,size-vh/%,"right: 0 bottom: 0 left: 0 max-height: min(92vh, 820px) padding: 10px 18px calc(22px + var(--safe-bottom)) overflow-y: auto border-radius: 26px 26px 0 0 transform: translateY(104%)",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+1937,.menu-item,size-vh/%,display: flex align-items: center width: 100% gap: 12px padding: 12px 14px border-radius: var(--radius-medium) color: var(--color-text) background: var(--color-surface-soft),要確認。線路外なら見えづらさの原因候補。
+2028,".form-field select, .form-field input[type=""number""], .station-name-input",size-vh/%,width: 100% min-height: 50px padding: 10px 13px border: 1px solid var(--color-border) border-radius: var(--radius-small) color: var(--color-text) background: #ffffff,線路内の進行表現として許容。ただし親高さに依存。
+2250,.radio-card input,position,position: absolute top: 7px left: 7px,要確認。線路外なら見えづらさの原因候補。
+2272,.radio-track-preview::before,position,"position: absolute content: """"",要確認。線路外なら見えづらさの原因候補。
+2277,.radio-track-preview i,position,position: absolute display: block width: 8px height: 8px border: 2px solid #ffffff border-radius: 50% background: var(--color-primary) box-shadow: 0 0 0 1px var(--color-primary),要確認。線路外なら見えづらさの原因候補。
+2371,.switch-slider,position,position: absolute inset: 0 border-radius: 999px background: #c8d3db,要確認。線路外なら見えづらさの原因候補。
+2378,.switch-slider::before,position,"position: absolute top: 4px left: 4px width: 24px height: 24px border-radius: 50% background: #ffffff box-shadow: 0 2px 5px rgba(36, 56, 70, 0.25)",要確認。線路外なら見えづらさの原因候補。
+2396,".apply-button, .cancel-button",size-vh/%,width: 100% min-height: 54px border-radius: var(--radius-medium) font-weight: 800,要確認。線路外なら見えづらさの原因候補。
+2424,.visually-hidden,position / !important,"position: absolute !important width: 1px !important height: 1px !important padding: 0 !important overflow: hidden !important clip: rect(0, 0, 0, 0) !important white-space: nowrap !important border: 0 !important",要確認。線路外なら見えづらさの原因候補。
+2452,.railway-track--vertical .station,size-vh/%,width: 66%,線路内の進行表現として許容。ただし親高さに依存。
+2488,.summary-card,position,grid-column: 2 grid-row: 1 / span 2 position: sticky top: calc(var(--header-height) + 24px),要確認。線路外なら見えづらさの原因候補。
+2556,/* ========================================================= 第8段階：アクセシビリティ・PWA・情報表示 ========================================================= */ .skip-link,position,position: fixed z-index: 300 top: 8px left: 8px padding: 10px 14px border-radius: 10px color: #ffffff background: #173f61,要確認。線路外なら見えづらさの原因候補。
+2653,.volume-control input,size-vh/%,width: 100%,要確認。線路外なら見えづらさの原因候補。
+2684,.offline-toast,position,"position: fixed z-index: 240 right: 12px bottom: calc(12px + var(--safe-bottom)) max-width: min(360px, calc(100vw - 24px)) padding: 11px 14px border-radius: 12px color: #fff",要確認。線路外なら見えづらさの原因候補。
+2697,.pwa-actions,size-vh/%,width: 100% justify-items: stretch,要確認。線路外なら見えづらさの原因候補。
+2769,.timer-card--hero::before,position,"position: absolute z-index: -1 right: -34px bottom: -38px width: 130px height: 130px border-radius: 50% background: rgba(79, 163, 111, 0.07)",要確認。線路外なら見えづらさの原因候補。
+2884,.mobile-bottom-nav,position,"position: fixed z-index: 70 right: max(10px, env(safe-area-inset-right)) bottom: max(8px, env(safe-area-inset-bottom)) left: max(10px, env(safe-area-inset-left)) display: grid grid-template-columns: repeat(4, minmax(0, 1fr)) gap: 4px",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+2987,.summary-card,size-vh/%,min-height: 100%,要確認。線路外なら見えづらさの原因候補。
+3070,body::before,position,"position: fixed z-index: -1 top: 84px right: -85px width: 220px height: 220px border: 1px solid rgba(24, 183, 180, 0.08) border-radius: 50%",要確認。線路外なら見えづらさの原因候補。
+3662,/* Header */ .app-shell,size-vh/%,"width: min(100%, 1120px)",要確認。線路外なら見えづらさの原因候補。
+4037,.journey-status-item::before,position,"position: absolute top: 0 bottom: 0 left: 0 width: 5px content: """" background: var(--route-blue)",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+4105,.segment-overview-list::before,position,"position: absolute top: 14px bottom: 14px left: 8px width: 4px border-radius: 3px content: """" background: var(--route-blue)",要確認。線路外なら見えづらさの原因候補。
+4126,.segment-overview-item::before,position,"position: absolute top: 17px left: -17px width: 12px height: 12px border: 3px solid #ffffff border-radius: 50% content: """"",要確認。線路外なら見えづらさの原因候補。
+4415,".mobile-nav-item.is-active::before, .mobile-nav-item[aria-current=""page""]::before",position,"position: absolute top: 0 right: 0 left: 0 height: 3px content: """" background: #e6002d",要確認。線路外なら見えづらさの原因候補。
+4547,"/* スタートからゴールまでの線路を一画面内に収める */ .railway-preview, .railway-track, .station-list, .track-segment-list",size-vh/%,max-width: 100%,線路内の進行表現として許容。ただし親高さに依存。
+4559,".railway-track--horizontal, .railway-track--vertical, .railway-track--circle",size-vh/%,max-width: 100%,線路内表示だが、残り時間や通知は重なり確認が必要。
+4574,.railway-preview--vertical,size-vh/%,"min-height: min(470px, calc(100dvh - 180px))",要確認。線路外なら見えづらさの原因候補。
+4578,.railway-track--vertical,size-vh/%,"height: min(432px, calc(100dvh - 218px)) min-height: 340px",線路内表示だが、残り時間や通知は重なり確認が必要。
+4583,.railway-preview--circle,size-vh/%,"min-height: min(382px, calc(100dvh - 190px))",要確認。線路外なら見えづらさの原因候補。
+4587,.railway-track--circle,size-vh/%,"width: min(100%, 336px, calc(100dvh - 224px)) height: min(336px, calc(100dvh - 224px)) min-width: 278px min-height: 278px",線路内表示だが、残り時間や通知は重なり確認が必要。
+4671,.circle-remaining-time-stack,size-vh/%,display: grid gap: 6px width: 100%,要確認。線路外なら見えづらさの原因候補。
+4724,#pageTimer .railway-card,position,grid-column: 2 grid-row: 1 position: sticky top: 14px,要確認。線路外なら見えづらさの原因候補。
+4822,body.page-timer-active,size-vh/%,height: 100svh overflow: hidden,要確認。線路外なら見えづらさの原因候補。
+4827,body.page-timer-active .app-shell,size-vh/%,height: 100svh overflow: hidden,要確認。線路外なら見えづらさの原因候補。
+4832,body.page-timer-active .main-content,size-vh/%,height: calc(100svh - var(--compact-header-height)) padding: 7px 8px calc(var(--compact-nav-height) + 10px + var(--safe-bottom)) overflow: hidden,要確認。線路外なら見えづらさの原因候補。
+4838,#pageTimer.app-page.is-active,size-vh/%,"display: grid grid-template-rows: auto minmax(0, 1fr) auto gap: 7px height: 100% min-height: 0 overflow: hidden",要確認。線路外なら見えづらさの原因候補。
+4926,#pageTimer .railway-preview,size-vh/% / !important,min-height: 0 !important height: 100% padding: 4px 5px overflow: hidden,要確認。線路外なら見えづらさの原因候補。
+4933,#pageTimer .railway-track--horizontal,size-vh/%,height: 100% min-height: 150px padding-right: 25px padding-left: 25px,線路内表示だが、残り時間や通知は重なり確認が必要。
+4946,#pageTimer .railway-track--vertical,size-vh/%,"width: min(100%, 360px) height: 100% min-height: 195px max-height: none",線路内表示だが、残り時間や通知は重なり確認が必要。
+4953,#pageTimer .railway-track--circle,size-vh/%,"width: min(68vw, 270px) height: min(68vw, 270px) max-width: 100% max-height: 100% margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+5060,#pageTimer .time-addition-history-card:not([hidden]),position,position: fixed z-index: 82 right: 8px bottom: calc(var(--compact-nav-height) + 12px + var(--safe-bottom)) left: 8px max-height: 125px margin: 0 padding: 8px,要確認。線路外なら見えづらさの原因候補。
+5085,#pageTimer .undo-time-button,size-vh/%,width: 100%,要確認。線路外なら見えづらさの原因候補。
+5152,"#pageTimer .railway-track--horizontal .track-bed, #pageTimer .railway-track--horizontal .track-segment-list",pos-%,top: 43%,線路内の進行表現として許容。ただし親高さに依存。
+5156,#pageTimer .railway-track--horizontal .station,pos-%,top: calc(43% - 10px),線路内の進行表現として許容。ただし親高さに依存。
+5160,#pageTimer .railway-track--horizontal .train-position,pos-%,top: calc(43% - 48px),線路内の進行表現として許容。ただし親高さに依存。
+5165,/* ========================================================= 案2：線路主役・時間を線路内に統合 ========================================================= */ .timer-card--source,position / !important,position: fixed !important top: -10000px !important left: -10000px !important width: 1px !important height: 1px !important padding: 0 !important overflow: hidden !important border: 0 !important,要確認。線路外なら見えづらさの原因候補。
+5315,#pageTimer .railway-preview,size-vh/% / !important,grid-row: 2 min-height: 0 !important height: 100%,要確認。線路外なら見えづらさの原因候補。
+5507,"html, body",size-vh/%,min-height: 100% overscroll-behavior-y: contain,要確認。線路外なら見えづらさの原因候補。
+5513,.app-shell,size-vh/%,min-height: 100dvh,要確認。線路外なら見えづらさの原因候補。
+5582,"body.page-timer-active, body.page-timer-active .app-shell",size-vh/%,height: 100dvh min-height: 100dvh,要確認。線路外なら見えづらさの原因候補。
+5588,body.page-timer-active .main-content,size-vh/%,"height: calc(100dvh - var(--compact-header-height)) padding-right: max(8px, env(safe-area-inset-right)) padding-bottom: calc(var(--compact-nav-height) + 10px + env(safe-area-inset-bottom)) padding-left: max(8px, env(safe-area-inset-left))",要確認。線路外なら見えづらさの原因候補。
+5605,#pageTimer .railway-preview,!important,min-height: 0 !important,要確認。線路外なら見えづらさの原因候補。
+5609,#pageTimer .railway-track--horizontal,size-vh/%,"min-height: clamp(210px, 31dvh, 275px)",線路内表示だが、残り時間や通知は重なり確認が必要。
+5613,#pageTimer .railway-track--vertical,size-vh/%,"min-height: clamp(245px, 38dvh, 330px)",線路内表示だが、残り時間や通知は重なり確認が必要。
+5617,#pageTimer .railway-track--circle,size-vh/%,"width: min(72vw, 310px, 39dvh) height: min(72vw, 310px, 39dvh)",線路内表示だが、残り時間や通知は重なり確認が必要。
+5635,#pageTimer .route-time-panel,size-vh/%,max-width: calc(100% - 28px),線路内表示だが、残り時間や通知は重なり確認が必要。
+5664,#pageTimer .railway-track--circle,size-vh/%,"width: min(66vw, 245px, 35dvh) height: min(66vw, 245px, 35dvh)",線路内表示だが、残り時間や通知は重なり確認が必要。
+5702,#pageTimer .railway-track--circle,size-vh/%,"width: min(76vw, 325px, 40dvh) height: min(76vw, 325px, 40dvh)",線路内表示だが、残り時間や通知は重なり確認が必要。
+5711,.app-shell,size-vh/%,"width: min(100%, 820px)",要確認。線路外なら見えづらさの原因候補。
+5718,.mobile-bottom-nav,!important,"display: grid !important right: max(16px, env(safe-area-inset-right)) bottom: max(12px, env(safe-area-inset-bottom)) left: max(16px, env(safe-area-inset-left)) max-width: 680px margin: 0 auto",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+5758,#pageTimer .timer-actions-card,size-vh/%,"width: min(100%, 560px) margin: 0 auto",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+5771,.app-shell,size-vh/%,"width: min(100%, 1120px)",要確認。線路外なら見えづらさの原因候補。
+5795,#pageTimer .timer-actions-card,position / size-vh/%,grid-area: actions position: sticky top: 78px width: 100%,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+5827,.app-shell,size-vh/%,"width: min(100%, 1280px)",要確認。線路外なら見えづらさの原因候補。
+5851,#pageTimer .timer-actions-card,position,grid-area: actions position: sticky top: 86px,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+5952,.route-editor-actions,position,"position: sticky z-index: 5 bottom: calc(68px + env(safe-area-inset-bottom, 0px)) display: grid grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr) gap: 10px padding: 12px border: 1px solid var(--color-border)",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+5984,.route-editor-actions,size-vh/%,"bottom: 18px width: min(560px, 100%) margin-left: auto",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+6002,#pageEdit .summary-card,position,position: sticky top: 76px,要確認。線路外なら見えづらさの原因候補。
+6035,#pageTimer .railway-card,!important,"display: grid !important grid-template-rows: auto minmax(0, 1fr) auto !important min-height: 0 !important overflow: hidden !important",要確認。線路外なら見えづらさの原因候補。
+6047,#pageTimer .railway-preview,size-vh/% / !important,grid-row: 2 min-height: 0 !important height: 100% !important overflow: hidden !important,要確認。線路外なら見えづらさの原因候補。
+6064,"/* 全端末でタイマーページだけはビューポート内に収める。 */ body.page-timer-active, body.page-timer-active .app-shell",size-vh/%,height: 100dvh min-height: 100dvh overflow: hidden,要確認。線路外なら見えづらさの原因候補。
+6082,/* ヘッダーの赤帯はPCでも画面幅いっぱいにする。 */ body.page-timer-active .app-shell,size-vh/%,width: 100% max-width: none,要確認。線路外なら見えづらさの原因候補。
+6088,body.page-timer-active .main-content,size-vh/%,"width: min(100%, 1240px) margin-right: auto margin-left: auto",要確認。線路外なら見えづらさの原因候補。
+6103,.app-header,!important,"min-height: var(--ideal-header-height) !important height: var(--ideal-header-height) padding: max(7px, env(safe-area-inset-top))
+      max(7px, env(safe-area-inset-right))
+      7px
+      max(7px, env(safe-area-inset-left))",要確認。線路外なら見えづらさの原因候補。
+6125,body.page-timer-active .main-content,size-vh/%,"height: calc(100dvh - var(--ideal-header-height)) padding: 7px
+      max(7px, env(safe-area-inset-right))
+      calc(var(--ideal-bottom-nav-height) + 9px + env(safe-area-inset-bottom))
+      max(7px, env(safe-area-inset-left))",要確認。線路外なら見えづらさの原因候補。
+6133,#pageTimer.app-page.is-active,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) grid-template-rows: minmax(0, 1fr) auto gap: 8px height: 100%",要確認。線路外なら見えづらさの原因候補。
+6165,"#pageTimer .railway-track--horizontal, #pageTimer .railway-track--vertical",size-vh/% / !important,height: 100% !important min-height: 0 !important,線路内表示だが、残り時間や通知は重なり確認が必要。
+6176,"#pageTimer .railway-track--horizontal .track-bed, #pageTimer .railway-track--horizontal .track-segment-list",pos-%,top: 43% right: 27px left: 27px,線路内の進行表現として許容。ただし親高さに依存。
+6183,#pageTimer .railway-track--horizontal .station,pos-%,top: calc(43% - 10px),線路内の進行表現として許容。ただし親高さに依存。
+6187,#pageTimer .railway-track--horizontal .train-position,pos-%,top: calc(43% - 48px),線路内の進行表現として許容。ただし親高さに依存。
+6191,#pageTimer .railway-track--vertical,size-vh/%,"width: min(100%, 365px)",線路内表示だが、残り時間や通知は重なり確認が必要。
+6195,#pageTimer .railway-track--circle,size-vh/%,"width: min(76vw, 320px, 40dvh) height: min(76vw, 320px, 40dvh) margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+6213,#pageTimer .route-time-panel.is-double,size-vh/%,"min-width: min(184px, calc(100% - 24px))",線路内表示だが、残り時間や通知は重なり確認が必要。
+6310,.app-header,!important,min-height: var(--ideal-header-height) !important height: var(--ideal-header-height),要確認。線路外なら見えづらさの原因候補。
+6348,#pageTimer .railway-track--circle,size-vh/%,"width: min(70vw, 260px, 36dvh) height: min(70vw, 260px, 36dvh)",線路内表示だが、残り時間や通知は重なり確認が必要。
+6373,.app-header,!important,"min-height: var(--ideal-tablet-header-height) !important height: var(--ideal-tablet-header-height) padding-right: max(12px, env(safe-area-inset-right)) padding-left: max(12px, env(safe-area-inset-left))",要確認。線路外なら見えづらさの原因候補。
+6380,body.page-timer-active .main-content,size-vh/%,"height: calc(100dvh - var(--ideal-tablet-header-height)) padding: 10px
+      max(16px, env(safe-area-inset-right))
+      calc(var(--ideal-tablet-nav-height) + 12px + env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left))",要確認。線路外なら見えづらさの原因候補。
+6388,#pageTimer.app-page.is-active,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) grid-template-rows: minmax(0, 1fr) auto gap: 10px width: min(100%, 760px) height: 100% margin: 0 auto",要確認。線路外なら見えづらさの原因候補。
+6409,"#pageTimer .railway-track--horizontal, #pageTimer .railway-track--vertical",size-vh/% / !important,height: 100% !important min-height: 0 !important,線路内表示だが、残り時間や通知は重なり確認が必要。
+6415,"#pageTimer .railway-track--horizontal .track-bed, #pageTimer .railway-track--horizontal .track-segment-list",pos-%,top: 43%,線路内の進行表現として許容。ただし親高さに依存。
+6420,#pageTimer .railway-track--horizontal .station,pos-%,top: calc(43% - 10px),線路内の進行表現として許容。ただし親高さに依存。
+6424,#pageTimer .railway-track--horizontal .train-position,pos-%,top: calc(43% - 52px),線路内の進行表現として許容。ただし親高さに依存。
+6428,#pageTimer .railway-track--circle,size-vh/%,"width: min(58vw, 470px, 49dvh) height: min(58vw, 470px, 49dvh) margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+6449,#pageTimer .timer-actions-card,size-vh/%,"width: min(100%, 640px) margin: 0 auto padding: 0 border: 0 background: transparent box-shadow: none",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+6480,.mobile-bottom-nav,size-vh/% / !important,"display: grid !important right: max(18px, env(safe-area-inset-right)) bottom: max(8px, env(safe-area-inset-bottom)) left: max(18px, env(safe-area-inset-left)) width: min(720px, calc(100% - 36px)) min-height: var(--ideal-tablet-nav-height) height: var(--ideal-tablet-nav-height) margin: 0 auto",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+6504,.app-header,!important,min-height: var(--ideal-wide-header-height) !important height: var(--ideal-wide-header-height),要確認。線路外なら見えづらさの原因候補。
+6509,body.page-timer-active .main-content,size-vh/%,height: calc(100dvh - var(--ideal-wide-header-height)) padding: 14px 18px 16px,要確認。線路外なら見えづらさの原因候補。
+6514,#pageTimer.app-page.is-active,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) minmax(300px, 350px) grid-template-rows: minmax(0, 1fr) grid-template-areas: ""route actions"" gap: 18px width: 100% height: 100%",要確認。線路外なら見えづらさの原因候補。
+6524,#pageTimer .railway-card,size-vh/% / !important,"grid-area: route grid-template-rows: 44px minmax(0, 1fr) 64px !important gap: 9px height: 100% padding: 10px",要確認。線路外なら見えづらさの原因候補。
+6532,"#pageTimer .railway-track--horizontal, #pageTimer .railway-track--vertical",size-vh/% / !important,height: 100% !important min-height: 0 !important,線路内表示だが、残り時間や通知は重なり確認が必要。
+6538,#pageTimer .railway-track--circle,size-vh/%,"width: min(44vw, 460px, 60dvh) height: min(44vw, 460px, 60dvh) margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+6554,#pageTimer .timer-actions-card,size-vh/%,grid-area: actions position: static align-self: start width: 100% padding: 12px,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+6575,.app-header,!important,min-height: var(--ideal-pc-header-height) !important height: var(--ideal-pc-header-height),要確認。線路外なら見えづらさの原因候補。
+6580,body.page-timer-active .main-content,size-vh/%,height: calc(100dvh - var(--ideal-pc-header-height)) padding: 18px 24px 20px,要確認。線路外なら見えづらさの原因候補。
+6585,#pageTimer.app-page.is-active,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) 380px grid-template-rows: minmax(0, 1fr) grid-template-areas: ""route actions"" gap: 24px width: min(100%, 1180px) height: 100% margin: 0 auto",要確認。線路外なら見えづらさの原因候補。
+6596,#pageTimer .railway-card,size-vh/% / !important,"grid-area: route grid-template-rows: 46px minmax(0, 1fr) 66px !important gap: 10px height: 100% padding: 12px",要確認。線路外なら見えづらさの原因候補。
+6604,"#pageTimer .railway-track--horizontal, #pageTimer .railway-track--vertical",size-vh/% / !important,height: 100% !important min-height: 0 !important,線路内表示だが、残り時間や通知は重なり確認が必要。
+6610,#pageTimer .railway-track--circle,size-vh/%,"width: min(38vw, 500px, 62dvh) height: min(38vw, 500px, 62dvh) margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+6626,#pageTimer .timer-actions-card,size-vh/%,grid-area: actions position: static align-self: start width: 100% padding: 12px,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+6643,"#pageTimer .railway-track--horizontal .track-bed, #pageTimer .railway-track--horizontal .track-segment-list",pos-% / !important,"top: var(--rail-y, 43%) !important",線路内の進行表現として許容。ただし親高さに依存。
+6647,#pageTimer .railway-track--horizontal .station,pos-% / !important,"top: calc(var(--rail-y, 43%) - 10px) !important",線路内の進行表現として許容。ただし親高さに依存。
+6651,#pageTimer .railway-track--horizontal .train-position,pos-% / !important,"top: calc(var(--rail-y, 43%) - 48px) !important",線路内の進行表現として許容。ただし親高さに依存。
+6663,#pageTimer .railway-card,size-vh/% / !important,height: 100% !important align-self: stretch !important,要確認。線路外なら見えづらさの原因候補。
+6941,.active-train-add-button,size-vh/%,display: inline-flex align-items: center justify-content: center gap: 8px min-height: 46px width: 100% padding: 9px 12px border: 1px solid #e6002d,要確認。線路外なら見えづらさの原因候補。
+7004,.active-train-progress > span,size-vh/%,"display: block min-width: 2px height: 100% border-radius: inherit background: linear-gradient(90deg, #e6002d, #0877bd) transition: width 180ms linear",要確認。線路外なら見えづらさの原因候補。
+7076,.create-train-panel,position / size-vh/%,"position: fixed z-index: 102 right: 0 bottom: 0 left: 0 max-height: min(94vh, 860px) padding: 10px 18px calc(22px + var(--safe-bottom)) overflow-y: auto",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+7192,.create-train-actions,position,"position: sticky bottom: 0 z-index: 1 margin: 0 -4px padding: 12px 4px 2px border-top: 1px solid rgba(226, 229, 232, 0.86) background: linear-gradient(180deg, rgba(255,255,255,0.75), #ffffff 38%)",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+7207,.create-train-panel,size-vh/%,"right: max(24px, calc((100vw - 780px) / 2)) left: max(24px, calc((100vw - 780px) / 2)) border-radius: 26px bottom: 24px max-height: min(88vh, 820px)",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+7377,.child-lock-overlay,position,"position: fixed inset: 0 z-index: 1200 display: flex align-items: center justify-content: center padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)) background: rgba(255, 255, 255, 0.68)",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+7394,.child-lock-card,size-vh/%,"width: min(100%, 390px) border: 1px solid rgba(144, 92, 102, 0.22) border-radius: 28px background: rgba(255, 255, 255, 0.94) padding: 22px text-align: center box-shadow: 0 22px 55px rgba(73, 50, 58, 0.18)",要確認。線路外なら見えづらさの原因候補。
+7431,.unlock-hold-button,size-vh/%,"width: 100% min-height: 64px margin-top: 18px border: none border-radius: 20px background: linear-gradient(135deg, #e6002d, #ff6b7e) color: #fff font: inherit",要確認。線路外なら見えづらさの原因候補。
+7451,.unlock-progress-track,size-vh/%,"display: block width: calc(100% - 34px) height: 7px margin: 9px auto 0 overflow: hidden border-radius: 999px background: rgba(255, 255, 255, 0.45)",要確認。線路外なら見えづらさの原因候補。
+7461,.unlock-progress-bar,size-vh/%,display: block width: 0% height: 100% border-radius: inherit background: #fff,要確認。線路外なら見えづらさの原因候補。
+7493,/* ========================================================= Stage 25: HTML表示順の安定化 - タイマー画面の可視DOM順を 線路切替 → 線路 → 現在区間/次の駅 → 操作 → 時間追加 に統一 - 非表示データソースはレイアウトに参加させない ========================================================= */ #pageTimer .timer-route-heading-source,position / !important,"position: absolute !important width: 1px !important height: 1px !important padding: 0 !important overflow: hidden !important clip: rect(0, 0, 0, 0) !important white-space: nowrap !important border: 0 !important",要確認。線路外なら見えづらさの原因候補。
+7513,#pageTimer .active-train-summary--timer-page,size-vh/%,justify-self: center max-width: 100% margin: 6px auto 0,要確認。線路外なら見えづらさの原因候補。
+7554,/* ========================================================= Stage 26：線路エリアだけ％配置に限定 - 線路表示領域を独立した stage として固定 - 残り時間カードは通常レイアウトに戻し、top/left/% 依存をなくす - ％指定は駅・電車・進行バーなど線路内の進行表現だけに限定 ========================================================= */ .railway-stage,size-vh/%,--rail-x-inset: 34px --rail-y: 96px --rail-y-start: 36px --rail-x-total-inset: 68px --rail-y-total-inset: 72px --rail-x: 35% display: grid gap: 12px,要確認。線路外なら見えづらさの原因候補。
+7577,.railway-stage .railway-track,size-vh/%,min-width: 0 max-width: 100%,線路内表示だが、残り時間や通知は重なり確認が必要。
+7593,.railway-stage.railway-preview--horizontal .railway-track--horizontal,size-vh/%,grid-row: 2 height: 100% min-height: 210px padding-right: var(--rail-x-inset) padding-left: var(--rail-x-inset),線路内表示だが、残り時間や通知は重なり確認が必要。
+7608,.railway-stage.railway-preview--vertical .railway-track--vertical,size-vh/%,grid-column: 1 grid-row: 1 height: 100% min-height: 320px,線路内表示だが、残り時間や通知は重なり確認が必要。
+7622,/* 円形線路：線路と残り時間を同じ grid area に置き、中央寄せで安定させる */ .railway-stage.railway-preview--circle,size-vh/%,"grid-template-areas: ""stage"" place-items: center aspect-ratio: 1 / 1 min-height: clamp(320px, 52dvh, 560px) max-height: min(610px, calc(100dvh - 210px))",要確認。線路外なら見えづらさの原因候補。
+7644,"/* 残り時間カードは線路外または円中央の通常レイアウト要素として扱う */ .railway-stage .route-time-panel, .railway-preview[data-track-shape=""horizontal""] .route-time-panel, .railway-preview[data-track-shape=""vertical""] .route-time-panel, .railway-preview[data-track-shape=""circle""] .route-time-panel",size-vh/%,"position: relative top: auto left: auto z-index: 14 max-width: min(100%, 230px) transform: none",線路内表示だが、残り時間や通知は重なり確認が必要。
+7689,/* タイマー画面では線路領域を明確に独立させる */ #pageTimer .railway-stage,size-vh/% / !important,"min-height: clamp(320px, 54dvh, 640px) !important height: auto overflow: hidden",要確認。線路外なら見えづらさの原因候補。
+7705,#pageTimer .railway-stage.railway-preview--circle,size-vh/% / !important,"min-height: clamp(315px, 52dvh, 570px) !important",要確認。線路外なら見えづらさの原因候補。
+7717,#pageTimer .railway-stage .railway-track--circle,size-vh/%,"width: min(72vw, 440px, 100%) height: min(72vw, 440px, 100%) min-width: 260px min-height: 260px",線路内表示だが、残り時間や通知は重なり確認が必要。
+7727,".railway-stage, #pageTimer .railway-stage",size-vh/% / !important,"min-height: clamp(300px, 48dvh, 430px) !important max-height: min(470px, calc(100dvh - 205px)) aspect-ratio: auto gap: 8px padding: 6px 7px",要確認。線路外なら見えづらさの原因候補。
+7767,".railway-stage.railway-preview--circle, #pageTimer .railway-stage.railway-preview--circle",size-vh/% / !important,"min-height: clamp(300px, 45dvh, 390px) !important aspect-ratio: 1 / 1",要確認。線路外なら見えづらさの原因候補。
+7781,#pageTimer .railway-stage .railway-track--circle,size-vh/%,"width: min(70vw, 300px, 36dvh) height: min(70vw, 300px, 36dvh) min-width: 230px min-height: 230px",線路内表示だが、残り時間や通知は重なり確認が必要。
+7798,#pageTimer .railway-stage,size-vh/% / !important,"min-height: clamp(430px, 54dvh, 560px) !important max-height: 620px",要確認。線路外なら見えづらさの原因候補。
+7822,#pageTimer .railway-stage,size-vh/% / !important,"min-height: clamp(500px, 64dvh, 690px) !important max-height: 720px",要確認。線路外なら見えづらさの原因候補。
+7843,/* Stage 26 最終上書き：旧メディアクエリの％指定を線路内部変数へ集約 */ #pageTimer .railway-stage .route-time-panel,!important,position: relative !important top: auto !important left: auto !important transform: none !important,線路内表示だが、残り時間や通知は重なり確認が必要。
+7851,"#pageTimer .railway-stage .railway-track--horizontal .track-bed, #pageTimer .railway-stage .railway-track--horizontal .track-segment-list",!important,top: var(--rail-y) !important right: var(--rail-x-inset) !important left: var(--rail-x-inset) !important,線路内の進行表現として許容。ただし親高さに依存。
+7858,#pageTimer .railway-stage .railway-track--horizontal .station,!important,top: calc(var(--rail-y) - 10px) !important,線路内の進行表現として許容。ただし親高さに依存。
+7862,#pageTimer .railway-stage .railway-track--horizontal .train-position,!important,top: calc(var(--rail-y) - 48px) !important,線路内の進行表現として許容。ただし親高さに依存。
+7866,"#pageTimer .railway-stage .railway-track--vertical .track-bed, #pageTimer .railway-stage .railway-track--vertical .track-segment-list",!important,top: var(--rail-y-start) !important bottom: var(--rail-y-start) !important left: var(--rail-x) !important,線路内の進行表現として許容。ただし親高さに依存。
+7873,"#pageTimer .railway-stage .railway-track--vertical .station, #pageTimer .railway-stage .railway-track--vertical .train-position",!important,left: var(--rail-x) !important,線路内の進行表現として許容。ただし親高さに依存。
+7895,#pageTimer .journey-status-grid,!important,grid-row: 3 position: relative z-index: 2 height: auto !important min-height: 0 margin: 0 !important,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+7912,#pageTimer .railway-stage,size-vh/% / !important,"min-height: clamp(460px, 57dvh, 640px) !important max-height: 660px",要確認。線路外なら見えづらさの原因候補。
+7925,/* Stage 26 最終上書き：旧3行グリッドを4行に戻し、状態カードを線路外へ固定 */ #pageTimer .railway-card,!important,display: grid !important grid-template-rows: auto auto auto auto !important gap: 10px !important height: auto !important min-height: 0 !important overflow: visible !important,要確認。線路外なら見えづらさの原因候補。
+8006,#pageTimer .primary-controls,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) gap: 8px width: 100%",要確認。線路外なら見えづらさの原因候補。
+8018,"#pageTimer .control-button, #pageTimer .quick-add-button",size-vh/%,position: static width: 100% min-width: 0 min-height: 48px white-space: normal overflow-wrap: anywhere text-align: center line-height: 1.25,要確認。線路外なら見えづらさの原因候補。
+8043,#pageTimer .quick-add-controls,size-vh/%,"display: grid grid-template-columns: repeat(2, minmax(0, 1fr)) gap: 8px width: 100% margin: 0",要確認。線路外なら見えづらさの原因候補。
+8176,".quick-routes-card, .active-trains-card, .preset-card, .route-editor-card, .page-intro-card, .summary-card, .settings-overview-card, .guide-card, .about-card",size-vh/%,width: 100% max-width: 100%,要確認。線路外なら見えづらさの原因候補。
+8364,".settings-panel--preferences .form-field select, .settings-panel--preferences .form-field input, #pageEdit .form-field select, #pageEdit .form-field input, #pagePresets .form-field input",size-vh/%,width: 100% max-width: 100%,固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+8475,#pageEdit .route-editor-actions,position,position: sticky bottom: 18px,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+8554,"html, body",size-vh/%,width: 100% max-width: 100% min-height: 100dvh overflow-x: hidden,要確認。線路外なら見えづらさの原因候補。
+8562,body.page-timer-active,size-vh/%,min-height: 100dvh height: auto overflow-x: hidden overflow-y: auto,要確認。線路外なら見えづらさの原因候補。
+8569,body.page-timer-active .app-shell,size-vh/%,min-height: 100dvh height: auto overflow: visible,要確認。線路外なら見えづらさの原因候補。
+8575,".app-shell, .app-header, .main-content, .app-page, .railway-card, .timer-actions-card, .mobile-bottom-nav",size-vh/%,max-width: 100%,固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+8609,"body.page-timer-active .main-content, .main-content",size-vh/%,"display: block width: 100% min-height: calc(100dvh - var(--smartphone-header-height)) height: auto padding:
+      var(--smartphone-page-gap)
+      var(--smartphone-page-inline)
+      calc(var(--smartphone-nav-height) + 24px + var(--safe-bottom)) overflow-x: hidden overflow-y: visible",要確認。線路外なら見えづらさの原因候補。
+8623,.app-page.is-active,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) gap: var(--smartphone-page-gap) width: 100% min-width: 0",要確認。線路外なら見えづらさの原因候補。
+8642,#pageTimer .railway-card,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) grid-template-rows: auto auto auto auto gap: 8px width: 100% min-width: 0 padding: clamp(10px, 2.8vw, 13px) overflow: visible",要確認。線路外なら見えづらさの原因候補。
+8672,#pageTimer .railway-preview,size-vh/%,"order: 2 display: grid width: 100% min-width: 0 max-width: 100% height: auto overflow: hidden padding: clamp(6px, 2vw, 10px)",要確認。線路外なら見えづらさの原因候補。
+8683,#pageTimer .railway-preview--horizontal,size-vh/% / !important,"min-height: clamp(286px, 42dvh, 370px) !important aspect-ratio: 1 / 0.86",要確認。線路外なら見えづらさの原因候補。
+8688,#pageTimer .railway-preview--vertical,size-vh/% / !important,"min-height: clamp(318px, 48dvh, 430px) !important aspect-ratio: 1 / 1.06",要確認。線路外なら見えづらさの原因候補。
+8693,#pageTimer .railway-preview--circle,size-vh/% / !important,"min-height: clamp(286px, 42dvh, 380px) !important aspect-ratio: 1 / 0.92 place-items: center",要確認。線路外なら見えづらさの原因候補。
+8699,#pageTimer .railway-track--horizontal,size-vh/%,"width: 100% min-width: 0 min-height: 230px height: auto padding-right: clamp(20px, 7vw, 34px) padding-left: clamp(20px, 7vw, 34px)",線路内表示だが、残り時間や通知は重なり確認が必要。
+8708,#pageTimer .railway-track--vertical,size-vh/%,"width: min(100%, 390px) min-width: 0 min-height: 300px height: auto margin-inline: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+8716,#pageTimer .railway-track--circle,size-vh/%,"width: min(78vw, 330px) height: min(78vw, 330px) min-width: 250px min-height: 250px max-width: 100% max-height: 100% margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+8732,#pageTimer .journey-status-grid,size-vh/%,"order: 3 display: grid grid-template-columns: repeat(2, minmax(0, 1fr)) gap: 8px width: 100% min-width: 0 margin: 0",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+8759,#pageTimer .active-train-summary--timer-page,size-vh/%,order: 4 width: fit-content max-width: 100% margin: 0 auto padding: 4px 10px font-size: 0.68rem line-height: 1.35,要確認。線路外なら見えづらさの原因候補。
+8775,#pageTimer .timer-actions-card,size-vh/%,"display: block width: 100% min-width: 0 padding: clamp(10px, 2.8vw, 13px) border: 1px solid var(--color-border) border-radius: 14px background: #ffffff box-shadow: var(--shadow-card)",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+8786,#pageTimer .timer-actions-layout,size-vh/%,"display: grid grid-template-columns: minmax(0, 1fr) gap: 9px width: 100%",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+8804,"#pageTimer .primary-controls, #pageTimer .quick-add-controls",size-vh/%,position: static display: grid width: 100% min-width: 0 transform: none,要確認。線路外なら見えづらさの原因候補。
+8829,"#pageTimer .control-button, #pageTimer .quick-add-button",size-vh/%,width: 100% min-width: 0 min-height: 48px padding: 10px 11px white-space: normal overflow-wrap: anywhere line-height: 1.25,要確認。線路外なら見えづらさの原因候補。
+8854,.mobile-bottom-nav,position,"position: fixed z-index: 70 right: max(8px, env(safe-area-inset-right, 0px)) bottom: max(8px, env(safe-area-inset-bottom, 0px)) left: max(8px, env(safe-area-inset-left, 0px)) min-height: var(--smartphone-nav-height) padding: 7px",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+8909,#pageTimer .railway-preview--horizontal,!important,min-height: 264px !important,要確認。線路外なら見えづらさの原因候補。
+8913,#pageTimer .railway-preview--vertical,!important,min-height: 296px !important,要確認。線路外なら見えづらさの原因候補。
+8917,#pageTimer .railway-preview--circle,!important,min-height: 264px !important,要確認。線路外なら見えづらさの原因候補。
+8970,#pageTimer .railway-preview--horizontal,size-vh/% / !important,"min-height: clamp(238px, 32dvh, 316px) !important",要確認。線路外なら見えづらさの原因候補。
+8973,#pageTimer .railway-preview--vertical,size-vh/% / !important,"min-height: clamp(258px, 36dvh, 340px) !important",要確認。線路外なら見えづらさの原因候補。
+8977,#pageTimer .railway-preview--circle,size-vh/% / !important,"min-height: clamp(238px, 32dvh, 316px) !important",要確認。線路外なら見えづらさの原因候補。
+8999,"#pageTimer .railway-preview--horizontal, #pageTimer .railway-preview--circle",!important,min-height: 226px !important,要確認。線路外なら見えづらさの原因候補。
+9003,#pageTimer .railway-preview--vertical,!important,min-height: 252px !important,要確認。線路外なら見えづらさの原因候補。
+9026,"#pageTimer .railway-preview--horizontal, #pageTimer .railway-preview--circle",!important,height: 238px !important min-height: 238px !important aspect-ratio: auto,要確認。線路外なら見えづらさの原因候補。
+9032,#pageTimer .railway-preview--vertical,!important,height: 260px !important min-height: 260px !important aspect-ratio: auto,要確認。線路外なら見えづらさの原因候補。
+9054,#pageTimer .railway-stage.railway-preview--horizontal,size-vh/% / !important,"height: clamp(238px, 32dvh, 316px) !important min-height: clamp(238px, 32dvh, 316px) !important max-height: clamp(238px, 32dvh, 316px) !important aspect-ratio: auto !important",要確認。線路外なら見えづらさの原因候補。
+9060,#pageTimer .railway-stage.railway-preview--vertical,size-vh/% / !important,"height: clamp(258px, 36dvh, 340px) !important min-height: clamp(258px, 36dvh, 340px) !important max-height: clamp(258px, 36dvh, 340px) !important aspect-ratio: auto !important",要確認。線路外なら見えづらさの原因候補。
+9067,#pageTimer .railway-stage.railway-preview--circle,size-vh/% / !important,"height: clamp(238px, 32dvh, 316px) !important min-height: clamp(238px, 32dvh, 316px) !important max-height: clamp(238px, 32dvh, 316px) !important aspect-ratio: auto !important",要確認。線路外なら見えづらさの原因候補。
+9074,#pageTimer .railway-stage.railway-preview--circle .railway-track--circle,size-vh/% / !important,"width: min(64vw, 252px, 30dvh) !important height: min(64vw, 252px, 30dvh) !important min-width: 204px !important min-height: 204px !important",線路内表示だが、残り時間や通知は重なり確認が必要。
+9084,"#pageTimer .railway-stage.railway-preview--horizontal, #pageTimer .railway-stage.railway-preview--circle",!important,height: 238px !important min-height: 238px !important max-height: 238px !important,要確認。線路外なら見えづらさの原因候補。
+9090,#pageTimer .railway-stage.railway-preview--vertical,!important,height: 260px !important min-height: 260px !important max-height: 260px !important,要確認。線路外なら見えづらさの原因候補。
+9096,#pageTimer .railway-stage.railway-preview--circle .railway-track--circle,!important,"width: min(62vw, 230px) !important height: min(62vw, 230px) !important min-width: 196px !important min-height: 196px !important",線路内表示だが、残り時間や通知は重なり確認が必要。
+9119,"html, body",size-vh/%,width: 100% max-width: 100% min-height: 100dvh overflow-x: hidden,要確認。線路外なら見えづらさの原因候補。
+9127,.app-shell,size-vh/%,width: 100% max-width: 100% min-height: 100dvh,要確認。線路外なら見えづらさの原因候補。
+9157,.main-content,size-vh/%,"width: 100% max-width: var(--tablet-portrait-content-max) min-height: calc(100dvh - var(--tablet-portrait-header-height)) margin-inline: auto padding: 18px 22px calc(var(--tablet-portrait-nav-height) + 34px + env(safe-area-inset-bottom, 0px)) overflow-x: hidden",要確認。線路外なら見えづらさの原因候補。
+9166,".app-page.is-active, #pageTimer.app-page.is-active, #pageEdit.app-page.is-active, #pagePresets.app-page.is-active, #pageSettings.app-page.is-active",size-vh/% / !important,"display: grid grid-template-columns: minmax(0, 1fr) !important grid-template-areas: none !important gap: var(--tablet-portrait-gap) width: 100% max-width: var(--tablet-portrait-content-max) margin-inline: auto align-items: start",要確認。線路外なら見えづらさの原因候補。
+9181,"#pageTimer .railway-card, #pageTimer .timer-actions-card, #pageEdit > *, #pagePresets > *, #pageSettings > *",size-vh/% / !important,grid-column: 1 / -1 !important width: 100% min-width: 0 max-width: 100% position: static,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+9211,#pageTimer .railway-preview,size-vh/%,width: 100% max-width: 760px margin-inline: auto padding: 14px,要確認。線路外なら見えづらさの原因候補。
+9218,"#pageTimer .railway-stage.railway-preview--horizontal, #pageTimer .railway-preview--horizontal",size-vh/% / !important,"height: clamp(430px, 46dvh, 520px) !important min-height: clamp(430px, 46dvh, 520px) !important max-height: clamp(430px, 46dvh, 520px) !important aspect-ratio: auto !important",要確認。線路外なら見えづらさの原因候補。
+9226,"#pageTimer .railway-stage.railway-preview--vertical, #pageTimer .railway-preview--vertical",size-vh/% / !important,"height: clamp(480px, 52dvh, 590px) !important min-height: clamp(480px, 52dvh, 590px) !important max-height: clamp(480px, 52dvh, 590px) !important aspect-ratio: auto !important",要確認。線路外なら見えづらさの原因候補。
+9234,"#pageTimer .railway-stage.railway-preview--circle, #pageTimer .railway-preview--circle",size-vh/% / !important,"height: clamp(430px, 46dvh, 520px) !important min-height: clamp(430px, 46dvh, 520px) !important max-height: clamp(430px, 46dvh, 520px) !important aspect-ratio: auto !important place-items: center",要確認。線路外なら見えづらさの原因候補。
+9249,#pageTimer .railway-track--vertical,size-vh/%,"width: min(100%, 470px) min-height: 450px margin-inline: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+9255,"#pageTimer .railway-stage.railway-preview--circle .railway-track--circle, #pageTimer .railway-track--circle",size-vh/% / !important,"width: min(58vw, 430px) !important height: min(58vw, 430px) !important min-width: 350px !important min-height: 350px !important max-width: 100% max-height: 100% margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+9266,#pageTimer .route-time-panel,size-vh/%,"max-width: min(340px, 72%) min-height: 92px padding: 12px 16px",線路内表示だが、残り時間や通知は重なり確認が必要。
+9284,#pageTimer .timer-actions-card,size-vh/%,"width: min(100%, var(--tablet-portrait-action-max)) max-width: var(--tablet-portrait-action-max) margin-inline: auto padding: 18px border-radius: 20px",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+9384,#pageEdit .route-editor-actions,position,"position: sticky bottom: calc(var(--tablet-portrait-nav-height) + 14px + env(safe-area-inset-bottom, 0px)) grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr) gap: 12px max-width: var(--tablet-portrait-action-max) margin-inline: auto",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+9398,".settings-panel--preferences, .create-train-panel",size-vh/%,"width: min(92vw, 700px) max-height: min(86dvh, 860px)",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+9409,.mobile-bottom-nav,!important,"display: grid !important right: max(28px, env(safe-area-inset-right, 0px)) bottom: max(14px, env(safe-area-inset-bottom, 0px)) left: max(28px, env(safe-area-inset-left, 0px)) max-width: 720px min-height: var(--tablet-portrait-nav-height) margin-inline: auto padding: 8px",固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+9448,"#pageTimer .railway-stage.railway-preview--horizontal, #pageTimer .railway-stage.railway-preview--circle",size-vh/% / !important,"height: clamp(390px, 44dvh, 470px) !important min-height: clamp(390px, 44dvh, 470px) !important max-height: clamp(390px, 44dvh, 470px) !important",要確認。線路外なら見えづらさの原因候補。
+9455,#pageTimer .railway-stage.railway-preview--vertical,size-vh/% / !important,"height: clamp(430px, 50dvh, 520px) !important min-height: clamp(430px, 50dvh, 520px) !important max-height: clamp(430px, 50dvh, 520px) !important",要確認。線路外なら見えづらさの原因候補。
+9461,"#pageTimer .railway-stage.railway-preview--circle .railway-track--circle, #pageTimer .railway-track--circle",!important,"width: min(62vw, 370px) !important height: min(62vw, 370px) !important min-width: 310px !important min-height: 310px !important",線路内表示だが、残り時間や通知は重なり確認が必要。
+9479,"html, body",size-vh/%,width: 100% max-width: 100% overflow-x: hidden,要確認。線路外なら見えづらさの原因候補。
+9485,.app-shell,size-vh/%,width: 100% max-width: 100% min-height: 100dvh,要確認。線路外なら見えづらさの原因候補。
+9491,.main-content,size-vh/%,width: 100% max-width: 100% margin-inline: auto overflow-x: hidden,要確認。線路外なら見えづらさの原因候補。
+9498,body.page-timer-active .main-content,size-vh/%,"min-height: calc(100dvh - var(--ideal-wide-header-height, 64px)) height: auto",要確認。線路外なら見えづらさの原因候補。
+9507,#pageTimer.app-page.is-active,size-vh/% / !important,"display: grid !important grid-template-columns: minmax(0, 1fr) minmax(320px, 380px) grid-template-areas: ""route actions"" gap: clamp(18px, 2.2vw, 28px) align-items: start width: min(100%, 1180px) height: auto margin-inline: auto",要確認。線路外なら見えづらさの原因候補。
+9518,#pageTimer .railway-card,!important,"grid-area: route !important min-width: 0 height: auto min-height: 0 display: grid grid-template-rows: auto minmax(0, auto) auto auto gap: 12px",要確認。線路外なら見えづらさの原因候補。
+9528,#pageTimer .timer-actions-card,position / size-vh/% / !important,"grid-area: actions !important position: sticky !important top: calc(var(--ideal-wide-header-height, 64px) + 16px) display: grid gap: 12px align-self: start width: 100% max-width: 100%",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+9542,#pageTimer .railway-preview,size-vh/%,width: 100% min-width: 0 max-width: 100% margin-inline: auto,要確認。線路外なら見えづらさの原因候補。
+9549,"#pageTimer .railway-stage.railway-preview--horizontal, #pageTimer .railway-preview--horizontal",size-vh/% / !important,"min-height: clamp(420px, 58dvh, 560px) !important max-height: none !important aspect-ratio: 16 / 9",要確認。線路外なら見えづらさの原因候補。
+9556,"#pageTimer .railway-stage.railway-preview--vertical, #pageTimer .railway-preview--vertical",size-vh/% / !important,"min-height: clamp(500px, 66dvh, 650px) !important max-height: none !important aspect-ratio: 4 / 5",要確認。線路外なら見えづらさの原因候補。
+9563,"#pageTimer .railway-stage.railway-preview--circle, #pageTimer .railway-preview--circle",size-vh/% / !important,"min-height: clamp(440px, 58dvh, 580px) !important max-height: none !important display: grid place-items: center aspect-ratio: 1 / 1",要確認。線路外なら見えづらさの原因候補。
+9572,#pageTimer .railway-track--circle,size-vh/% / !important,"width: min(42vw, 500px, 62dvh) !important height: min(42vw, 500px, 62dvh) !important margin: auto",線路内表示だが、残り時間や通知は重なり確認が必要。
+9578,#pageTimer .timer-actions-card .journey-status-grid,size-vh/%,"grid-template-columns: minmax(0, 1fr) gap: 10px width: 100% max-width: 100% margin: 0 height: auto",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+9598,#pageTimer .timer-actions-layout,size-vh/%,display: grid gap: 12px width: 100% margin: 0,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+9624,"#pageTimer .control-button, #pageTimer .quick-add-button",size-vh/%,min-height: 52px width: 100% min-width: 0 white-space: normal,要確認。線路外なら見えづらさの原因候補。
+9632,"#pageTimer .completion-panel, #pageTimer .time-addition-history-card",size-vh/%,width: 100% min-width: 0,要確認。線路外なら見えづらさの原因候補。
+9638,"#pageTimer .journey-progress, #pageTimer .segment-overview",size-vh/%,width: 100% min-width: 0,要確認。線路外なら見えづらさの原因候補。
+9644,"#pagePresets.app-page.is-active, #pageEdit.app-page.is-active, #pageSettings.app-page.is-active",size-vh/%,"width: min(100%, 1180px) max-width: 1180px margin-inline: auto align-items: start",要確認。線路外なら見えづらさの原因候補。
+9653,"#pagePresets .quick-route-button, #pagePresets .active-train-add-button, #pagePresets .active-train-button, #pagePresets .preset-action-button, #pagePresets .data-action-button, #pageEdit .apply-button, #pageEdit .cancel-button, #pageSettings .apply-button",size-vh/%,min-height: 50px width: 100% max-width: 100% white-space: normal,要確認。線路外なら見えづらさの原因候補。
+9667,"#pagePresets input, #pageEdit input, #pageEdit select, #pageSettings input, #pageSettings select, .settings-panel input, .settings-panel select",size-vh/%,width: 100% max-width: 100% min-width: 0,固定UI・モーダル系。端末高さ、safe-area、キーボードで見切れやすい。
+9679,#pagePresets .data-management-card,size-vh/%,"width: 100% max-width: 100% padding: 18px border: 1px solid rgba(213, 228, 239, .92) border-radius: var(--radius-large) background: var(--color-surface) box-shadow: var(--shadow-card)",要確認。線路外なら見えづらさの原因候補。
+9704,#pageEdit .route-editor-actions,position,"position: sticky bottom: 18px display: grid grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr) gap: 12px padding: 12px border: 1px solid rgba(213, 228, 239, .92) border-radius: 16px",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+9734,#pageTimer.app-page.is-active,size-vh/%,"grid-template-columns: minmax(0, 1fr) minmax(310px, 360px) width: min(100%, 1120px)",要確認。線路外なら見えづらさの原因候補。
+9835,body.page-timer-active .main-content,size-vh/%,"min-height: calc(100dvh - var(--ideal-pc-header-height, 64px))",要確認。線路外なら見えづらさの原因候補。
+9839,#pageTimer.app-page.is-active,size-vh/%,"grid-template-columns: minmax(0, 1fr) 400px width: min(100%, var(--stage33-pc-content-max)) gap: 28px",要確認。線路外なら見えづらさの原因候補。
+9850,"#pageTimer .railway-stage.railway-preview--horizontal, #pageTimer .railway-preview--horizontal",size-vh/% / !important,"min-height: clamp(500px, 62dvh, 660px) !important",要確認。線路外なら見えづらさの原因候補。
+9855,"#pageTimer .railway-stage.railway-preview--vertical, #pageTimer .railway-preview--vertical",size-vh/% / !important,"min-height: clamp(560px, 68dvh, 720px) !important",要確認。線路外なら見えづらさの原因候補。
+9860,"#pageTimer .railway-stage.railway-preview--circle, #pageTimer .railway-preview--circle",size-vh/% / !important,"min-height: clamp(500px, 62dvh, 660px) !important",要確認。線路外なら見えづらさの原因候補。
+9865,"#pagePresets.app-page.is-active, #pageEdit.app-page.is-active, #pageSettings.app-page.is-active",size-vh/%,"width: min(100%, var(--stage33-pc-content-max)) max-width: var(--stage33-pc-content-max)",要確認。線路外なら見えづらさの原因候補。
+9922,#pageEdit .summary-card,position,"grid-column: 1 position: sticky top: calc(var(--ideal-pc-header-height, 64px) + 18px)",要確認。線路外なら見えづらさの原因候補。
+9985,body,size-vh/%,min-height: 100dvh,要確認。線路外なら見えづらさの原因候補。
+9989,"button, [role=""button""], input, select, textarea, .mobile-nav-item, .menu-item, .preset-action-button, .data-action-button, .quick-route-button, .apply-button, .cancel-button, .outline-button, .secondary-button",size-vh/%,max-width: 100%,要確認。線路外なら見えづらさの原因候補。
+10165,.child-lock-card,size-vh/%,"max-height: calc(100dvh - max(36px, env(safe-area-inset-top)) - max(36px, env(safe-area-inset-bottom))) overflow: auto",要確認。線路外なら見えづらさの原因候補。
+10185,"/* ========================================================= Stage 35: My設定・経路編集・設定ページの最終整理 - 管理画面を端末幅ごとに読みやすいカード配置へ整理 - 危険操作を下部に控えめに配置 - 入力欄・操作ボタンの横はみ出しを抑制 ========================================================= */ #pagePresets.app-page.is-active, #pageEdit.app-page.is-active, #pageSettings.app-page.is-active",size-vh/%,"width: 100% max-width: 1180px margin-inline: auto align-content: start gap: clamp(12px, 2vw, 20px)",要確認。線路外なら見えづらさの原因候補。
+10207,"#pagePresets input, #pagePresets select, #pagePresets textarea, #pageEdit input, #pageEdit select, #pageEdit textarea, #pageSettings input, #pageSettings select, #pageSettings textarea",size-vh/%,width: 100% max-width: 100%,要確認。線路外なら見えづらさの原因候補。
+10220,"#pagePresets .quick-routes-card, #pagePresets .active-trains-card, #pagePresets .preset-card, #pagePresets .data-management-card, #pageEdit .page-intro-card, #pageEdit .summary-card, #pageEdit .route-editor-card, #pageSettings .page-intro-card, #pageSettings .settings-overview-card, #pageSettings .guide-card, #pageSettings .about-card",size-vh/%,width: 100% max-width: 100% overflow-wrap: anywhere,要確認。線路外なら見えづらさの原因候補。
+10609,#pageEdit .route-editor-actions,position,"grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr) position: sticky bottom: 18px z-index: 2",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+10688,body.page-timer-active .main-content,size-vh/% / !important,"height: auto !important min-height: calc(100dvh - var(--tablet-portrait-header-height, 68px)) !important overflow-y: auto !important padding-bottom: calc(var(--tablet-portrait-nav-height, 76px) + 48px + env(safe-area-inset-bottom, 0px)) !important",要確認。線路外なら見えづらさの原因候補。
+10694,#pageTimer.app-page.is-active,!important,height: auto !important min-height: 0 !important grid-template-rows: auto auto !important align-content: start !important gap: 18px !important,要確認。線路外なら見えづらさの原因候補。
+10708,#pageTimer .timer-actions-card,!important,margin-top: 0 !important margin-bottom: 0 !important,操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+10716,#pageTimer .timer-actions-card,!important,"margin-bottom: calc(var(--tablet-portrait-nav-height, 76px) + 20px + env(safe-area-inset-bottom, 0px)) !important",操作・カード系。absolute/%ではなくgrid/flex中心に寄せたい。
+10724,"#pageTimer .railway-stage.railway-preview--horizontal, #pageTimer .railway-preview--horizontal, #pageTimer .railway-stage.railway-preview--circle, #pageTimer .railway-preview--circle",size-vh/% / !important,"height: clamp(360px, 38dvh, 420px) !important min-height: clamp(360px, 38dvh, 420px) !important max-height: clamp(360px, 38dvh, 420px) !important",要確認。線路外なら見えづらさの原因候補。
+10732,#pageTimer .railway-track--horizontal,!important,min-height: 305px !important,線路内表示だが、残り時間や通知は重なり確認が必要。
+10736,"#pageTimer .railway-stage.railway-preview--vertical, #pageTimer .railway-preview--vertical",size-vh/% / !important,"height: clamp(410px, 42dvh, 470px) !important min-height: clamp(410px, 42dvh, 470px) !important max-height: clamp(410px, 42dvh, 470px) !important",要確認。線路外なら見えづらさの原因候補。
+10743,#pageTimer .railway-track--vertical,!important,min-height: 380px !important,線路内表示だが、残り時間や通知は重なり確認が必要。

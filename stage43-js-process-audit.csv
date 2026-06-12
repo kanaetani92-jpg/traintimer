@@ -1,0 +1,11 @@
+﻿function,line,note
+initialize,6650,主要処理。次段階で視覚確認とエラー耐性を確認。
+positionTrainForShape,1892,線路形状ごとの描画。％配置は線路内部に限定できているか確認対象。
+renderActiveTrainsList,2165,My設定ページの運行中リスト。タイマー画面に戻さないこと。
+openCreateTrainPanel,2979,新しい電車追加フォーム。スマホ高さ・入力欄・保存ボタン見切れの確認対象。
+updateCreateTrainModeVisibility,2768,主要処理。次段階で視覚確認とエラー耐性を確認。
+updateCreateTrainPreview,2898,新しい電車追加フォーム。スマホ高さ・入力欄・保存ボタン見切れの確認対象。
+validateCreateTrainRawValues,2810,新しい電車追加フォーム。スマホ高さ・入力欄・保存ボタン見切れの確認対象。
+createTrainByStationCount,2530,主要処理。次段階で視覚確認とエラー耐性を確認。
+createTrainByAutoUnit,2574,主要処理。次段階で視覚確認とエラー耐性を確認。
+createNewTrainConfiguration,2614,主要処理。次段階で視覚確認とエラー耐性を確認。
