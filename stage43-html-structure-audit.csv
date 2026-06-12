@@ -1,6 +1,0 @@
-﻿area,line,current_structure,risk_or_note
-pageTimer,38,section#routeSection → section#timerActionsSection → section#timerSection,構造順は概ね整理済み。内容量が多いページは端末別余白とカード化が次段階の対象。
-pageEdit,187,section.page-intro-card → section#summarySection → form#routeEditorForm,構造順は概ね整理済み。内容量が多いページは端末別余白とカード化が次段階の対象。
-pagePresets,364,section#quickRoutesSection → section#activeTrainsSection → section#presetSection → section#dataManagementSection,構造順は概ね整理済み。内容量が多いページは端末別余白とカード化が次段階の対象。
-pageSettings,508,section.page-intro-card → section#settingsOverviewSection → section#guideSection → section#aboutSection,構造順は概ね整理済み。内容量が多いページは端末別余白とカード化が次段階の対象。
-createTrainPanel,864,button#closeCreateTrainButton / button#勉強25分号 / button#休憩5分号 / button#お片付け10分号 / button#朝の支度15分号 / button#読書15分号 / input#newTrainCreationMode / input#newTrainCreationMode / input#newTrainNameInput / input#newTrainTotalMinutesInput / input#newTrainStationCountInput / input#newTrainUnitMinutesInput(hidden parent) / select#newTrainTrackShapeSelect / select#newTrainSoundSelect / input#newTrainAutoShowToggle / button#cancelCreateTrainButton / button#createTrainSubmitButton,フォーム項目が多い。スマホではカード分割・保存ボタンの見つけやすさが重要。
