@@ -33,8 +33,8 @@
     OVERALL: "overall"
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
-  const STORAGE_SCHEMA_VERSION = 10;
-  const APP_VERSION = "1.17.8";
+  const STORAGE_SCHEMA_VERSION = 11;
+  const APP_VERSION = "1.17.9";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
@@ -804,6 +804,36 @@
     };
   }
 
+  function deriveTrainCreationDataForConfiguration(source = {}, sourceConfiguration) {
+    const configuration = normalizeConfigurationData(sourceConfiguration);
+    const rawSource = source && typeof source === "object" ? source : {};
+    const rawCreationData =
+      rawSource.creationData && typeof rawSource.creationData === "object"
+        ? rawSource.creationData
+        : rawSource;
+    const segmentMinutes = configuration.segments.map((segment) =>
+      getSegmentDurationMinutes(configuration, segment)
+    );
+
+    return normalizeTrainCreationData({
+      creationMode:
+        rawCreationData.creationMode ||
+        rawSource.creationMode ||
+        DEFAULT_TRAIN_CREATION_MODE,
+      totalMinutes: calculateTotalMinutes(configuration),
+      stationCount: configuration.stations.length,
+      unitMinutes:
+        rawCreationData.unitMinutes ??
+        rawSource.unitMinutes ??
+        configuration.unitMinutes ??
+        1,
+      segmentMinutes,
+      warningMessages: Array.isArray(rawCreationData.warningMessages)
+        ? rawCreationData.warningMessages
+        : []
+    }, { configuration });
+  }
+
   function sanitizeStationName(value, fallbackName) {
     const normalized = String(value ?? "")
       .replace(/\s+/g, " ")
@@ -1030,7 +1060,12 @@
       name: sanitizeTrainName(source.name, "いま見る電車"),
       status: safeStatus,
       creationData: normalizeTrainCreationData(
-        source.creationData || source,
+        source.creationData && typeof source.creationData === "object"
+          ? {
+              ...source.creationData,
+              creationMode: source.creationData.creationMode || source.creationMode || DEFAULT_TRAIN_CREATION_MODE
+            }
+          : source,
         { configuration: normalizedConfiguration }
       ),
       remainingMs: source.remainingMs,
@@ -1222,6 +1257,7 @@
       id: activeTrainId || existingTrain?.id || createId("train"),
       name: existingTrain?.name || "いま見る電車",
       status: getTimerStatusForTrain(),
+      creationData: deriveTrainCreationDataForConfiguration(existingTrain || {}, configuration),
       remainingMs: timer.remainingMs,
       endTimeMs: timer.state === TIMER_STATE.RUNNING ? timer.endTimeMs : null,
       soundSettings: storagePreferences,
@@ -2576,7 +2612,10 @@
   }
 
   function createNewTrainConfiguration(values = {}) {
-    return createTrainByStationCount(values).configuration;
+    const mode = normalizeTrainCreationMode(values.creationMode);
+    return mode === TRAIN_CREATION_MODE.AUTO_BY_UNIT
+      ? createTrainByAutoUnit(values).configuration
+      : createTrainByStationCount(values).configuration;
   }
 
   function createQuickRouteConfiguration(definition) {
@@ -2625,6 +2664,10 @@
     const newTrain = createTrainRecordFromConfiguration(configurationForRoute, {
       name: definition.name,
       status: TRAIN_STATUS.IDLE,
+      creationData: deriveTrainCreationDataForConfiguration({
+        creationMode: TRAIN_CREATION_MODE.STATION_COUNT,
+        unitMinutes: definition.unitMinutes || 1
+      }, configurationForRoute),
       remainingMs: calculateTotalMinutes(configurationForRoute) * 60 * 1000,
       soundSettings: getSoundSettingsForNewTrain(definition.sound)
     });
@@ -6830,6 +6873,7 @@
       createTrainByStationCount,
       createTrainByAutoUnit,
       normalizeTrainCreationData,
+      deriveTrainCreationDataForConfiguration,
       validateCreateTrainRawValues
     });
   }
