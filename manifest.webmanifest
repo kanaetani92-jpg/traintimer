@@ -1,18 +1,15 @@
 {
   "name": "でんしゃタイマー",
-  "short_name": "でんしゃ",
-  "description": "静かモードを初期設定にし、単色と色違いの線路を選べるでんしゃタイマー",
+  "short_name": "でんしゃタイマー",
+  "description": "駅と区間で時間の見通しを支援する電車タイマーです。",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#eff8ff",
-  "theme_color": "#3b82f6",
-  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#e6002d",
+  "lang": "ja",
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
