@@ -9469,3 +9469,507 @@ body.is-child-locked #pageTimer .timer-actions-card button {
   }
 }
 
+
+/* =========================================================
+   Stage 33: タブレット横・PCの2カラム／3カラム最適化
+   - 900px以上ではタイマー画面を「左：線路」「右：現在区間・操作」に分割
+   - My設定・経路編集・設定ページを幅に応じて2〜3カラム化
+   - ボタン・カード・入力欄はGrid/Flexで安定配置し、％配置に依存しない
+   ========================================================= */
+@media (min-width: 900px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+  }
+
+  .main-content {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    overflow-x: hidden;
+  }
+
+  body.page-timer-active .main-content {
+    min-height: calc(100dvh - var(--ideal-wide-header-height, 64px));
+    height: auto;
+  }
+
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  #pageTimer.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+    grid-template-areas: "route actions";
+    gap: clamp(18px, 2.2vw, 28px);
+    align-items: start;
+    width: min(100%, 1180px);
+    height: auto;
+    margin-inline: auto;
+  }
+
+  #pageTimer .railway-card {
+    grid-area: route !important;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, auto) auto auto;
+    gap: 12px;
+  }
+
+  #pageTimer .timer-actions-card {
+    grid-area: actions !important;
+    position: sticky !important;
+    top: calc(var(--ideal-wide-header-height, 64px) + 16px);
+    display: grid;
+    gap: 12px;
+    align-self: start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    padding: 16px;
+  }
+
+  #pageTimer .railway-preview {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  #pageTimer .railway-stage.railway-preview--horizontal,
+  #pageTimer .railway-preview--horizontal {
+    min-height: clamp(420px, 58dvh, 560px) !important;
+    max-height: none !important;
+    aspect-ratio: 16 / 9;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical,
+  #pageTimer .railway-preview--vertical {
+    min-height: clamp(500px, 66dvh, 650px) !important;
+    max-height: none !important;
+    aspect-ratio: 4 / 5;
+  }
+
+  #pageTimer .railway-stage.railway-preview--circle,
+  #pageTimer .railway-preview--circle {
+    min-height: clamp(440px, 58dvh, 580px) !important;
+    max-height: none !important;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+  }
+
+  #pageTimer .railway-track--circle {
+    width: min(42vw, 500px, 62dvh) !important;
+    height: min(42vw, 500px, 62dvh) !important;
+    margin: auto;
+  }
+
+  #pageTimer .timer-actions-card .journey-status-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    height: auto;
+  }
+
+  #pageTimer .timer-actions-card .journey-status-item {
+    min-height: 76px;
+    padding: 14px 16px;
+  }
+
+  #pageTimer .timer-actions-card .active-train-summary--timer-page {
+    justify-self: start;
+    margin: 0;
+    font-size: .78rem;
+  }
+
+  #pageTimer .timer-actions-layout {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+  }
+
+  #pageTimer .action-zone {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  #pageTimer .primary-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  #pageTimer .primary-controls.is-resume-choice,
+  #pageTimer .quick-add-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  #pageTimer .control-button,
+  #pageTimer .quick-add-button {
+    min-height: 52px;
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  #pageTimer .completion-panel,
+  #pageTimer .time-addition-history-card {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #pageTimer .journey-progress,
+  #pageTimer .segment-overview {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #pagePresets.app-page.is-active,
+  #pageEdit.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    width: min(100%, 1180px);
+    max-width: 1180px;
+    margin-inline: auto;
+    align-items: start;
+  }
+
+  #pagePresets .quick-route-button,
+  #pagePresets .active-train-add-button,
+  #pagePresets .active-train-button,
+  #pagePresets .preset-action-button,
+  #pagePresets .data-action-button,
+  #pageEdit .apply-button,
+  #pageEdit .cancel-button,
+  #pageSettings .apply-button {
+    min-height: 50px;
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  #pagePresets input,
+  #pageEdit input,
+  #pageEdit select,
+  #pageSettings input,
+  #pageSettings select,
+  .settings-panel input,
+  .settings-panel select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  #pagePresets .data-management-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px;
+    border: 1px solid rgba(213, 228, 239, .92);
+    border-radius: var(--radius-large);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  #pagePresets .data-action-button--danger {
+    justify-self: stretch;
+  }
+
+  #pageEdit .route-editor-card,
+  #pageEdit .summary-card,
+  #pagePresets .quick-routes-card,
+  #pagePresets .active-trains-card,
+  #pagePresets .preset-card,
+  #pageSettings .settings-overview-card,
+  #pageSettings .guide-card,
+  #pageSettings .about-card {
+    align-self: start;
+  }
+
+  #pageEdit .route-editor-actions {
+    position: sticky;
+    bottom: 18px;
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid rgba(213, 228, 239, .92);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(12px);
+  }
+
+  #pageSettings .settings-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageSettings .settings-overview-item:nth-child(1) { grid-column: 1; grid-row: 1; }
+  #pageSettings .settings-overview-item:nth-child(2) { grid-column: 1; grid-row: 2; }
+  #pageSettings .settings-overview-item:nth-child(3) { grid-column: 1 / -1; grid-row: 3; }
+  #pageSettings .settings-overview-item:nth-child(4) { grid-column: 2; grid-row: 1; }
+  #pageSettings .settings-overview-item:nth-child(5) { grid-column: 2; grid-row: 2; }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .main-content {
+    padding: 20px 22px 42px;
+  }
+
+  #pageTimer.app-page.is-active {
+    grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+    width: min(100%, 1120px);
+  }
+
+  #pageTimer .railway-card,
+  #pageTimer .timer-actions-card {
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  #pagePresets.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  #pagePresets .quick-routes-card {
+    grid-column: 1 / -1;
+    order: 1;
+  }
+
+  #pagePresets .active-trains-card {
+    grid-column: 1;
+    order: 2;
+  }
+
+  #pagePresets .preset-card {
+    grid-column: 2;
+    order: 3;
+  }
+
+  #pagePresets .data-management-card {
+    grid-column: 1 / -1;
+    order: 4;
+  }
+
+  #pagePresets .quick-routes-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pagePresets .active-trains-list,
+  #pagePresets .preset-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #pagePresets .data-action-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #pagePresets .data-action-button--wide {
+    grid-column: span 2;
+  }
+
+  #pageEdit.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  #pageEdit .page-intro-card {
+    grid-column: 1 / -1;
+  }
+
+  #pageEdit .summary-card {
+    grid-column: 1;
+  }
+
+  #pageEdit .route-editor-card {
+    grid-column: 2;
+  }
+
+  #pageSettings.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  #pageSettings .page-intro-card,
+  #pageSettings .settings-overview-card {
+    grid-column: 1 / -1;
+  }
+
+  #pageSettings .guide-card {
+    grid-column: 1;
+  }
+
+  #pageSettings .about-card {
+    grid-column: 2;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --stage33-pc-content-max: 1320px;
+  }
+
+  .main-content {
+    padding: 24px 28px 54px;
+  }
+
+  body.page-timer-active .main-content {
+    min-height: calc(100dvh - var(--ideal-pc-header-height, 64px));
+  }
+
+  #pageTimer.app-page.is-active {
+    grid-template-columns: minmax(0, 1fr) 400px;
+    width: min(100%, var(--stage33-pc-content-max));
+    gap: 28px;
+  }
+
+  #pageTimer .timer-actions-card {
+    top: calc(var(--ideal-pc-header-height, 64px) + 18px);
+    padding: 18px;
+  }
+
+  #pageTimer .railway-stage.railway-preview--horizontal,
+  #pageTimer .railway-preview--horizontal {
+    min-height: clamp(500px, 62dvh, 660px) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical,
+  #pageTimer .railway-preview--vertical {
+    min-height: clamp(560px, 68dvh, 720px) !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--circle,
+  #pageTimer .railway-preview--circle {
+    min-height: clamp(500px, 62dvh, 660px) !important;
+  }
+
+  #pagePresets.app-page.is-active,
+  #pageEdit.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    width: min(100%, var(--stage33-pc-content-max));
+    max-width: var(--stage33-pc-content-max);
+  }
+
+  #pagePresets.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(340px, .9fr);
+    gap: 20px;
+  }
+
+  #pagePresets .quick-routes-card {
+    grid-column: 1;
+    order: 1;
+  }
+
+  #pagePresets .active-trains-card {
+    grid-column: 2;
+    order: 2;
+  }
+
+  #pagePresets .preset-card {
+    grid-column: 3;
+    order: 3;
+  }
+
+  #pagePresets .data-management-card {
+    grid-column: 1 / -1;
+    order: 4;
+  }
+
+  #pagePresets .quick-routes-list,
+  #pagePresets .active-trains-list,
+  #pagePresets .preset-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #pagePresets .data-action-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  #pagePresets .data-action-button--wide {
+    grid-column: span 2;
+  }
+
+  #pageEdit.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  #pageEdit .page-intro-card {
+    grid-column: 1 / -1;
+  }
+
+  #pageEdit .summary-card {
+    grid-column: 1;
+    position: sticky;
+    top: calc(var(--ideal-pc-header-height, 64px) + 18px);
+  }
+
+  #pageEdit .route-editor-card {
+    grid-column: 2;
+    max-width: 860px;
+  }
+
+  #pageEdit .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageEdit .unit-setting-grid,
+  #pageEdit .settings-total-card,
+  #pageEdit .radio-card-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pageSettings.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  #pageSettings .page-intro-card {
+    grid-column: 1 / -1;
+  }
+
+  #pageSettings .settings-overview-card {
+    grid-column: 1 / -1;
+  }
+
+  #pageSettings .guide-card {
+    grid-column: 1;
+  }
+
+  #pageSettings .about-card {
+    grid-column: 2;
+  }
+}
+
+/* Stage 33 safety: author display rules must not override hidden pages or panels. */
+[hidden],
+.app-page[hidden],
+section[hidden],
+div[hidden],
+button[hidden] {
+  display: none !important;
+}

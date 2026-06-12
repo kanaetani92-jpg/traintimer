@@ -76,19 +76,6 @@
 </section>
 <div class="railway-track railway-track--horizontal" data-track-shape="horizontal" id="railwayTrack"></div>
 </div>
-<dl class="journey-status-grid">
-<div class="journey-status-item">
-<dt>乗車中の区間</dt>
-<dd id="currentSegmentName">スタート → 駅1</dd>
-</div>
-<div class="journey-status-item">
-<dt>次の停車駅</dt>
-<dd id="nextStationName">駅1</dd>
-</div>
-</dl><p aria-live="polite" class="active-train-summary active-train-summary--timer-page" id="activeTrainSummary">
-          運行中の電車：1本
-        </p>
-
 <div aria-label="線路全体の進み具合" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="journey-progress" role="progressbar">
 <div class="journey-progress-heading">
 <span>ゴールまでの進捗</span>
@@ -105,6 +92,19 @@
 </section>
 
       <section aria-label="タイマー操作" class="timer-actions-card" id="timerActionsSection">
+<dl class="journey-status-grid">
+<div class="journey-status-item">
+<dt>乗車中の区間</dt>
+<dd id="currentSegmentName">スタート → 駅1</dd>
+</div>
+<div class="journey-status-item">
+<dt>次の停車駅</dt>
+<dd id="nextStationName">駅1</dd>
+</div>
+</dl><p aria-live="polite" class="active-train-summary active-train-summary--timer-page" id="activeTrainSummary">
+          運行中の電車：1本
+        </p>
+
 <div class="timer-actions-layout">
 <div class="action-zone action-zone--primary">
 <p class="action-zone-label">出発・停車</p>
@@ -465,7 +465,9 @@
 <p id="presetCountText">0件</p>
 </div>
 <div aria-live="polite" class="preset-list" id="presetList"></div>
-<section aria-labelledby="dataManagementHeading" class="data-management">
+
+</section>
+<section aria-labelledby="dataManagementHeading" class="data-management data-management-card">
 <div class="data-management-heading">
 <div>
 <p class="eyebrow">バックアップと初期化</p>
@@ -496,7 +498,6 @@
               アプリ全体を初期状態へ戻す
             </button>
 </div>
-</section>
 </section>
 </div>
 <div class="app-page" data-page="settings" hidden="" id="pageSettings">
