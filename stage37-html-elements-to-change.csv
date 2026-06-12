@@ -1,0 +1,15 @@
+file,line,id_or_element,current_role,planned_change
+index.html,864,createTrainPanel,新しい電車を追加するパネル本体。作り方2択をここに入れる。,第3段階以降で2モード化または説明整理の対象
+index.html,864,createTrainDescription,現在は「電車名、全体時間、駅の数」と説明しているが、1単位の分数もあるため説明と入力がずれる。,第3段階以降で2モード化または説明整理の対象
+index.html,878,createTrainForm,作成フォーム全体。2モード切替のイベント対象。,第3段階以降で2モード化または説明整理の対象
+index.html,879,newTrainExamplesHeading,入力例。今後は作成モードも含めた例にする必要あり。,第3段階以降で2モード化または説明整理の対象
+index.html,897,newTrainFormHeading,電車の内容。ここより前に「電車の作り方」を追加する候補。,第3段階以降で2モード化または説明整理の対象
+index.html,909,newTrainNameInput,電車名入力。両モード共通。,第3段階以降で2モード化または説明整理の対象
+index.html,913,newTrainTotalMinutesInput,全体時間入力。両モード共通。,第3段階以降で2モード化または説明整理の対象
+index.html,920,newTrainStationCountInput,駅数指定モード専用にする候補。,第3段階以降で2モード化または説明整理の対象
+index.html,927,newTrainUnitMinutesInput,自動分割モードでは「1駅間の目安」として使う候補。駅数指定では非表示候補。,第3段階以降で2モード化または説明整理の対象
+index.html,934,newTrainTrackShapeSelect,線路形状。両モード共通。,第3段階以降で2モード化または説明整理の対象
+index.html,942,newTrainSoundSelect,音。両モード共通。,第3段階以降で2モード化または説明整理の対象
+index.html,950,newTrainAutoPreview,現在のプレビュー。今後はモード別の結果表示に拡張。,第3段階以降で2モード化または説明整理の対象
+index.html,954,newTrainAutoShowToggle,追加後にタイマー画面表示。両モード共通。,第3段階以降で2モード化または説明整理の対象
+index.html,959,cancelCreateTrainButton,キャンセル。,第3段階以降で2モード化または説明整理の対象

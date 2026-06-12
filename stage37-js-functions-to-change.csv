@@ -1,0 +1,16 @@
+file,line,function_or_symbol,current_role,planned_change
+app.js,79,NEW_TRAIN_EXAMPLES,入力例データ。現状は totalMinutes / stationCount / unitMinutes を同時に持つ。,第2段階以降で分離・拡張の対象
+app.js,2273,generateStationNamesForNewTrain,駅数から「スタート」「駅1...」「ゴール」を作る。両モードで利用可能。,第2段階以降で分離・拡張の対象
+app.js,2291,distributeMinutesAcrossSegments,時間を区間数へ配分する。現状は均等配分で、22分・5分ごとの最後2分方式には未対応。,第2段階以降で分離・拡張の対象
+app.js,2307,createNewTrainConfiguration,新しい電車の設定作成。stationCount と unitMinutes を同時に使っており、駅数指定と自動分割が混ざっている。,第2段階以降で分離・拡張の対象
+app.js,2338,createQuickRouteConfiguration,すぐ使う用の設定作成。既存5路線維持のため影響確認が必要。,第2段階以降で分離・拡張の対象
+app.js,2436,setCreateTrainFormValues,入力例をフォームに反映。作成モードも反映する必要あり。,第2段階以降で分離・拡張の対象
+app.js,2470,getCreateTrainFormValues,フォーム値取得。現在は minimumTotalMinutes = (stationCount - 1) * unitMinutes で全体時間を自動引き上げる。,第2段階以降で分離・拡張の対象
+app.js,2467,updateCreateTrainPreview,作成前プレビュー。モード別に駅・駅間・駅間時間を表示する必要あり。,第2段階以降で分離・拡張の対象
+app.js,2532,openCreateTrainPanel,新しい電車追加パネルを開く。初期モード設定が必要。,第2段階以降で分離・拡張の対象
+app.js,2594,handleCreateTrainSubmit,保存処理。モード別に createTrainByStationCount / createTrainByAutoUnit を呼び分ける候補。,第2段階以降で分離・拡張の対象
+app.js,859,createTrainRecordFromConfiguration,設定から電車レコードを作成。creationMode等のメタ情報を保存する場合は options から受ける拡張候補。,第2段階以降で分離・拡張の対象
+app.js,899,normalizeTrainData,旧保存データの読み込み補正。creationModeがない旧データへの補完候補。,第2段階以降で分離・拡張の対象
+app.js,935,serializeTrainRecord,localStorage保存時の電車データ作成。creationMetaを保存するならここに追加。,第2段階以降で分離・拡張の対象
+app.js,1175,createStoragePayload,保存ペイロード作成。trains/presets/current configurationの保存構造確認対象。,第2段階以降で分離・拡張の対象
+app.js,1210,normalizeStoragePayload,旧データ読み込み。schemaVersionと旧データ補正の入口。,第2段階以降で分離・拡張の対象
