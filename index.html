@@ -351,6 +351,7 @@
 </div>
 </fieldset>
 <div class="route-editor-actions">
+<p class="route-editor-actions-hint">変更した内容は「変更を反映する」でタイマーへ反映されます。</p>
 <button aria-label="未保存の経路変更を取り消す" class="cancel-button" id="resetRouteEditorButton" type="button">
               変更を取り消す
             </button>
@@ -422,6 +423,10 @@
           タイマー画面では1本の電車を大きく表示します。ここでは、表示する電車を選んだり、電車ごとに出発・一時停止・はじめから・削除を操作できます。
         </p>
 <div class="active-train-add-area">
+<div class="active-train-add-heading">
+<h3>電車を追加する</h3>
+<p>今の経路をコピーするか、時間と駅数を選んで新しい電車を作れます。</p>
+</div>
 <div class="active-train-add-buttons">
 <button aria-label="今の経路を電車として追加する" class="active-train-add-button" id="addCurrentRouteTrainButton" type="button">
 <span aria-hidden="true">🚆</span>
@@ -433,7 +438,7 @@
 </button>
 </div>
 <p class="active-train-add-note">
-            今の経路をコピーするか、時間・駅数・線路の形を選んで新しい電車を作れます。追加しても、初期状態では表示中の電車は切り替わりません。
+            追加しても、初期状態では表示中の電車は切り替わりません。操作は下の運行中リストから行えます。
           </p>
 </div>
 <div aria-live="polite" class="active-trains-list" id="activeTrainsList"></div>
@@ -467,7 +472,7 @@
 <div aria-live="polite" class="preset-list" id="presetList"></div>
 
 </section>
-<section aria-labelledby="dataManagementHeading" class="data-management data-management-card">
+<section aria-labelledby="dataManagementHeading" class="data-management data-management-card" id="dataManagementSection">
 <div class="data-management-heading">
 <div>
 <p class="eyebrow">バックアップと初期化</p>
@@ -589,10 +594,10 @@
 <p class="eyebrow">アプリ情報</p>
 <h2 id="aboutHeading">でんしゃタイマー</h2>
 </div>
-<span class="status-badge">Version 1.17.3</span>
+<span class="status-badge">Version 1.17.4</span>
 </div>
 <dl class="about-list">
-<div><dt>バージョン</dt><dd>1.17.3</dd></div>
+<div><dt>バージョン</dt><dd>1.17.4</dd></div>
 <div><dt>更新日</dt><dd>2026年6月10日</dd></div>
 <div><dt>保存場所</dt><dd>この端末のブラウザ内</dd></div>
 <div><dt>通信</dt><dd>設定やプリセットを外部へ送信しません</dd></div>

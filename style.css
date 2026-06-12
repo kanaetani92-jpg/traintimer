@@ -10183,3 +10183,502 @@ body.is-child-locked .child-lock-overlay * {
     font-size: 0.74rem;
   }
 }
+
+/* =========================================================
+   Stage 35: My設定・経路編集・設定ページの最終整理
+   - 管理画面を端末幅ごとに読みやすいカード配置へ整理
+   - 危険操作を下部に控えめに配置
+   - 入力欄・操作ボタンの横はみ出しを抑制
+   ========================================================= */
+#pagePresets.app-page.is-active,
+#pageEdit.app-page.is-active,
+#pageSettings.app-page.is-active {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  align-content: start;
+  gap: clamp(12px, 2vw, 20px);
+}
+
+#pagePresets *,
+#pageEdit *,
+#pageSettings * {
+  min-width: 0;
+}
+
+#pagePresets input,
+#pagePresets select,
+#pagePresets textarea,
+#pageEdit input,
+#pageEdit select,
+#pageEdit textarea,
+#pageSettings input,
+#pageSettings select,
+#pageSettings textarea {
+  width: 100%;
+  max-width: 100%;
+}
+
+#pagePresets .quick-routes-card,
+#pagePresets .active-trains-card,
+#pagePresets .preset-card,
+#pagePresets .data-management-card,
+#pageEdit .page-intro-card,
+#pageEdit .summary-card,
+#pageEdit .route-editor-card,
+#pageSettings .page-intro-card,
+#pageSettings .settings-overview-card,
+#pageSettings .guide-card,
+#pageSettings .about-card {
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* My設定：すぐ使う → 運行中 → 登録経路 → データ管理の順を固定 */
+#pagePresets .quick-routes-card { order: 1; }
+#pagePresets .active-trains-card { order: 2; }
+#pagePresets .preset-card { order: 3; }
+#pagePresets .data-management-card { order: 4; }
+
+#pagePresets .quick-routes-card {
+  padding: clamp(15px, 2vw, 22px);
+}
+
+#pagePresets .quick-routes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr));
+  gap: 10px;
+}
+
+#pagePresets .quick-route-button {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  min-height: 58px;
+  padding: 12px;
+  text-align: left;
+}
+
+#pagePresets .quick-route-copy {
+  min-width: 0;
+}
+
+#pagePresets .quick-route-copy strong,
+#pagePresets .quick-route-copy small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+#pagePresets .active-train-add-area {
+  display: grid;
+  gap: 12px;
+  padding: clamp(12px, 2vw, 16px);
+  margin-block: 12px 14px;
+  border: 1px solid rgba(230, 0, 45, .16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff8fa 0%, #ffffff 100%);
+}
+
+#pagePresets .active-train-add-heading {
+  display: grid;
+  gap: 4px;
+}
+
+#pagePresets .active-train-add-heading h3 {
+  margin: 0;
+  color: var(--color-primary-dark);
+  font-size: clamp(.98rem, 1.4vw, 1.08rem);
+}
+
+#pagePresets .active-train-add-heading p,
+#pagePresets .active-train-add-note {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: clamp(.78rem, 1.2vw, .88rem);
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+#pagePresets .active-train-add-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+#pagePresets .active-train-add-button {
+  justify-content: center;
+  min-height: 52px;
+  padding: 12px 14px;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+#pagePresets .active-trains-list,
+#pagePresets .preset-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+#pagePresets .active-train-card,
+#pagePresets .preset-item {
+  display: grid;
+  gap: 11px;
+  align-content: start;
+  padding: clamp(13px, 2vw, 16px);
+  border-radius: 18px;
+}
+
+#pagePresets .active-train-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+#pagePresets .active-train-name-row,
+#pagePresets .preset-item-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+#pagePresets .active-train-name,
+#pagePresets .preset-name-input {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#pagePresets .active-train-actions,
+#pagePresets .preset-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+#pagePresets .active-train-button,
+#pagePresets .preset-action-button,
+#pagePresets .data-action-button {
+  min-height: 48px;
+  padding: 10px 12px;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+#pagePresets .active-train-button--danger,
+#pagePresets .preset-action-button--danger {
+  color: #8a5652;
+  border-color: #eadbd8;
+  background: #fffdfc;
+  font-weight: 700;
+}
+
+#pagePresets .data-management-card {
+  margin-top: clamp(8px, 1.8vw, 18px);
+  padding: clamp(14px, 2vw, 18px);
+  border-style: dashed;
+  background: #fffdfb;
+}
+
+#pagePresets .data-management-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+#pagePresets .data-action-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+}
+
+#pagePresets .data-action-button--danger {
+  color: #8a5652;
+  border-color: #eadbd8;
+  background: #fffdfc;
+  font-weight: 700;
+}
+
+#pagePresets .data-action-button--wide {
+  grid-column: 1 / -1;
+}
+
+/* 経路編集：現在設定と編集フォームの役割を分け、保存ボタンを見つけやすくする */
+#pageEdit .summary-card {
+  align-self: start;
+}
+
+#pageEdit .summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 148px), 1fr));
+  gap: 10px;
+}
+
+#pageEdit .route-editor-card {
+  display: grid;
+  gap: clamp(12px, 1.6vw, 18px);
+  padding: clamp(15px, 2vw, 22px);
+}
+
+#pageEdit .settings-section,
+#pageEdit .settings-total-card,
+#pageEdit .route-editor-card > fieldset {
+  border-radius: 18px;
+}
+
+#pageEdit .station-editor-list,
+#pageEdit .segment-editor-list {
+  display: grid;
+  gap: 10px;
+}
+
+#pageEdit .route-editor-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(230, 0, 45, .14);
+  border-radius: 18px;
+  background: #fff8fa;
+}
+
+#pageEdit .route-editor-actions-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: .8rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+#pageEdit .route-editor-actions .apply-button {
+  order: 2;
+  min-height: 52px;
+  font-size: clamp(.98rem, 1.3vw, 1.08rem);
+}
+
+#pageEdit .route-editor-actions .cancel-button {
+  order: 1;
+  min-height: 48px;
+  background: #fff;
+}
+
+/* 設定ページ：音・表示・文字・安全・画面維持の説明を読みやすく */
+#pageSettings .settings-overview-card,
+#pageSettings .guide-card,
+#pageSettings .about-card {
+  padding: clamp(15px, 2vw, 22px);
+}
+
+#pageSettings .settings-overview-grid,
+#pageSettings .guide-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+#pageSettings .settings-overview-item,
+#pageSettings .guide-item {
+  min-height: 92px;
+  align-items: start;
+  overflow-wrap: anywhere;
+}
+
+#pageSettings .settings-overview-item p,
+#pageSettings .guide-item p,
+#pageSettings .about-list,
+#pageSettings .disclaimer-box p,
+#pageSettings .pwa-status-card p {
+  font-size: clamp(.78rem, 1.1vw, .9rem);
+  line-height: 1.65;
+}
+
+#pageSettings .settings-overview-item h3,
+#pageSettings .guide-item h3 {
+  font-size: clamp(.92rem, 1.25vw, 1.02rem);
+}
+
+/* 狭い幅では2列を無理に使わず、保存・削除ボタンが隠れない下余白を確保 */
+@media (max-width: 599px) {
+  #pagePresets.app-page.is-active,
+  #pageEdit.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    padding-bottom: calc(136px + var(--safe-bottom));
+  }
+
+  #pagePresets .active-train-main {
+    grid-template-columns: 1fr;
+  }
+
+  #pagePresets .active-train-time {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 359px) {
+  #pagePresets .active-train-actions,
+  #pagePresets .preset-actions,
+  #pagePresets .active-train-add-buttons,
+  #pageEdit .route-editor-actions,
+  #pagePresets .data-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #pagePresets .quick-route-button,
+  #pagePresets .active-train-button,
+  #pagePresets .preset-action-button,
+  #pagePresets .data-action-button,
+  #pageEdit .route-editor-actions .apply-button,
+  #pageEdit .route-editor-actions .cancel-button {
+    padding-inline: 10px;
+    font-size: .86rem;
+  }
+}
+
+/* タブレット縦：広めの1カラムを基本に、カード内だけ2列化 */
+@media (min-width: 600px) and (max-width: 899px) {
+  #pagePresets.app-page.is-active,
+  #pageEdit.app-page.is-active,
+  #pageSettings.app-page.is-active {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 820px;
+  }
+
+  #pagePresets .active-train-add-buttons,
+  #pagePresets .data-action-grid,
+  #pageSettings .settings-overview-grid,
+  #pageSettings .guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pagePresets .active-trains-list,
+  #pagePresets .preset-list {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+  }
+}
+
+/* タブレット横・PC：管理画面の役割ごとに2〜3カラム化 */
+@media (min-width: 900px) {
+  #pagePresets.app-page.is-active {
+    grid-template-columns: minmax(0, 1.08fr) minmax(310px, .92fr);
+  }
+
+  #pagePresets .quick-routes-card,
+  #pagePresets .data-management-card {
+    grid-column: 1 / -1;
+  }
+
+  #pagePresets .active-trains-card {
+    grid-column: 1;
+    align-self: start;
+  }
+
+  #pagePresets .preset-card {
+    grid-column: 2;
+    align-self: start;
+  }
+
+  #pagePresets .quick-routes-list {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  #pagePresets .active-train-add-buttons,
+  #pagePresets .data-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pagePresets .active-trains-list,
+  #pagePresets .preset-list {
+    grid-template-columns: 1fr;
+  }
+
+  #pageEdit.app-page.is-active {
+    grid-template-columns: minmax(270px, 340px) minmax(0, 1fr);
+  }
+
+  #pageEdit .page-intro-card,
+  #pageEdit .summary-card {
+    grid-column: 1;
+  }
+
+  #pageEdit .route-editor-card {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  #pageEdit .route-editor-actions {
+    grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr);
+    position: sticky;
+    bottom: 18px;
+    z-index: 2;
+  }
+
+  #pageEdit .route-editor-actions-hint {
+    grid-column: 1 / -1;
+  }
+
+  #pageEdit .route-editor-actions .cancel-button {
+    order: 2;
+  }
+
+  #pageEdit .route-editor-actions .apply-button {
+    order: 3;
+  }
+
+  #pageSettings.app-page.is-active {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, .9fr);
+  }
+
+  #pageSettings .page-intro-card,
+  #pageSettings .settings-overview-card {
+    grid-column: 1 / -1;
+  }
+
+  #pageSettings .guide-card {
+    grid-column: 1;
+  }
+
+  #pageSettings .about-card {
+    grid-column: 2;
+  }
+
+  #pageSettings .settings-overview-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  #pageSettings .guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  #pagePresets.app-page.is-active,
+  #pageSettings.app-page.is-active,
+  #pageEdit.app-page.is-active {
+    max-width: 1240px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #pagePresets .quick-route-button:hover,
+  #pagePresets .active-train-add-button:hover,
+  #pagePresets .active-train-button:hover,
+  #pagePresets .preset-action-button:hover,
+  #pageEdit .route-editor-actions .apply-button:hover,
+  #pageSettings .apply-button:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pagePresets .quick-route-button:hover,
+  #pagePresets .active-train-add-button:hover,
+  #pagePresets .active-train-button:hover,
+  #pagePresets .preset-action-button:hover,
+  #pageEdit .route-editor-actions .apply-button:hover,
+  #pageSettings .apply-button:hover {
+    transform: none;
+  }
+}
