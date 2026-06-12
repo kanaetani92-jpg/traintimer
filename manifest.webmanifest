@@ -1,31 +1,17 @@
 {
-  "id": "./",
   "name": "でんしゃタイマー",
-  "short_name": "でんしゃタイマー",
-  "description": "運行中の電車、すぐ使う路線、いたずら防止ロック、画面をつけたままにする設定に対応した電車タイマーです。",
-  "lang": "ja",
+  "short_name": "でんしゃ",
+  "description": "静かモードを初期設定にし、単色と色違いの線路を選べるでんしゃタイマー",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#f3f4f5",
-  "theme_color": "#e6002d",
-  "categories": [
-    "productivity",
-    "education",
-    "utilities"
-  ],
+  "background_color": "#eff8ff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

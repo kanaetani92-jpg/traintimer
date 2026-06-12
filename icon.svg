@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="120" fill="#3b82f6"/>
+  <circle cx="256" cy="256" r="162" fill="none" stroke="#dff4ff" stroke-width="42"/>
+  <circle cx="256" cy="256" r="162" fill="none" stroke="#fbbf24" stroke-width="26" stroke-linecap="round" stroke-dasharray="210 820" transform="rotate(-90 256 256)"/>
+  <g transform="translate(256 94)">
+    <circle cx="0" cy="0" r="42" fill="#ffffff" opacity="0.96"/>
+    <text x="0" y="13" text-anchor="middle" font-size="54" font-family="Apple Color Emoji, Segoe UI Emoji, sans-serif">🚃</text>
+  </g>
+  <circle cx="256" cy="94" r="14" fill="#ffffff" stroke="#1d4ed8" stroke-width="8"/>
+  <circle cx="396" cy="256" r="14" fill="#ffffff" stroke="#1d4ed8" stroke-width="8"/>
+  <circle cx="256" cy="418" r="14" fill="#ffffff" stroke="#1d4ed8" stroke-width="8"/>
+  <circle cx="116" cy="256" r="14" fill="#ffffff" stroke="#1d4ed8" stroke-width="8"/>
+</svg>
