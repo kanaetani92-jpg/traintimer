@@ -1,8 +1,0 @@
-﻿area,selector_or_element,line,risk,priority
-タイマー画面,"body.page-timer-active, .app-shell",5584,height:100dvh + overflow:hidden により、端末高さが足りないと下部が切れやすい。,高
-タイマー画面,#pageTimer .railway-card,4631,grid-template-rows固定 + overflow:hidden により、駅名や線路内表示が見切れる可能性。,高
-タイマー画面,#pageTimer .railway-preview,4643,height:100% !important + overflow:hidden で、形状ごとの必要高さを吸収しにくい。,高
-タイマー画面,.mobile-bottom-nav,2886,スマホで固定表示のため、操作ボタン・保存ボタン・フォーム末尾を隠す可能性。,高
-経路編集,.route-editor-actions,5954,sticky bottom と下部ナビが同時に存在する幅で重なりやすい。,中
-新しい電車追加,.create-train-panel,7078,fixed bottom + max-height 94vh。スマホキーボード表示時に保存ボタンが見切れる可能性。,高
-線路表示,track-bed/station/train-position top:43%,6646,線路内部としては許容だが、親高さが圧縮されると駅名・電車位置が窮屈になる。,中
