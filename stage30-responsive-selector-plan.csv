@@ -1,0 +1,26 @@
+selector,現在の役割,修正必要度,方針,対象段階
+.app-shell,アプリ全体の幅と高さ,高,幅基準の最大幅と100dvhを端末別に整理する,第2-4段階
+.main-content,各ページの主コンテンツ領域,高,スマホは下部ナビ余白を確保しPCは余白を広げる,第2-4段階
+.mobile-bottom-nav,スマホ・タブレット縦の下部ナビ,高,safe-areaを考慮し900px以上では非表示にする,第2-4段階
+#pageTimer.app-page.is-active,タイマー画面の全体レイアウト,高,スマホ1カラム/900px以上2カラムに整理する,第2-4段階
+#pageTimer .railway-card,線路カード,高,線路切替・線路・状態表示をHTML順に自然配置する,第2-4段階
+.railway-stage,線路表示エリアの親要素,高,aspect-ratio/min-height/max-heightを端末別に定義する,第2-4段階
+.railway-track--horizontal,横線路,高,駅・電車・進行位置だけ%で管理する,第2-4段階
+.railway-track--vertical,縦線路,高,駅ラベルと線路の距離を端末別に安定化する,第2-4段階
+.railway-track--circle,円形線路,中,円中央の残り時間をGrid中央配置に維持する,第2-4段階
+.route-time-panel,残り時間表示,高,線路外または円中央の通常レイアウトとして扱う,第2-4段階
+.timer-actions-card,操作パネル,高,スマホは線路下/PCは右カラムに配置する,第2-4段階
+.timer-actions-layout,操作ボタン群,高,Grid/Flexとgapで状態別ボタンを安定配置する,第2-5段階
+.control-button,主操作ボタン,高,タッチ端末は48px目安で文字折り返しに耐える,第2-5段階
+.quick-adjust-grid,＋1分・＋5分領域,高,主操作から分離し%配置にしない,第2-5段階
+#pagePresets.app-page.is-active,My設定ページ,高,幅に応じ1列/2列/2カラムへ切替,第3-6段階
+.quick-routes-list,すぐ使う一覧,高,スマホ1列/タブレット2列/PC3列,第3-6段階
+.active-trains-list,運行中の電車リスト,高,スマホ1列/広い画面2列でカード崩れを防ぐ,第3-6段階
+.active-train-actions,複数電車の操作ボタン,高,狭い画面では1列または2列に逃がす,第3-6段階
+#pageEdit.app-page.is-active,経路編集ページ,高,PCでは左に現在設定/右に編集フォーム,第3-6段階
+.route-editor-actions,経路編集の保存ボタン,高,下部ナビに隠れない位置と余白を確保,第3-6段階
+#pageSettings.app-page.is-active,設定ページ,高,設定カードを1列/2列へ切替,第3-6段階
+.settings-overview-grid,設定概要カード,中,説明が読める幅で2列化,第3-6段階
+.preference-row,設定項目行,高,狭い画面では1列にしてスイッチを下げる,第3-6段階
+.child-lock-overlay,いたずら防止ロック,中,全端末で中央表示・長押し領域を確保,第5段階
+.toast-container,到着通知,中,下部ナビと重ならない位置に調整,第5-7段階
