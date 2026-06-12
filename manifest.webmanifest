@@ -1,18 +1,33 @@
 {
-  "name": "でんしゃタイマー",
-  "short_name": "でんしゃ",
-  "description": "静かモードを初期設定にし、単色と色違いの線路を選べるでんしゃタイマー",
+  "name": "おしたくトレイン",
+  "short_name": "おしたくトレイン",
+  "description": "予定と時間を駅と乗り物で見える化するビジュアルタイマー",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#eff8ff",
-  "theme_color": "#3b82f6",
-  "orientation": "portrait",
+  "background_color": "#f5f8fc",
+  "theme_color": "#356ac3",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "./icons/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
