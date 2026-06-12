@@ -134,7 +134,7 @@
     <div class="settings-list">
       <label class="settings-number"><span>新しく開いたときの駅の数</span><input id="defaultSegmentsInput" type="number" inputmode="numeric" min="1" max="12" step="1" value="3" /></label>
       <label class="settings-select"><span>線路の色</span><select id="railColorModeInput" aria-label="線路の色"><option value="single">単色</option><option value="multi">色違い</option></select></label>
-      <label><span>しゅっぱつ中に画面を暗くしにくくする</span><input id="wakeLockInput" type="checkbox" checked /></label>
+      <label><span>うんてん中に画面を暗くしにくくする</span><input id="wakeLockInput" type="checkbox" checked /></label>
       <label><span>駅に着いたら振動</span><input id="vibrationInput" type="checkbox" checked /></label>
       <label><span>ゴール音</span><input id="soundInput" type="checkbox" checked /></label>
       <label><span>動きを少なくする（静かモード）</span><input id="reducedMotionInput" type="checkbox" checked /></label>
@@ -144,5 +144,23 @@
   </section>
 
   <script src="app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const stateText = document.getElementById('stateText');
+      const replaceRunningLabel = () => {
+        if (stateText && stateText.textContent === 'しゅっぱつ中') {
+          stateText.textContent = 'うんてん中';
+        }
+      };
+      replaceRunningLabel();
+      if (stateText) {
+        new MutationObserver(replaceRunningLabel).observe(stateText, {
+          childList: true,
+          characterData: true,
+          subtree: true
+        });
+      }
+    });
+  </script>
 </body>
 </html>
