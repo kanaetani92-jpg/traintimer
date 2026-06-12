@@ -18,9 +18,7 @@
         <h1>でんしゃタイマー</h1>
         <p class="lead">はじめから線路の区切りが見えて、色をえらべるタイマーです。</p>
       </div>
-      <button id="settingsToggle" class="icon-button" type="button" aria-label="保護者設定を開く" aria-expanded="false" aria-controls="settingsPanel">
-        ⚙️
-      </button>
+      <button id="settingsToggle" class="icon-button" type="button" aria-label="保護者設定を開く" aria-expanded="false" aria-controls="settingsPanel">⚙️</button>
     </header>
 
     <main>
@@ -54,9 +52,7 @@
             <text id="timeText" class="time-text" x="130" y="121" text-anchor="middle">10:00</text>
             <text id="stateText" class="state-text" x="130" y="151" text-anchor="middle">しゅっぱつ まえ</text>
           </svg>
-          <div id="celebration" class="celebration" aria-hidden="true">
-            <span>⭐</span><span>✨</span><span>⭐</span><span>✨</span>
-          </div>
+          <div id="celebration" class="celebration" aria-hidden="true"><span>⭐</span><span>✨</span><span>⭐</span><span>✨</span></div>
         </div>
         <p id="screenReaderStatus" class="sr-only" aria-live="polite">でんしゃはしゅっぱつ前です。</p>
 
@@ -64,6 +60,17 @@
           <div class="guide-item"><span class="sample-station future"></span><span>まだ</span></div>
           <div class="guide-item"><span class="sample-station next"></span><span>つぎ</span></div>
           <div class="guide-item"><span class="sample-station passed"></span><span>ついた</span></div>
+        </div>
+
+        <div class="status-grid" aria-label="進行状況">
+          <div><span>つぎのえき</span><strong id="currentSegment">1 / 3</strong></div>
+          <div><span>えきまで</span><strong id="segmentLeft">3:20</strong></div>
+          <div><span>すすみ</span><strong id="progressPercent">0%</strong></div>
+        </div>
+
+        <div class="controls">
+          <button id="startPauseButton" class="primary-button" type="button">しゅっぱつ</button>
+          <button id="resetButton" class="secondary-button" type="button">はじめにもどる</button>
         </div>
 
         <div class="input-panel" aria-label="タイマー時間と駅の数の入力">
@@ -99,26 +106,6 @@
             <p id="segmentsHelp" class="hint">駅が区切りポイントになります。</p>
           </div>
         </div>
-
-        <div class="status-grid" aria-label="進行状況">
-          <div>
-            <span>つぎのえき</span>
-            <strong id="currentSegment">1 / 3</strong>
-          </div>
-          <div>
-            <span>えきまで</span>
-            <strong id="segmentLeft">3:20</strong>
-          </div>
-          <div>
-            <span>すすみ</span>
-            <strong id="progressPercent">0%</strong>
-          </div>
-        </div>
-
-        <div class="controls">
-          <button id="startPauseButton" class="primary-button" type="button">しゅっぱつ</button>
-          <button id="resetButton" class="secondary-button" type="button">はじめにもどる</button>
-        </div>
       </section>
 
       <details class="help-card">
@@ -145,33 +132,12 @@
     </div>
 
     <div class="settings-list">
-      <label class="settings-number">
-        <span>新しく開いたときの駅の数</span>
-        <input id="defaultSegmentsInput" type="number" inputmode="numeric" min="1" max="12" step="1" value="3" />
-      </label>
-      <label class="settings-select">
-        <span>線路の色</span>
-        <select id="railColorModeInput" aria-label="線路の色">
-          <option value="single">単色</option>
-          <option value="multi">色違い</option>
-        </select>
-      </label>
-      <label>
-        <span>しゅっぱつ中に画面を暗くしにくくする</span>
-        <input id="wakeLockInput" type="checkbox" checked />
-      </label>
-      <label>
-        <span>駅に着いたら振動</span>
-        <input id="vibrationInput" type="checkbox" checked />
-      </label>
-      <label>
-        <span>ゴール音</span>
-        <input id="soundInput" type="checkbox" checked />
-      </label>
-      <label>
-        <span>動きを少なくする（静かモード）</span>
-        <input id="reducedMotionInput" type="checkbox" checked />
-      </label>
+      <label class="settings-number"><span>新しく開いたときの駅の数</span><input id="defaultSegmentsInput" type="number" inputmode="numeric" min="1" max="12" step="1" value="3" /></label>
+      <label class="settings-select"><span>線路の色</span><select id="railColorModeInput" aria-label="線路の色"><option value="single">単色</option><option value="multi">色違い</option></select></label>
+      <label><span>しゅっぱつ中に画面を暗くしにくくする</span><input id="wakeLockInput" type="checkbox" checked /></label>
+      <label><span>駅に着いたら振動</span><input id="vibrationInput" type="checkbox" checked /></label>
+      <label><span>ゴール音</span><input id="soundInput" type="checkbox" checked /></label>
+      <label><span>動きを少なくする（静かモード）</span><input id="reducedMotionInput" type="checkbox" checked /></label>
     </div>
     <p class="hint">設定はこの端末のブラウザに保存されます。</p>
     <button id="saveSettingsButton" class="secondary-button full" type="button">設定を保存</button>
