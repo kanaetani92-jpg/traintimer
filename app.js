@@ -29,7 +29,7 @@
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
   const STORAGE_SCHEMA_VERSION = 9;
-  const APP_VERSION = "1.17.2";
+  const APP_VERSION = "1.17.3";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
@@ -3491,7 +3491,7 @@
       elements.keepAwakeToggle.checked = preferences.keepAwakeEnabled;
     }
     if (elements.wakeLockSupportText) {
-      elements.wakeLockSupportText.textContent = "wakeLock" in navigator
+      elements.wakeLockSupportText.textContent = canUseWakeLock()
         ? "対応ブラウザでは、運転中に画面が暗くなりにくくなります。"
         : "端末やブラウザによっては、画面が暗くなることがあります。";
     }
@@ -3639,7 +3639,7 @@
   }
 
   function canUseWakeLock() {
-    return "wakeLock" in navigator && typeof navigator.wakeLock?.request === "function";
+    return typeof navigator !== "undefined" && "wakeLock" in navigator && typeof navigator.wakeLock?.request === "function";
   }
 
   async function requestScreenWakeLock() {
@@ -6145,6 +6145,11 @@
       }
       if (elements.sideMenu?.classList.contains("is-open")) {
         closeMenu();
+        return;
+      }
+      if (isChildLockActive()) {
+        cancelUnlockHold();
+        warnChildLockActive();
       }
       return;
     }
@@ -6162,7 +6167,7 @@
       timer.state === TIMER_STATE.RUNNING ? pauseTimer() : startTimer();
     } else if (event.key.toLowerCase() === "r") {
       event.preventDefault();
-      requestResetTimer();
+      restartTimer();
     } else if (event.key.toLowerCase() === "m") {
       event.preventDefault();
       toggleSoundFromKeyboard();

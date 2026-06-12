@@ -9973,3 +9973,213 @@ div[hidden],
 button[hidden] {
   display: none !important;
 }
+
+
+/* =========================================================
+   Stage 34: 操作性・アクセシビリティ・PWA確認
+   - タッチ目標 44〜48px、キーボードフォーカス、ホバー、文字拡大、ロック表示を補強
+   ========================================================= */
+:root {
+  --focus-ring-color: #005fcc;
+  --focus-ring-shadow: 0 0 0 4px rgba(0, 95, 204, 0.22);
+}
+
+body {
+  min-height: 100dvh;
+}
+
+button,
+[role="button"],
+input,
+select,
+textarea,
+.mobile-nav-item,
+.menu-item,
+.preset-action-button,
+.data-action-button,
+.quick-route-button,
+.apply-button,
+.cancel-button,
+.outline-button,
+.secondary-button {
+  max-width: 100%;
+}
+
+button,
+.mobile-nav-item,
+.menu-item,
+.preset-action-button,
+.data-action-button,
+.quick-route-button,
+.apply-button,
+.cancel-button,
+.outline-button,
+.secondary-button,
+.control-button,
+.quick-add-button,
+.restart-button,
+.unlock-hold-button,
+.install-app-button {
+  min-height: 44px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+.mobile-nav-item:focus-visible,
+.menu-item:focus-visible {
+  outline: 3px solid var(--focus-ring-color) !important;
+  outline-offset: 3px !important;
+  box-shadow: var(--focus-ring-shadow) !important;
+}
+
+.switch input:focus-visible + .switch-slider {
+  outline: 3px solid var(--focus-ring-color) !important;
+  outline-offset: 4px !important;
+  box-shadow: var(--focus-ring-shadow) !important;
+}
+
+.control-button,
+.quick-add-button,
+.restart-button {
+  min-height: 52px;
+}
+
+.primary-controls.is-resume-choice {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.primary-controls.is-resume-choice .control-button--start,
+.primary-controls.is-resume-choice .control-button--start-over {
+  min-width: 0;
+  min-height: 52px;
+}
+
+@media (pointer: coarse) {
+  button,
+  .mobile-nav-item,
+  .menu-item,
+  .preset-action-button,
+  .data-action-button,
+  .quick-route-button,
+  .apply-button,
+  .cancel-button,
+  .outline-button,
+  .secondary-button,
+  .control-button,
+  .quick-add-button,
+  .restart-button,
+  .unlock-hold-button,
+  .install-app-button {
+    min-height: 48px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    font-size: max(16px, 1rem);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:hover:not(:disabled),
+  .mobile-nav-item:hover,
+  .menu-item:hover,
+  .preset-action-button:hover:not(:disabled),
+  .data-action-button:hover:not(:disabled),
+  .quick-route-button:hover:not(:disabled),
+  .apply-button:hover:not(:disabled),
+  .cancel-button:hover:not(:disabled),
+  .outline-button:hover:not(:disabled),
+  .secondary-button:hover:not(:disabled),
+  .control-button:hover:not(:disabled),
+  .quick-add-button:hover:not(:disabled),
+  .restart-button:hover:not(:disabled) {
+    box-shadow: 0 8px 18px rgba(29, 76, 112, 0.14);
+    filter: brightness(0.98);
+  }
+}
+
+html[data-font-size="large"] .timer-actions-card,
+html[data-font-size="xlarge"] .timer-actions-card,
+html[data-font-size="large"] .settings-section,
+html[data-font-size="xlarge"] .settings-section,
+html[data-font-size="large"] .preset-card,
+html[data-font-size="xlarge"] .preset-card,
+html[data-font-size="large"] .settings-overview-item,
+html[data-font-size="xlarge"] .settings-overview-item {
+  overflow-wrap: anywhere;
+}
+
+html[data-font-size="xlarge"] .journey-status-grid,
+html[data-font-size="xlarge"] .settings-overview-grid,
+html[data-font-size="xlarge"] .preference-row,
+html[data-font-size="xlarge"] .quick-route-list,
+html[data-font-size="xlarge"] .active-train-list,
+html[data-font-size="xlarge"] .preset-list {
+  grid-template-columns: 1fr !important;
+}
+
+body.is-high-contrast {
+  --focus-ring-color: #000000;
+  --focus-ring-shadow: 0 0 0 4px rgba(0, 0, 0, 0.18);
+}
+
+body.is-high-contrast button,
+body.is-high-contrast .mobile-nav-item,
+body.is-high-contrast .menu-item,
+body.is-high-contrast input,
+body.is-high-contrast select,
+body.is-high-contrast textarea,
+body.is-high-contrast .switch-slider {
+  border-color: #000000 !important;
+}
+
+body.is-reduced-motion button:active:not(:disabled),
+body.is-reduced-motion .track-shape-button:hover,
+body.is-reduced-motion .mobile-nav-item:hover,
+body.is-reduced-motion .preset-action-button:hover,
+body.is-reduced-motion .data-action-button:hover {
+  transform: none !important;
+}
+
+body.is-child-locked .app-shell,
+body.is-child-locked .mobile-bottom-nav {
+  pointer-events: none;
+}
+
+body.is-child-locked .child-lock-overlay,
+body.is-child-locked .child-lock-overlay * {
+  pointer-events: auto;
+}
+
+.child-lock-overlay {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.child-lock-card {
+  max-height: calc(100dvh - max(36px, env(safe-area-inset-top)) - max(36px, env(safe-area-inset-bottom)));
+  overflow: auto;
+}
+
+.unlock-progress-track {
+  min-height: 8px;
+}
+
+@media (max-width: 359px) {
+  .primary-controls.is-resume-choice {
+    gap: 8px;
+  }
+
+  .primary-controls.is-resume-choice .control-button {
+    padding-inline: 8px;
+    font-size: 0.74rem;
+  }
+}
