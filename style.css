@@ -10977,3 +10977,417 @@ body.is-child-locked .child-lock-overlay * {
     font-size: 0.84rem;
   }
 }
+
+/* =========================================================
+   Stage 44: スマホのタイマー画面を軽くする
+   - iPhone / Androidスマホ縦では1カラムの自然な文書順を優先
+   - 100dvh + safe-area で固定下部ナビとの重なりを回避
+   - 線路は大きく、操作カードは線路の下に分離
+   ========================================================= */
+@media (max-width: 599px) and (orientation: portrait) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body.page-timer-active,
+  body.page-timer-active .app-shell {
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body.page-timer-active .main-content {
+    height: auto !important;
+    min-height: calc(100dvh - var(--compact-header-height, 58px)) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding-top: 8px !important;
+    padding-right: max(8px, env(safe-area-inset-right, 0px)) !important;
+    padding-bottom: calc(var(--compact-nav-height, 66px) + 30px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: max(8px, env(safe-area-inset-left, 0px)) !important;
+  }
+
+  #pageTimer.app-page.is-active {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-content: start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  #pageTimer .railway-card,
+  #pageTimer .timer-actions-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    position: static !important;
+    transform: none !important;
+    border-radius: 14px !important;
+  }
+
+  #pageTimer .railway-card {
+    display: grid !important;
+    grid-template-rows: auto auto auto !important;
+    gap: 8px !important;
+    min-height: 0 !important;
+    padding: 10px !important;
+    overflow: visible !important;
+  }
+
+  #pageTimer .railway-card .section-heading-row {
+    display: none !important;
+  }
+
+  #pageTimer .track-shape-switcher {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+  }
+
+  #pageTimer .track-shape-button {
+    min-width: 0 !important;
+    min-height: 42px !important;
+    padding: 6px 4px !important;
+    font-size: clamp(0.72rem, 3.2vw, 0.84rem) !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  #pageTimer .railway-preview {
+    display: grid !important;
+    place-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: clamp(304px, 43dvh, 380px) !important;
+    min-height: clamp(304px, 43dvh, 380px) !important;
+    max-height: none !important;
+    padding: 8px !important;
+    overflow: hidden !important;
+  }
+
+  #pageTimer .railway-preview--horizontal {
+    height: clamp(300px, 42dvh, 368px) !important;
+    min-height: clamp(300px, 42dvh, 368px) !important;
+  }
+
+  #pageTimer .railway-preview--vertical {
+    height: clamp(338px, 47dvh, 430px) !important;
+    min-height: clamp(338px, 47dvh, 430px) !important;
+  }
+
+  #pageTimer .railway-preview--circle {
+    height: clamp(314px, 43dvh, 384px) !important;
+    min-height: clamp(314px, 43dvh, 384px) !important;
+  }
+
+  #pageTimer .railway-track--horizontal,
+  #pageTimer .railway-track--vertical {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  #pageTimer .railway-track--horizontal {
+    min-height: 258px !important;
+    padding-right: 24px !important;
+    padding-left: 24px !important;
+  }
+
+  #pageTimer .railway-track--horizontal .track-bed,
+  #pageTimer .railway-track--horizontal .track-segment-list {
+    right: 24px !important;
+    left: 24px !important;
+  }
+
+  #pageTimer .railway-track--vertical {
+    width: min(100%, 368px) !important;
+    min-height: 310px !important;
+    margin-inline: auto !important;
+  }
+
+  #pageTimer .railway-track--circle {
+    width: min(78vw, 316px) !important;
+    height: min(78vw, 316px) !important;
+    min-width: 260px !important;
+    min-height: 260px !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: auto !important;
+  }
+
+  #pageTimer .route-time-panel {
+    min-width: 122px !important;
+    min-height: 74px !important;
+    padding: 8px 10px !important;
+    gap: 4px !important;
+  }
+
+  #pageTimer .route-time-panel.is-double {
+    min-width: 174px !important;
+  }
+
+  #pageTimer .route-time-value-block strong {
+    font-size: clamp(1.34rem, 6.2vw, 1.72rem) !important;
+  }
+
+  #pageTimer .route-time-panel.is-double .route-time-value-block strong {
+    font-size: clamp(1.02rem, 4.6vw, 1.22rem) !important;
+  }
+
+  #pageTimer .station-name {
+    font-size: clamp(0.62rem, 2.8vw, 0.78rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  #pageTimer .station-time {
+    font-size: clamp(0.56rem, 2.4vw, 0.68rem) !important;
+  }
+
+  #pageTimer .train-emoji {
+    font-size: clamp(2.18rem, 10vw, 2.75rem) !important;
+  }
+
+  #pageTimer .journey-status-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  #pageTimer .journey-status-item {
+    min-height: 58px !important;
+    padding: 8px 9px 8px 12px !important;
+    overflow: hidden !important;
+  }
+
+  #pageTimer .journey-status-item dt {
+    font-size: clamp(0.62rem, 2.6vw, 0.72rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  #pageTimer .journey-status-item dd {
+    margin-top: 4px !important;
+    font-size: clamp(0.78rem, 3.4vw, 0.92rem) !important;
+    line-height: 1.3 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #pageTimer .active-train-summary--timer-page {
+    justify-self: center !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    min-height: 24px !important;
+    margin: 8px auto 0 !important;
+    padding: 3px 10px !important;
+    font-size: 0.72rem !important;
+    line-height: 1.3 !important;
+  }
+
+  #pageTimer .journey-progress,
+  #pageTimer .segment-overview {
+    display: none !important;
+  }
+
+  #pageTimer .timer-actions-card {
+    display: grid !important;
+    gap: 9px !important;
+    padding: 10px !important;
+    border: 1px solid var(--color-border) !important;
+    background: #ffffff !important;
+    box-shadow: var(--shadow-card) !important;
+    overflow: visible !important;
+  }
+
+  #pageTimer .timer-actions-layout {
+    display: grid !important;
+    gap: 9px !important;
+  }
+
+  #pageTimer .action-zone {
+    display: grid !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+
+  #pageTimer .action-zone-label {
+    margin: 0 !important;
+    color: var(--color-muted) !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+  }
+
+  #pageTimer .primary-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  #pageTimer .primary-controls.is-resume-choice {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  #pageTimer .control-button,
+  #pageTimer .restart-button {
+    min-width: 0 !important;
+    min-height: 48px !important;
+    padding: 10px 12px !important;
+    font-size: clamp(0.9rem, 3.8vw, 1rem) !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
+  }
+
+  #pageTimer .quick-add-controls {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  #pageTimer .quick-add-button {
+    min-height: 44px !important;
+    padding: 9px 10px !important;
+    font-size: clamp(0.86rem, 3.5vw, 0.96rem) !important;
+  }
+
+  #pageTimer .completion-panel {
+    margin-top: 8px !important;
+    padding: 10px !important;
+  }
+
+  #pageTimer .time-addition-history-card:not([hidden]) {
+    right: max(8px, env(safe-area-inset-right, 0px)) !important;
+    bottom: calc(var(--compact-nav-height, 66px) + 14px + env(safe-area-inset-bottom, 0px)) !important;
+    left: max(8px, env(safe-area-inset-left, 0px)) !important;
+    max-height: 132px !important;
+  }
+
+  .mobile-bottom-nav {
+    min-height: var(--compact-nav-height, 66px) !important;
+    right: max(8px, env(safe-area-inset-right, 0px)) !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    left: max(8px, env(safe-area-inset-left, 0px)) !important;
+  }
+}
+
+@media (max-width: 359px) and (orientation: portrait) {
+  body.page-timer-active .main-content {
+    padding-top: 6px !important;
+    padding-right: max(6px, env(safe-area-inset-right, 0px)) !important;
+    padding-left: max(6px, env(safe-area-inset-left, 0px)) !important;
+  }
+
+  #pageTimer.app-page.is-active {
+    gap: 8px !important;
+  }
+
+  #pageTimer .railway-card,
+  #pageTimer .timer-actions-card {
+    border-radius: 12px !important;
+  }
+
+  #pageTimer .railway-card {
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+
+  #pageTimer .track-shape-switcher {
+    min-height: 38px !important;
+    gap: 5px !important;
+  }
+
+  #pageTimer .track-shape-button {
+    min-height: 38px !important;
+    padding-inline: 3px !important;
+  }
+
+  #pageTimer .railway-preview,
+  #pageTimer .railway-preview--horizontal,
+  #pageTimer .railway-preview--circle {
+    height: clamp(272px, 40dvh, 320px) !important;
+    min-height: clamp(272px, 40dvh, 320px) !important;
+    padding: 6px !important;
+  }
+
+  #pageTimer .railway-preview--vertical {
+    height: clamp(306px, 45dvh, 360px) !important;
+    min-height: clamp(306px, 45dvh, 360px) !important;
+  }
+
+  #pageTimer .railway-track--horizontal {
+    min-height: 226px !important;
+    padding-right: 20px !important;
+    padding-left: 20px !important;
+  }
+
+  #pageTimer .railway-track--horizontal .track-bed,
+  #pageTimer .railway-track--horizontal .track-segment-list {
+    right: 20px !important;
+    left: 20px !important;
+  }
+
+  #pageTimer .railway-track--vertical {
+    min-height: 276px !important;
+  }
+
+  #pageTimer .railway-track--circle {
+    width: min(72vw, 260px) !important;
+    height: min(72vw, 260px) !important;
+    min-width: 236px !important;
+    min-height: 236px !important;
+  }
+
+  #pageTimer .route-time-panel {
+    min-width: 110px !important;
+    min-height: 68px !important;
+    padding: 7px 8px !important;
+  }
+
+  #pageTimer .route-time-panel.is-double {
+    min-width: 158px !important;
+  }
+
+  #pageTimer .journey-status-grid {
+    gap: 6px !important;
+  }
+
+  #pageTimer .journey-status-item {
+    min-height: 52px !important;
+    padding: 7px 7px 7px 10px !important;
+  }
+
+  #pageTimer .timer-actions-card {
+    gap: 8px !important;
+    padding: 8px !important;
+  }
+
+  #pageTimer .control-button,
+  #pageTimer .restart-button {
+    min-height: 44px !important;
+    padding-inline: 8px !important;
+    font-size: 0.86rem !important;
+  }
+
+  #pageTimer .primary-controls.is-resume-choice {
+    gap: 6px !important;
+  }
+
+  #pageTimer .quick-add-button {
+    min-height: 42px !important;
+    padding-inline: 8px !important;
+  }
+}

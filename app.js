@@ -34,7 +34,7 @@
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
   const STORAGE_SCHEMA_VERSION = 11;
-  const APP_VERSION = "1.18.0";
+  const APP_VERSION = "1.18.1";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
