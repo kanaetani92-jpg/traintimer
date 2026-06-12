@@ -34,7 +34,7 @@
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
   const STORAGE_SCHEMA_VERSION = 10;
-  const APP_VERSION = "1.17.7";
+  const APP_VERSION = "1.17.8";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
@@ -385,6 +385,8 @@
     newTrainSoundSelect: document.getElementById("newTrainSoundSelect"),
     newTrainAutoShowToggle: document.getElementById("newTrainAutoShowToggle"),
     newTrainAutoPreview: document.getElementById("newTrainAutoPreview"),
+    newTrainSubmitHint: document.getElementById("newTrainSubmitHint"),
+    createTrainSubmitButton: document.getElementById("createTrainSubmitButton"),
     createTrainExampleButtons: document.querySelectorAll("[data-example-train]"),
     quickRouteButtons: document.querySelectorAll("[data-quick-route]"),
     storageStatusBadge: document.getElementById("storageStatusBadge"),
@@ -540,6 +542,15 @@
 
   function sanitizeTrainName(value, fallbackName = "いま見る電車") {
     return sanitizePresetName(value, fallbackName);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function normalizeTrainStatus(value) {
@@ -2727,38 +2738,141 @@
     });
   }
 
-  function getCreateTrainFormValues() {
-    const stationCount = clamp(
-      Math.round(Number(elements.newTrainStationCountInput?.value) || 4),
-      2,
-      MAX_STATIONS
-    );
-    const unitMinutes = sanitizeUnitMinutes(
-      elements.newTrainUnitMinutesInput?.value || 5
-    );
-    const creationMode = getSelectedTrainCreationMode();
+  function readIntegerInputValue(input) {
+    const rawValue = String(input?.value ?? "").trim();
 
+    if (rawValue === "") {
+      return NaN;
+    }
+
+    return Math.round(Number(rawValue));
+  }
+
+  function getCreateTrainRawFormValues() {
     return {
       name: sanitizeTrainName(
         elements.newTrainNameInput?.value,
         getSuggestedTrainName()
       ),
-      creationMode,
-      totalMinutes: clamp(
-        Math.round(Number(elements.newTrainTotalMinutesInput?.value) || 25),
-        1,
-        180
-      ),
-      stationCount,
-      unitMinutes,
+      creationMode: getSelectedTrainCreationMode(),
+      totalMinutes: readIntegerInputValue(elements.newTrainTotalMinutesInput),
+      stationCount: readIntegerInputValue(elements.newTrainStationCountInput),
+      unitMinutes: readIntegerInputValue(elements.newTrainUnitMinutesInput),
       trackShape: normalizeTrackShape(elements.newTrainTrackShapeSelect?.value),
       sound: elements.newTrainSoundSelect?.value || "default",
       autoShow: Boolean(elements.newTrainAutoShowToggle?.checked)
     };
   }
 
+  function validateCreateTrainRawValues(rawValues = getCreateTrainRawFormValues()) {
+    const errors = [];
+    const creationMode = normalizeTrainCreationMode(rawValues.creationMode);
+
+    if (!Number.isFinite(rawValues.totalMinutes) || rawValues.totalMinutes < 1) {
+      errors.push("全体時間は1分以上にしてください。");
+    } else if (rawValues.totalMinutes > MAX_UNIT_MINUTES) {
+      errors.push(`全体時間は${MAX_UNIT_MINUTES}分までにしてください。`);
+    }
+
+    if (creationMode === TRAIN_CREATION_MODE.STATION_COUNT) {
+      if (!Number.isFinite(rawValues.stationCount) || rawValues.stationCount < 2) {
+        errors.push("駅は2つ以上にしてください。");
+      } else if (rawValues.stationCount > MAX_STATIONS) {
+        errors.push(`駅が多くなりすぎるので、${MAX_STATIONS}駅までにしてください。`);
+      }
+    }
+
+    if (creationMode === TRAIN_CREATION_MODE.AUTO_BY_UNIT) {
+      if (!Number.isFinite(rawValues.unitMinutes) || rawValues.unitMinutes < 1) {
+        errors.push("1駅間の目安は1分以上にしてください。");
+      } else if (rawValues.unitMinutes > MAX_UNIT_MINUTES) {
+        errors.push(`1駅間の目安は${MAX_UNIT_MINUTES}分までにしてください。`);
+      }
+
+      if (errors.length === 0) {
+        const calculatedSegmentCount = Math.ceil(rawValues.totalMinutes / rawValues.unitMinutes);
+        if (calculatedSegmentCount > MAX_STATIONS - 1) {
+          errors.push(
+            `駅が多くなりすぎるので、1駅間の時間を少し長くしてください。最大${MAX_STATIONS}駅まで作れます。`
+          );
+        }
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  function getCreateTrainFormValues() {
+    const rawValues = getCreateTrainRawFormValues();
+    const stationCount = clamp(
+      Math.round(Number(rawValues.stationCount) || 4),
+      2,
+      MAX_STATIONS
+    );
+    const unitMinutes = sanitizeUnitMinutes(rawValues.unitMinutes || 5);
+
+    return {
+      name: rawValues.name,
+      creationMode: normalizeTrainCreationMode(rawValues.creationMode),
+      totalMinutes: clamp(
+        Math.round(Number(rawValues.totalMinutes) || 25),
+        1,
+        MAX_UNIT_MINUTES
+      ),
+      stationCount,
+      unitMinutes,
+      trackShape: rawValues.trackShape,
+      sound: rawValues.sound,
+      autoShow: rawValues.autoShow
+    };
+  }
+
+  function formatSegmentMinutesForPreview(segmentMinutes = []) {
+    return normalizeMinuteArray(segmentMinutes, [])
+      .map((minutes) => `${minutes}分`)
+      .join("、");
+  }
+
+  function updateCreateTrainSubmitState({ isValid, summaryText, errors } = {}) {
+    const disabled = !isValid;
+
+    if (elements.createTrainSubmitButton) {
+      elements.createTrainSubmitButton.disabled = disabled;
+      elements.createTrainSubmitButton.setAttribute("aria-disabled", disabled ? "true" : "false");
+    }
+
+    if (elements.newTrainSubmitHint) {
+      elements.newTrainSubmitHint.textContent = disabled
+        ? (errors?.[0] || "入力内容を確認してください。")
+        : (summaryText || "この内容で電車を作ります");
+      elements.newTrainSubmitHint.classList.toggle("is-error", disabled);
+    }
+  }
+
   function updateCreateTrainPreview() {
     if (!elements.newTrainAutoPreview) {
+      return;
+    }
+
+    const rawValues = getCreateTrainRawFormValues();
+    const validation = validateCreateTrainRawValues(rawValues);
+
+    if (!validation.isValid) {
+      const errorItems = validation.errors
+        .map((message) => `<li>${escapeHtml(message)}</li>`)
+        .join("");
+      elements.newTrainAutoPreview.classList.add("has-error");
+      elements.newTrainAutoPreview.innerHTML =
+        `<p class="create-train-preview-title">できあがる電車</p>` +
+        `<p class="create-train-preview-body">入力を直すと、作成結果がここに表示されます。</p>` +
+        `<ul class="create-train-preview-errors">${errorItems}</ul>`;
+      updateCreateTrainSubmitState({
+        isValid: false,
+        errors: validation.errors
+      });
       return;
     }
 
@@ -2770,23 +2884,52 @@
       const creationData = result.creationData;
       const stationNames = generateStationNamesForNewTrain(creationData.stationCount);
       const shapeLabel = getTrackShapeDetails(values.trackShape).label;
-      const segmentText = creationData.segmentMinutes.join("分、") + "分";
-      const warningText = creationData.warningMessages.length > 0
-        ? ` ${creationData.warningMessages.join(" ")}`
-        : "";
-
+      const segmentText = formatSegmentMinutesForPreview(creationData.segmentMinutes);
+      const allSegmentsEqual = creationData.segmentMinutes.every(
+        (minutes) => minutes === creationData.segmentMinutes[0]
+      );
       const modeText = values.creationMode === TRAIN_CREATION_MODE.AUTO_BY_UNIT
         ? `時間に合わせて駅を自動で作ります。1駅間の目安は${creationData.unitMinutes}分です。`
         : `駅の数を自分で決めます。${creationData.stationCount}駅で作ります。`;
+      const detailRows = [
+        ["全体", `${creationData.totalMinutes}分`],
+        ["駅", `${creationData.stationCount}駅`],
+        ["駅間", `${creationData.segmentMinutes.length}区間`],
+        allSegmentsEqual
+          ? ["1駅間", `${creationData.segmentMinutes[0]}分`]
+          : ["駅間時間", segmentText]
+      ];
+      const warningText = creationData.warningMessages.length > 0
+        ? `<p class="create-train-preview-warning">${escapeHtml(creationData.warningMessages.join(" "))}</p>`
+        : "";
+      const routeText = stationNames.join(" → ");
+      const summaryText = `この内容で電車を作ります：全体${creationData.totalMinutes}分・${creationData.stationCount}駅・${shapeLabel}線路`;
+
+      elements.newTrainAutoPreview.classList.remove("has-error");
       elements.newTrainAutoPreview.innerHTML =
         `<p class="create-train-preview-title">できあがる電車</p>` +
-        `<p class="create-train-preview-body">${modeText}</p>` +
-        `<p class="create-train-preview-body">全体${creationData.totalMinutes}分、${creationData.stationCount}駅、駅間${creationData.segmentMinutes.length}区間（${segmentText}）で作成します。</p>` +
-        `<p class="create-train-preview-body">${stationNames.join(" → ")}、${shapeLabel}線路。${warningText}</p>`;
+        `<p class="create-train-preview-body">${escapeHtml(modeText)}</p>` +
+        `<dl class="create-train-preview-summary">${detailRows.map(([label, value]) =>
+          `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`
+        ).join("")}</dl>` +
+        `<p class="create-train-preview-body">${escapeHtml(routeText)}、${escapeHtml(shapeLabel)}線路。</p>` +
+        warningText;
+      updateCreateTrainSubmitState({
+        isValid: true,
+        summaryText
+      });
     } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "入力内容を確認してください。";
+      elements.newTrainAutoPreview.classList.add("has-error");
       elements.newTrainAutoPreview.innerHTML =
         `<p class="create-train-preview-title">できあがる電車</p>` +
-        `<p class="create-train-preview-body">${error instanceof Error ? error.message : "入力内容を確認してください。"}</p>`;
+        `<p class="create-train-preview-body">${escapeHtml(message)}</p>`;
+      updateCreateTrainSubmitState({
+        isValid: false,
+        errors: [message]
+      });
     }
   }
 
@@ -2860,6 +3003,15 @@
       setStatusMessage(
         `運行中の電車は${MAX_ACTIVE_TRAINS}本まで追加できます。使わない電車を削除してください。`
       );
+      return;
+    }
+
+    const rawValues = getCreateTrainRawFormValues();
+    const validation = validateCreateTrainRawValues(rawValues);
+
+    if (!validation.isValid) {
+      setStatusMessage(validation.errors[0] || "入力内容を確認してください。");
+      updateCreateTrainPreview();
       return;
     }
 
@@ -6677,7 +6829,8 @@
       distributeMinutesAcrossSegments,
       createTrainByStationCount,
       createTrainByAutoUnit,
-      normalizeTrainCreationData
+      normalizeTrainCreationData,
+      validateCreateTrainRawValues
     });
   }
 

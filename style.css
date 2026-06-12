@@ -10872,3 +10872,108 @@ body.is-child-locked .child-lock-overlay * {
     font-size: 0.7rem;
   }
 }
+
+/* Stage 40: 作成プレビューと入力チェック */
+.create-train-preview {
+  display: grid;
+  gap: 8px;
+}
+
+.create-train-preview.has-error {
+  border-color: #f4a6b5;
+  background: #fff5f6;
+  color: #8b1d2f;
+}
+
+.create-train-preview-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 2px 0;
+}
+
+.create-train-preview-summary div {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #f1d4da;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.create-train-preview-summary dt {
+  margin: 0 0 2px;
+  color: #59636d;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.create-train-preview-summary dd {
+  margin: 0;
+  color: #27313b;
+  font-size: 0.92rem;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.create-train-preview-errors {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 1.15em;
+  color: #9f1239;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.create-train-preview-warning {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #fff3cd;
+  color: #7c4a03;
+  font-weight: 900;
+}
+
+.create-train-submit-area {
+  display: grid;
+  gap: 8px;
+}
+
+.create-train-submit-hint {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: #4f5963;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.create-train-submit-hint.is-error {
+  color: #9f1239;
+  background: #fff1f3;
+}
+
+#createTrainSubmitButton:disabled,
+#createTrainSubmitButton[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.52;
+  filter: grayscale(0.18);
+}
+
+@media (max-width: 359px) {
+  .create-train-preview-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .create-train-preview-summary div,
+  .create-train-submit-hint {
+    padding: 7px 8px;
+  }
+
+  .create-train-preview-summary dd {
+    font-size: 0.84rem;
+  }
+}

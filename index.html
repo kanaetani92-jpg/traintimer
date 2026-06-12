@@ -594,10 +594,10 @@
 <p class="eyebrow">アプリ情報</p>
 <h2 id="aboutHeading">でんしゃタイマー</h2>
 </div>
-<span class="status-badge">Version 1.17.6</span>
+<span class="status-badge">Version 1.17.8</span>
 </div>
 <dl class="about-list">
-<div><dt>バージョン</dt><dd>1.17.6</dd></div>
+<div><dt>バージョン</dt><dd>1.17.8</dd></div>
 <div><dt>更新日</dt><dd>2026年6月10日</dd></div>
 <div><dt>保存場所</dt><dd>この端末のブラウザ内</dd></div>
 <div><dt>通信</dt><dd>設定やプリセットを外部へ送信しません</dd></div>
@@ -968,18 +968,27 @@
 </select>
 </div>
 </div>
-<div aria-live="polite" class="create-train-preview" id="newTrainAutoPreview">
+<div aria-live="polite" aria-atomic="true" class="create-train-preview" id="newTrainAutoPreview">
 <p class="create-train-preview-title">できあがる電車</p>
-<p class="create-train-preview-body">スタート → 駅1 → 駅2 → ゴール、全体25分で作成します。</p>
+<dl class="create-train-preview-summary">
+<div><dt>全体</dt><dd>25分</dd></div>
+<div><dt>駅</dt><dd>4駅</dd></div>
+<div><dt>駅間</dt><dd>3区間</dd></div>
+<div><dt>駅間時間</dt><dd>9分、8分、8分</dd></div>
+</dl>
+<p class="create-train-preview-body">スタート → 駅1 → 駅2 → ゴール</p>
 </div>
 <label class="check-option create-train-auto-show">
 <input id="newTrainAutoShowToggle" type="checkbox"/>
 <span>追加後にタイマー画面で表示する</span>
 </label>
 </section>
+<div class="create-train-submit-area">
+<p class="create-train-submit-hint" id="newTrainSubmitHint">この内容で電車を作ります</p>
 <div class="settings-actions create-train-actions">
 <button class="cancel-button" id="cancelCreateTrainButton" type="button">キャンセル</button>
-<button class="apply-button" type="submit">追加する</button>
+<button class="apply-button" id="createTrainSubmitButton" type="submit">追加する</button>
+</div>
 </div>
 </form>
 </section>
