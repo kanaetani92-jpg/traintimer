@@ -19,17 +19,22 @@
 
   const MIN_UNIT_MINUTES = 1;
   const MAX_UNIT_MINUTES = 180;
-  const MAX_STATIONS = 10;
+  const MAX_STATIONS = 12;
   const DISPLAY_UPDATE_INTERVAL_MS = 100;
   const UNIT_PRESETS = [1, 2, 3, 5, 10, 15];
+  const TRAIN_CREATION_MODE = Object.freeze({
+    STATION_COUNT: "stationCount",
+    AUTO_BY_UNIT: "autoByUnit"
+  });
+  const DEFAULT_TRAIN_CREATION_MODE = TRAIN_CREATION_MODE.STATION_COUNT;
   const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
   const ADDITION_TARGET = Object.freeze({
     CURRENT: "current",
     OVERALL: "overall"
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
-  const STORAGE_SCHEMA_VERSION = 9;
-  const APP_VERSION = "1.17.5";
+  const STORAGE_SCHEMA_VERSION = 10;
+  const APP_VERSION = "1.17.6";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
@@ -77,11 +82,11 @@
   });
 
   const NEW_TRAIN_EXAMPLES = Object.freeze({
-    study25: { name: "勉強25分号", totalMinutes: 25, stationCount: 4, unitMinutes: 5, trackShape: "horizontal", sound: "default" },
-    break5: { name: "休憩5分号", totalMinutes: 5, stationCount: 3, unitMinutes: 5, trackShape: "circle", sound: "goal-only" },
-    cleanup10: { name: "お片付け10分号", totalMinutes: 10, stationCount: 4, unitMinutes: 5, trackShape: "horizontal", sound: "default" },
-    morning15: { name: "朝の支度15分号", totalMinutes: 15, stationCount: 4, unitMinutes: 5, trackShape: "horizontal", sound: "default" },
-    reading15: { name: "読書15分号", totalMinutes: 15, stationCount: 4, unitMinutes: 5, trackShape: "vertical", sound: "goal-only" }
+    study25: { name: "勉強25分号", totalMinutes: 25, stationCount: 4, unitMinutes: 5, creationMode: "stationCount", trackShape: "horizontal", sound: "default" },
+    break5: { name: "休憩5分号", totalMinutes: 5, stationCount: 3, unitMinutes: 5, creationMode: "stationCount", trackShape: "circle", sound: "goal-only" },
+    cleanup10: { name: "お片付け10分号", totalMinutes: 10, stationCount: 4, unitMinutes: 5, creationMode: "stationCount", trackShape: "horizontal", sound: "default" },
+    morning15: { name: "朝の支度15分号", totalMinutes: 15, stationCount: 4, unitMinutes: 5, creationMode: "stationCount", trackShape: "horizontal", sound: "default" },
+    reading15: { name: "読書15分号", totalMinutes: 15, stationCount: 4, unitMinutes: 5, creationMode: "stationCount", trackShape: "vertical", sound: "goal-only" }
   });
 
   const QUICK_ROUTE_DEFINITIONS = Object.freeze({
@@ -191,7 +196,7 @@
   }) {
     const safeStationNames =
       Array.isArray(stationNames) && stationNames.length >= 2
-        ? stationNames.slice(0, 10)
+        ? stationNames.slice(0, MAX_STATIONS)
         : ["スタート", "ゴール"];
 
     const stations = safeStationNames.map((name, index) => ({
@@ -540,6 +545,12 @@
       : TRAIN_STATUS.IDLE;
   }
 
+  function normalizeTrainCreationMode(value) {
+    return Object.values(TRAIN_CREATION_MODE).includes(value)
+      ? value
+      : DEFAULT_TRAIN_CREATION_MODE;
+  }
+
   function normalizeFontSize(value) {
     return ["normal", "large", "xlarge"].includes(value)
       ? value
@@ -705,6 +716,80 @@
     return clamp(parsed, MIN_UNIT_MINUTES, MAX_UNIT_MINUTES);
   }
 
+  function normalizeMinuteArray(values, fallbackValues = []) {
+    const source = Array.isArray(values) && values.length > 0
+      ? values
+      : Array.isArray(fallbackValues)
+        ? fallbackValues
+        : [];
+
+    return source
+      .map((value) => Math.max(1, Math.round(Number(value) || 1)))
+      .filter((value) => Number.isFinite(value) && value > 0)
+      .slice(0, MAX_STATIONS - 1);
+  }
+
+  function normalizeTrainCreationData(source = {}, options = {}) {
+    const rawSource = source && typeof source === "object" ? source : {};
+    const configuration = options.configuration
+      ? normalizeConfigurationData(options.configuration)
+      : rawSource.configuration
+        ? normalizeConfigurationData(rawSource.configuration)
+        : null;
+    const fallbackSegmentMinutes = configuration
+      ? configuration.segments.map((segment) =>
+          getSegmentDurationMinutes(configuration, segment)
+        )
+      : [];
+    const segmentMinutes = normalizeMinuteArray(
+      rawSource.segmentMinutes,
+      fallbackSegmentMinutes
+    );
+    const totalFromSegments = segmentMinutes.reduce((total, value) => total + value, 0);
+    const totalMinutes = clamp(
+      Math.max(
+        1,
+        Math.round(
+          Number(rawSource.totalMinutes) ||
+            (configuration ? calculateTotalMinutes(configuration) : 0) ||
+            totalFromSegments ||
+            1
+        )
+      ),
+      1,
+      MAX_UNIT_MINUTES
+    );
+    const stationCount = clamp(
+      Math.round(
+        Number(rawSource.stationCount) ||
+          (configuration ? configuration.stations.length : 0) ||
+          segmentMinutes.length + 1 ||
+          2
+      ),
+      2,
+      MAX_STATIONS
+    );
+    const unitMinutes = sanitizeUnitMinutes(
+      rawSource.unitMinutes ??
+        rawSource.autoUnitMinutes ??
+        rawSource.targetUnitMinutes ??
+        (configuration ? configuration.unitMinutes : 5)
+    );
+
+    return {
+      creationMode: normalizeTrainCreationMode(rawSource.creationMode),
+      totalMinutes,
+      stationCount,
+      unitMinutes,
+      segmentMinutes: segmentMinutes.length > 0
+        ? segmentMinutes
+        : distributeMinutesAcrossSegments(totalMinutes, Math.max(1, stationCount - 1)),
+      warningMessages: Array.isArray(rawSource.warningMessages)
+        ? rawSource.warningMessages.map((message) => String(message)).filter(Boolean)
+        : []
+    };
+  }
+
   function sanitizeStationName(value, fallbackName) {
     const normalized = String(value ?? "")
       .replace(/\s+/g, " ")
@@ -735,7 +820,7 @@
         ? settings.segments
         : [];
 
-    if (rawStations.length < 2 || rawStations.length > 10) {
+    if (rawStations.length < 2 || rawStations.length > MAX_STATIONS) {
       throw new Error("駅の数が正しくありません。");
     }
 
@@ -867,11 +952,17 @@
     const now = new Date().toISOString();
     const totalMinutes = calculateTotalMinutes(normalizedConfiguration);
     const totalMs = totalMinutes * 60 * 1000;
+    const normalizedCreationData = normalizeTrainCreationData(
+      options.creationData || options,
+      { configuration: normalizedConfiguration }
+    );
 
     return {
       id: options.id || createId("train"),
       name: sanitizeTrainName(options.name, "いま見る電車"),
       status: normalizeTrainStatus(options.status),
+      creationMode: normalizedCreationData.creationMode,
+      creationData: normalizedCreationData,
       settings: serialized.settings,
       stations: serialized.stations,
       segments: serialized.segments,
@@ -924,6 +1015,10 @@
           : createId("train"),
       name: sanitizeTrainName(source.name, "いま見る電車"),
       status: safeStatus,
+      creationData: normalizeTrainCreationData(
+        source.creationData || source,
+        { configuration: normalizedConfiguration }
+      ),
       remainingMs: source.remainingMs,
       endTimeMs: source.endTimeMs,
       soundSettings: source.soundSettings,
@@ -939,6 +1034,8 @@
       id: normalized.id,
       name: normalized.name,
       status: normalized.status,
+      creationMode: normalized.creationMode,
+      creationData: { ...normalized.creationData },
       settings: normalized.settings,
       stations: normalized.stations.map((station) => ({ ...station })),
       segments: normalized.segments.map((segment) => ({ ...segment })),
@@ -2288,14 +2385,31 @@
     });
   }
 
-  function distributeMinutesAcrossSegments(totalMinutes, segmentCount) {
+  function distributeMinutesAcrossSegments(totalMinutes, segmentCount, options = {}) {
     const safeSegmentCount = Math.max(1, Math.round(Number(segmentCount) || 1));
-    const safeTotalMinutes = Math.max(
-      safeSegmentCount,
-      Math.round(Number(totalMinutes) || safeSegmentCount)
-    );
-    const base = Math.floor(safeTotalMinutes / safeSegmentCount);
-    let remainder = safeTotalMinutes % safeSegmentCount;
+    const safeTotalMinutes = Math.max(1, Math.round(Number(totalMinutes) || 1));
+    const strategy = options.strategy || "balanced";
+
+    if (strategy === "lastRemainder") {
+      const unitMinutes = sanitizeUnitMinutes(options.unitMinutes || safeTotalMinutes);
+      const minutes = [];
+      let remainingMinutes = safeTotalMinutes;
+
+      for (let index = 0; index < safeSegmentCount; index += 1) {
+        const isLast = index === safeSegmentCount - 1;
+        const value = isLast
+          ? remainingMinutes
+          : Math.min(unitMinutes, remainingMinutes - (safeSegmentCount - index - 1));
+        minutes.push(Math.max(1, value));
+        remainingMinutes -= value;
+      }
+
+      return minutes;
+    }
+
+    const adjustedTotalMinutes = Math.max(safeSegmentCount, safeTotalMinutes);
+    const base = Math.floor(adjustedTotalMinutes / safeSegmentCount);
+    let remainder = adjustedTotalMinutes % safeSegmentCount;
 
     return Array.from({ length: safeSegmentCount }, () => {
       const minutes = base + (remainder > 0 ? 1 : 0);
@@ -2304,35 +2418,151 @@
     });
   }
 
-  function createNewTrainConfiguration({
-    totalMinutes,
-    stationCount,
-    unitMinutes,
-    trackShape
+  function calculateStationCountFromUnitMinutes(totalMinutes, unitMinutes) {
+    const safeTotalMinutes = clamp(
+      Math.max(1, Math.round(Number(totalMinutes) || 1)),
+      1,
+      MAX_UNIT_MINUTES
+    );
+    const safeUnitMinutes = sanitizeUnitMinutes(unitMinutes || 5);
+    const calculatedSegmentCount = Math.max(
+      1,
+      Math.ceil(safeTotalMinutes / safeUnitMinutes)
+    );
+    const maximumSegmentCount = MAX_STATIONS - 1;
+    const warningMessages = [];
+
+    if (calculatedSegmentCount > maximumSegmentCount) {
+      warningMessages.push(
+        `駅が多くなりすぎるので、1駅間の時間を少し長くしてください。最大${MAX_STATIONS}駅まで作れます。`
+      );
+    }
+
+    const safeSegmentCount = clamp(calculatedSegmentCount, 1, maximumSegmentCount);
+
+    return {
+      isValid: calculatedSegmentCount <= maximumSegmentCount,
+      totalMinutes: safeTotalMinutes,
+      unitMinutes: safeUnitMinutes,
+      segmentCount: safeSegmentCount,
+      stationCount: safeSegmentCount + 1,
+      warningMessages
+    };
+  }
+
+  function createConfigurationFromSegmentMinutes({
+    segmentMinutes,
+    trackShape,
+    stationCount
   }) {
-    const safeUnitMinutes = sanitizeUnitMinutes(unitMinutes);
-    const stationNames = generateStationNamesForNewTrain(stationCount);
-    const segmentMinutes = distributeMinutesAcrossSegments(
-      Math.max(
-        Math.round(Number(totalMinutes) || 1),
-        (stationNames.length - 1) * safeUnitMinutes
-      ),
-      stationNames.length - 1
+    const safeSegmentMinutes = normalizeMinuteArray(segmentMinutes, [1]);
+    const safeStationCount = clamp(
+      Math.round(Number(stationCount) || safeSegmentMinutes.length + 1),
+      2,
+      MAX_STATIONS
     );
-    const segmentUnits = segmentMinutes.map((minutes) =>
-      Math.max(1, Math.floor(minutes / safeUnitMinutes))
-    );
-    const segmentExtraMinutes = segmentMinutes.map((minutes, index) =>
-      Math.max(0, minutes - segmentUnits[index] * safeUnitMinutes)
-    );
+    const stationNames = generateStationNamesForNewTrain(safeStationCount);
+    const minutesForSegments = safeSegmentMinutes.slice(0, stationNames.length - 1);
+
+    while (minutesForSegments.length < stationNames.length - 1) {
+      minutesForSegments.push(1);
+    }
 
     return createConfigurationFromDefinition({
-      unitMinutes: safeUnitMinutes,
+      unitMinutes: 1,
       trackShape: normalizeTrackShape(trackShape),
       stationNames,
-      segmentUnits,
-      segmentExtraMinutes
+      segmentUnits: minutesForSegments,
+      segmentExtraMinutes: minutesForSegments.map(() => 0)
     });
+  }
+
+  function createTrainByStationCount(values = {}) {
+    const stationCount = clamp(
+      Math.round(Number(values.stationCount) || 4),
+      2,
+      MAX_STATIONS
+    );
+    const segmentCount = stationCount - 1;
+    const inputTotalMinutes = clamp(
+      Math.max(1, Math.round(Number(values.totalMinutes) || 25)),
+      1,
+      MAX_UNIT_MINUTES
+    );
+    const adjustedTotalMinutes = Math.max(inputTotalMinutes, segmentCount);
+    const warningMessages = [];
+
+    if (inputTotalMinutes < segmentCount) {
+      warningMessages.push(
+        `駅は${stationCount}駅あるため、全体時間を${adjustedTotalMinutes}分として作ります。`
+      );
+    }
+
+    const segmentMinutes = distributeMinutesAcrossSegments(
+      adjustedTotalMinutes,
+      segmentCount
+    );
+    const configurationForTrain = createConfigurationFromSegmentMinutes({
+      segmentMinutes,
+      stationCount,
+      trackShape: values.trackShape
+    });
+
+    return {
+      configuration: configurationForTrain,
+      creationData: normalizeTrainCreationData({
+        creationMode: TRAIN_CREATION_MODE.STATION_COUNT,
+        totalMinutes: adjustedTotalMinutes,
+        stationCount,
+        unitMinutes: sanitizeUnitMinutes(values.unitMinutes || 1),
+        segmentMinutes,
+        warningMessages
+      }, { configuration: configurationForTrain })
+    };
+  }
+
+  function createTrainByAutoUnit(values = {}) {
+    const calculation = calculateStationCountFromUnitMinutes(
+      values.totalMinutes,
+      values.unitMinutes || values.autoUnitMinutes || 5
+    );
+
+    if (!calculation.isValid) {
+      throw new Error(
+        calculation.warningMessages[0] ||
+          "駅が多くなりすぎるので、1駅間の時間を少し長くしてください。"
+      );
+    }
+
+    const segmentMinutes = distributeMinutesAcrossSegments(
+      calculation.totalMinutes,
+      calculation.segmentCount,
+      {
+        strategy: "lastRemainder",
+        unitMinutes: calculation.unitMinutes
+      }
+    );
+    const configurationForTrain = createConfigurationFromSegmentMinutes({
+      segmentMinutes,
+      stationCount: calculation.stationCount,
+      trackShape: values.trackShape
+    });
+
+    return {
+      configuration: configurationForTrain,
+      creationData: normalizeTrainCreationData({
+        creationMode: TRAIN_CREATION_MODE.AUTO_BY_UNIT,
+        totalMinutes: calculation.totalMinutes,
+        stationCount: calculation.stationCount,
+        unitMinutes: calculation.unitMinutes,
+        segmentMinutes,
+        warningMessages: calculation.warningMessages
+      }, { configuration: configurationForTrain })
+    };
+  }
+
+  function createNewTrainConfiguration(values = {}) {
+    return createTrainByStationCount(values).configuration;
   }
 
   function createQuickRouteConfiguration(definition) {
@@ -2483,11 +2713,9 @@
         elements.newTrainNameInput?.value,
         getSuggestedTrainName()
       ),
+      creationMode: TRAIN_CREATION_MODE.STATION_COUNT,
       totalMinutes: clamp(
-        Math.max(
-          minimumTotalMinutes,
-          Math.round(Number(elements.newTrainTotalMinutesInput?.value) || 25)
-        ),
+        Math.round(Number(elements.newTrainTotalMinutesInput?.value) || 25),
         1,
         180
       ),
@@ -2504,29 +2732,27 @@
       return;
     }
 
-    const stationCount = clamp(
-      Math.round(Number(elements.newTrainStationCountInput?.value) || 4),
-      2,
-      MAX_STATIONS
-    );
-    const unitMinutes = sanitizeUnitMinutes(
-      elements.newTrainUnitMinutesInput?.value || 5
-    );
-    const minimumTotalMinutes = (stationCount - 1) * unitMinutes;
-    const inputTotalMinutes = Math.round(
-      Number(elements.newTrainTotalMinutesInput?.value) || 25
-    );
-    const totalMinutes = Math.max(inputTotalMinutes, minimumTotalMinutes);
-    const stationNames = generateStationNamesForNewTrain(stationCount);
-    const shapeLabel = getTrackShapeDetails(
-      elements.newTrainTrackShapeSelect?.value
-    ).label;
-    const adjustment = inputTotalMinutes < minimumTotalMinutes
-      ? `（${stationCount}駅では最短${minimumTotalMinutes}分のため自動調整）`
-      : "";
+    try {
+      const values = getCreateTrainFormValues();
+      const result = values.creationMode === TRAIN_CREATION_MODE.AUTO_BY_UNIT
+        ? createTrainByAutoUnit(values)
+        : createTrainByStationCount(values);
+      const creationData = result.creationData;
+      const stationNames = generateStationNamesForNewTrain(creationData.stationCount);
+      const shapeLabel = getTrackShapeDetails(values.trackShape).label;
+      const segmentText = creationData.segmentMinutes.join("分、") + "分";
+      const warningText = creationData.warningMessages.length > 0
+        ? ` ${creationData.warningMessages.join(" ")}`
+        : "";
 
-    elements.newTrainAutoPreview.textContent =
-      `${stationNames.join(" → ")}、${shapeLabel}線路、全体${totalMinutes}分で作成します。${adjustment}`;
+      elements.newTrainAutoPreview.textContent =
+        `${stationNames.join(" → ")}、${shapeLabel}線路、全体${creationData.totalMinutes}分、駅間${creationData.segmentMinutes.length}区間（${segmentText}）で作成します。${warningText}`;
+    } catch (error) {
+      elements.newTrainAutoPreview.textContent =
+        error instanceof Error
+          ? error.message
+          : "入力内容を確認してください。";
+    }
   }
 
   function openCreateTrainPanel() {
@@ -2603,10 +2829,27 @@
     }
 
     const values = getCreateTrainFormValues();
-    const newConfiguration = createNewTrainConfiguration(values);
+    let creationResult;
+
+    try {
+      creationResult = values.creationMode === TRAIN_CREATION_MODE.AUTO_BY_UNIT
+        ? createTrainByAutoUnit(values)
+        : createTrainByStationCount(values);
+    } catch (error) {
+      setStatusMessage(
+        error instanceof Error
+          ? error.message
+          : "入力内容を確認してください。"
+      );
+      updateCreateTrainPreview();
+      return;
+    }
+
+    const newConfiguration = creationResult.configuration;
     const newTrain = createTrainRecordFromConfiguration(newConfiguration, {
       name: values.name,
       status: TRAIN_STATUS.IDLE,
+      creationData: creationResult.creationData,
       remainingMs: calculateTotalMinutes(newConfiguration) * 60 * 1000,
       soundSettings: getSoundSettingsForNewTrain(values.sound)
     });
@@ -6382,6 +6625,16 @@
     if (storageRecoveryNotice) {
       setStatusMessage(storageRecoveryNotice);
     }
+  }
+
+  if (typeof window !== "undefined") {
+    window.__trainTimerCreationUtils = Object.freeze({
+      calculateStationCountFromUnitMinutes,
+      distributeMinutesAcrossSegments,
+      createTrainByStationCount,
+      createTrainByAutoUnit,
+      normalizeTrainCreationData
+    });
   }
 
   initialize();

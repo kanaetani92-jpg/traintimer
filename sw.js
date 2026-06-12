@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "train-timer-v1.17.5";
+const CACHE_NAME = "train-timer-v1.17.6";
 const APP_SHELL = [
   "./",
   "./index.html",
