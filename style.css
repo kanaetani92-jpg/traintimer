@@ -10682,3 +10682,67 @@ body.is-child-locked .child-lock-overlay * {
     transform: none;
   }
 }
+
+/* Stage 36: iPad・タブレット縦の統合確認で、線路カードと操作カードが
+   100dvh内に圧縮されて重ならないように、タイマー画面を自然な縦積みに戻す。 */
+@media (min-width: 600px) and (max-width: 899px) and (orientation: portrait) {
+  body.page-timer-active .main-content {
+    height: auto !important;
+    min-height: calc(100dvh - var(--tablet-portrait-header-height, 68px)) !important;
+    overflow-y: auto !important;
+    padding-bottom: calc(var(--tablet-portrait-nav-height, 76px) + 48px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #pageTimer.app-page.is-active {
+    height: auto !important;
+    min-height: 0 !important;
+    grid-template-rows: auto auto !important;
+    align-content: start !important;
+    gap: 18px !important;
+  }
+
+  #pageTimer .railway-card,
+  #pageTimer .timer-actions-card {
+    position: static !important;
+    transform: none !important;
+  }
+
+  #pageTimer .timer-actions-card {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) and (orientation: portrait) {
+  #pageTimer .timer-actions-card {
+    margin-bottom: calc(var(--tablet-portrait-nav-height, 76px) + 20px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Stage 36: iPad縦の初期表示で操作カードと固定ナビが重ならないよう、
+   線路は大きく保ちながらも1画面内の操作余白を優先する。 */
+@media (min-width: 600px) and (max-width: 899px) and (orientation: portrait) {
+  #pageTimer .railway-stage.railway-preview--horizontal,
+  #pageTimer .railway-preview--horizontal,
+  #pageTimer .railway-stage.railway-preview--circle,
+  #pageTimer .railway-preview--circle {
+    height: clamp(360px, 38dvh, 420px) !important;
+    min-height: clamp(360px, 38dvh, 420px) !important;
+    max-height: clamp(360px, 38dvh, 420px) !important;
+  }
+
+  #pageTimer .railway-track--horizontal {
+    min-height: 305px !important;
+  }
+
+  #pageTimer .railway-stage.railway-preview--vertical,
+  #pageTimer .railway-preview--vertical {
+    height: clamp(410px, 42dvh, 470px) !important;
+    min-height: clamp(410px, 42dvh, 470px) !important;
+    max-height: clamp(410px, 42dvh, 470px) !important;
+  }
+
+  #pageTimer .railway-track--vertical {
+    min-height: 380px !important;
+  }
+}
