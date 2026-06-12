@@ -1,4 +1,4 @@
-const CACHE_NAME = 'traintimer-den-sha-v6';
+const CACHE_NAME = 'traintimer-den-sha-v7';
 const ASSETS = [
   './',
   './index.html',
