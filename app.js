@@ -34,7 +34,7 @@
   });
   const MAX_TIME_ADDITION_HISTORY = 30;
   const STORAGE_SCHEMA_VERSION = 10;
-  const APP_VERSION = "1.17.6";
+  const APP_VERSION = "1.17.7";
   const SERVICE_WORKER_URL = "sw.js";
   const DEFAULT_USER_PREFERENCES = Object.freeze({
     soundEnabled: true,
@@ -378,6 +378,9 @@
     newTrainTotalMinutesInput: document.getElementById("newTrainTotalMinutesInput"),
     newTrainStationCountInput: document.getElementById("newTrainStationCountInput"),
     newTrainUnitMinutesInput: document.getElementById("newTrainUnitMinutesInput"),
+    newTrainCreationModeInputs: document.querySelectorAll('input[name="newTrainCreationMode"]'),
+    newTrainStationCountField: document.getElementById("newTrainStationCountField"),
+    newTrainUnitMinutesField: document.getElementById("newTrainUnitMinutesField"),
     newTrainTrackShapeSelect: document.getElementById("newTrainTrackShapeSelect"),
     newTrainSoundSelect: document.getElementById("newTrainSoundSelect"),
     newTrainAutoShowToggle: document.getElementById("newTrainAutoShowToggle"),
@@ -2694,7 +2697,34 @@
         : "default";
     }
 
+    const creationMode = normalizeTrainCreationMode(values.creationMode);
+    elements.newTrainCreationModeInputs?.forEach((input) => {
+      input.checked = input.value === creationMode;
+    });
+    updateCreateTrainModeVisibility();
     updateCreateTrainPreview();
+  }
+
+  function getSelectedTrainCreationMode() {
+    const checkedInput = Array.from(elements.newTrainCreationModeInputs || [])
+      .find((input) => input.checked);
+    return normalizeTrainCreationMode(checkedInput?.value);
+  }
+
+  function updateCreateTrainModeVisibility() {
+    const creationMode = getSelectedTrainCreationMode();
+    const stationCountMode = creationMode === TRAIN_CREATION_MODE.STATION_COUNT;
+
+    if (elements.newTrainStationCountField) {
+      elements.newTrainStationCountField.hidden = !stationCountMode;
+    }
+    if (elements.newTrainUnitMinutesField) {
+      elements.newTrainUnitMinutesField.hidden = stationCountMode;
+    }
+    elements.newTrainCreationModeInputs?.forEach((input) => {
+      const option = input.closest(".create-train-mode-option");
+      option?.classList.toggle("is-selected", input.checked);
+    });
   }
 
   function getCreateTrainFormValues() {
@@ -2706,14 +2736,14 @@
     const unitMinutes = sanitizeUnitMinutes(
       elements.newTrainUnitMinutesInput?.value || 5
     );
-    const minimumTotalMinutes = (stationCount - 1) * unitMinutes;
+    const creationMode = getSelectedTrainCreationMode();
 
     return {
       name: sanitizeTrainName(
         elements.newTrainNameInput?.value,
         getSuggestedTrainName()
       ),
-      creationMode: TRAIN_CREATION_MODE.STATION_COUNT,
+      creationMode,
       totalMinutes: clamp(
         Math.round(Number(elements.newTrainTotalMinutesInput?.value) || 25),
         1,
@@ -2745,13 +2775,18 @@
         ? ` ${creationData.warningMessages.join(" ")}`
         : "";
 
-      elements.newTrainAutoPreview.textContent =
-        `${stationNames.join(" → ")}、${shapeLabel}線路、全体${creationData.totalMinutes}分、駅間${creationData.segmentMinutes.length}区間（${segmentText}）で作成します。${warningText}`;
+      const modeText = values.creationMode === TRAIN_CREATION_MODE.AUTO_BY_UNIT
+        ? `時間に合わせて駅を自動で作ります。1駅間の目安は${creationData.unitMinutes}分です。`
+        : `駅の数を自分で決めます。${creationData.stationCount}駅で作ります。`;
+      elements.newTrainAutoPreview.innerHTML =
+        `<p class="create-train-preview-title">できあがる電車</p>` +
+        `<p class="create-train-preview-body">${modeText}</p>` +
+        `<p class="create-train-preview-body">全体${creationData.totalMinutes}分、${creationData.stationCount}駅、駅間${creationData.segmentMinutes.length}区間（${segmentText}）で作成します。</p>` +
+        `<p class="create-train-preview-body">${stationNames.join(" → ")}、${shapeLabel}線路。${warningText}</p>`;
     } catch (error) {
-      elements.newTrainAutoPreview.textContent =
-        error instanceof Error
-          ? error.message
-          : "入力内容を確認してください。";
+      elements.newTrainAutoPreview.innerHTML =
+        `<p class="create-train-preview-title">できあがる電車</p>` +
+        `<p class="create-train-preview-body">${error instanceof Error ? error.message : "入力内容を確認してください。"}</p>`;
     }
   }
 
@@ -6475,7 +6510,16 @@
     addSafeListener(elements.createTrainBackdrop, "click", () => closeCreateTrainPanel());
     addSafeListener(elements.createTrainForm, "submit", handleCreateTrainSubmit);
     addSafeListener(elements.createTrainForm, "input", updateCreateTrainPreview);
-    addSafeListener(elements.createTrainForm, "change", updateCreateTrainPreview);
+    addSafeListener(elements.createTrainForm, "change", () => {
+      updateCreateTrainModeVisibility();
+      updateCreateTrainPreview();
+    });
+    elements.newTrainCreationModeInputs?.forEach((input) => {
+      addSafeListener(input, "change", () => {
+        updateCreateTrainModeVisibility();
+        updateCreateTrainPreview();
+      });
+    });
     elements.createTrainExampleButtons?.forEach((button) => {
       addSafeListener(button, "click", handleCreateTrainExampleClick);
     });

@@ -873,7 +873,7 @@
 </button>
 </div>
 <p class="create-train-description" id="createTrainDescription">
-      電車名、全体時間、駅の数を選ぶと、スタート・駅・ゴールと区間を自動で作ります。
+      電車の作り方を選んで、スタート・駅・ゴールと駅間を作ります。
     </p>
 <form class="create-train-form" id="createTrainForm">
 <section aria-labelledby="newTrainExamplesHeading" class="create-train-section">
@@ -900,10 +900,29 @@
 <p class="settings-step">作成</p>
 <div>
 <h3 id="newTrainFormHeading">電車の内容</h3>
-<p>駅名と区間は自動で作成されます。</p>
+<p>作り方を選ぶと、入力欄が切り替わります。</p>
 </div>
 </div>
 </div>
+<fieldset class="create-train-mode-fieldset" id="newTrainCreationModeFieldset">
+<legend>電車の作り方</legend>
+<div class="create-train-mode-options" role="radiogroup" aria-label="電車の作り方">
+<label class="create-train-mode-option">
+<input checked="" name="newTrainCreationMode" type="radio" value="stationCount"/>
+<span>
+<strong>駅の数を自分で決める</strong>
+<small>全体時間を、決めた駅の数に合わせて分けます。</small>
+</span>
+</label>
+<label class="create-train-mode-option">
+<input name="newTrainCreationMode" type="radio" value="autoByUnit"/>
+<span>
+<strong>時間に合わせて駅を自動で作る</strong>
+<small>1駅間の目安から、駅の数を自動で決めます。</small>
+</span>
+</label>
+</div>
+</fieldset>
 <div class="create-train-grid">
 <div class="form-field create-train-field--wide">
 <label for="newTrainNameInput">電車名</label>
@@ -916,19 +935,21 @@
 <span>分</span>
 </div>
 </div>
-<div class="form-field">
+<div class="form-field" id="newTrainStationCountField" data-creation-mode-field="stationCount">
 <label for="newTrainStationCountInput">駅の数</label>
 <div class="number-with-unit">
 <input id="newTrainStationCountInput" inputmode="numeric" max="12" min="2" step="1" type="number" value="4"/>
 <span>駅</span>
 </div>
+<p class="field-help">スタートとゴールを含めた駅の数です。</p>
 </div>
-<div class="form-field">
-<label for="newTrainUnitMinutesInput">1単位の分数</label>
+<div class="form-field" hidden="" id="newTrainUnitMinutesField" data-creation-mode-field="autoByUnit">
+<label for="newTrainUnitMinutesInput">1駅間の目安</label>
 <div class="number-with-unit">
 <input id="newTrainUnitMinutesInput" inputmode="numeric" max="180" min="1" step="1" type="number" value="5"/>
 <span>分</span>
 </div>
+<p class="field-help">この時間を目安に、駅を自動で作ります。</p>
 </div>
 <div class="form-field">
 <label for="newTrainTrackShapeSelect">線路の形</label>
@@ -947,9 +968,10 @@
 </select>
 </div>
 </div>
-<p aria-live="polite" class="create-train-preview" id="newTrainAutoPreview">
-          スタート → 駅1 → 駅2 → ゴール、全体25分で作成します。
-        </p>
+<div aria-live="polite" class="create-train-preview" id="newTrainAutoPreview">
+<p class="create-train-preview-title">できあがる電車</p>
+<p class="create-train-preview-body">スタート → 駅1 → 駅2 → ゴール、全体25分で作成します。</p>
+</div>
 <label class="check-option create-train-auto-show">
 <input id="newTrainAutoShowToggle" type="checkbox"/>
 <span>追加後にタイマー画面で表示する</span>

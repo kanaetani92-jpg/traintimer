@@ -10746,3 +10746,129 @@ body.is-child-locked .child-lock-overlay * {
     min-height: 380px !important;
   }
 }
+
+/* =========================================================
+   第3段階：新しい電車追加UIの2モード化
+   ========================================================= */
+.create-train-mode-fieldset {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e5e9ee;
+  border-radius: 16px;
+  background: #fffafb;
+}
+
+.create-train-mode-fieldset legend {
+  padding: 0 6px;
+  color: #2a333b;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.create-train-mode-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+}
+
+.create-train-mode-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  min-height: 48px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dce2e8;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #2a333b;
+  cursor: pointer;
+}
+
+.create-train-mode-option.is-selected {
+  border-color: #e6002d;
+  background: #fff5f7;
+  box-shadow: 0 0 0 3px rgba(230, 0, 45, 0.08);
+}
+
+.create-train-mode-option input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: #e6002d;
+}
+
+.create-train-mode-option span,
+.create-train-mode-option strong,
+.create-train-mode-option small {
+  min-width: 0;
+}
+
+.create-train-mode-option span {
+  display: grid;
+  gap: 4px;
+}
+
+.create-train-mode-option strong {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.create-train-mode-option small,
+.field-help {
+  color: #59636d;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.field-help {
+  margin: 6px 0 0;
+}
+
+.create-train-preview-title {
+  margin: 0 0 4px;
+  color: #b40024;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.create-train-preview-body {
+  margin: 0;
+}
+
+.create-train-preview-body + .create-train-preview-body {
+  margin-top: 4px;
+}
+
+@media (min-width: 680px) {
+  .create-train-mode-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 359px) {
+  .create-train-mode-fieldset {
+    padding: 10px;
+  }
+
+  .create-train-mode-option {
+    min-height: 48px;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .create-train-mode-option strong {
+    font-size: 0.82rem;
+  }
+
+  .create-train-mode-option small,
+  .field-help {
+    font-size: 0.7rem;
+  }
+}
